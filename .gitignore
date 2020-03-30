@@ -1,0 +1,23 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.obj
+*.bin
+*.hex
+
+# VIM
+*.swp
+
+# Build directory
+development/system/msp_sdk/*
+development/applications/drone/Debug
+development/applications/falcon/Debug
+
+
+
+
+
+
+
