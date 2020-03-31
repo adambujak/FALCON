@@ -37,7 +37,7 @@
 #include <stdint.h>
 
 /* Entry point for the application. */
-extern int _mainCRTStartup();
+extern int main();
 
 /* External declaration for system initialization function                  */
 extern void SystemInit(void);
@@ -196,7 +196,7 @@ void Reset_Handler(void)
     SystemInit();
 
     /* Jump to the main initialization routine. */
-    _mainCRTStartup();
+    main();
 }
 
 /* This is the code that gets called when the processor receives an unexpected  */
