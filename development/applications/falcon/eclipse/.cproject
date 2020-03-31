@@ -11,6 +11,8 @@
                     					
                     <stringMacro name="FALCON_APP_DIR" type="VALUE_TEXT" value="${FALCON_DEV_DIR}/applications/falcon"/>
                     					
+                    <stringMacro name="MSP_SDK_DIR" type="VALUE_TEXT" value="${FALCON_DEV_DIR}/system/msp_sdk"/>
+                    					
                     <stringMacro name="FALCON_DEV_DIR" type="VALUE_TEXT" value="${ProjDirPath}/../../../"/>
                     				
                 </macros>
@@ -37,7 +39,7 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" errorParsers="org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GCCErrorParser" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.688192311" name="Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.enablement=null,org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.image=null,org.eclipse.cdt.docker.launcher.containerbuild.property.connection=null" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" errorParsers="org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GCCErrorParser" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.688192311" name="Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.enablement=null,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.connection=null,org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.image=null" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
                     					
                     <folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.688192311." name="/" resourcePath="">
                         						
@@ -111,13 +113,13 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${FALCON_APP_DIR}/src&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/system/msp_sdk/source&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${MSP_SDK_DIR}/source&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/system/msp_sdk/source/third_party/CMSIS/Include&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${MSP_SDK_DIR}/source/third_party/CMSIS/Include&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/system/msp_sdk/source/ti/devices/msp432p4xx/inc&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${MSP_SDK_DIR}/source/ti/devices/msp432p4xx/inc&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/system/msp_sdk/source/ti/devices/msp432p4xx/driverlib&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${MSP_SDK_DIR}/source/ti/devices/msp432p4xx/driverlib&quot;"/>
                                     								
                                 </option>
                                 								
