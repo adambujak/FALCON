@@ -25,15 +25,35 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>falcon.ld</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/falcon.ld</locationURI>
+		</link>
+		<link>
 			<name>src</name>
 			<type>2</type>
-			<locationURI>FALCON_ROOT_DIR</locationURI>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>startup_msp432p401r_gcc.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/startup_msp432p401r_gcc.c</locationURI>
+		</link>
+		<link>
+			<name>system_msp432p401r.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/system_msp432p401r.c</locationURI>
+		</link>
+		<link>
+			<name>src/main.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/src/main.c</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
 		<variable>
 			<name>FALCON_ROOT_DIR</name>
-			<value>file:/C:/Users/Adam/Workspace/FALCON/development/applications/drone/src</value>
+			<value>$%7BPARENT-4-PROJECT_LOC%7D</value>
 		</variable>
 	</variableList>
 </projectDescription>
