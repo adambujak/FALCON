@@ -20,10 +20,10 @@
         EUSCI_B_I2C_NO_AUTO_STOP             \
   }
 
-#define FI2C_MODULE_0 EUSCI_B0_BASE;
-#define FI2C_MODULE_1 EUSCI_B1_BASE;
-#define FI2C_MODULE_2 EUSCI_B2_BASE;
-#define FI2C_MODULE_3 EUSCI_B3_BASE;  
+#define FI2C_MODULE_0 EUSCI_B0_BASE
+#define FI2C_MODULE_1 EUSCI_B1_BASE
+#define FI2C_MODULE_2 EUSCI_B2_BASE
+#define FI2C_MODULE_3 EUSCI_B3_BASE
 
 typedef uint32_t fi2c_module_t;
 typedef uint8_t  fi2c_addr_t;
