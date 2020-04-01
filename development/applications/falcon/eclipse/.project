@@ -35,6 +35,11 @@
 			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/falcon.ld</locationURI>
 		</link>
 		<link>
+			<name>hal</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>src</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -363,6 +368,16 @@
 			<name>drivers/wdt_a.h</name>
 			<type>1</type>
 			<locationURI>FALCON_ROOT_DIR/development/system/msp_sdk/source/ti/devices/msp432p4xx/driverlib/wdt_a.h</locationURI>
+		</link>
+		<link>
+			<name>hal/i2c_master.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/i2c_master.c</locationURI>
+		</link>
+		<link>
+			<name>hal/i2c_master.h</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/i2c_master.h</locationURI>
 		</link>
 		<link>
 			<name>src/main.c</name>
