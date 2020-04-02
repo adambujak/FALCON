@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "i2c_master.h"
+#define SLAVE_ADDR 0x52
+
 
 void setpin ( uint_fast8_t port, uint_fast16_t pin, uint8_t state )
 {
@@ -26,6 +29,38 @@ int main ( void )
   MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0);
   MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN1);
   MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN2);
+
+
+
+  fi2c_t * i2cInstance;
+  i2cInstance = FI2C_Initialize(FIO_MODULE_0, &fi2c_default_config);
+
+
+  fi2c_reg_t txData[] = {0x60, 0xFF, 0x00, 0x00};
+  fi2c_reg_t rxData[] = {0x00, 0x00, 0x00, 0x00};
+//  i2cInstance.blockingWrite(&i2cInstance, SLAVE_ADDR, txData, 3);
+
+//  txData[0] = 0x31;
+//  txData[1] = 0x0;
+//  txData[2] = 0x0;
+//  i2cInstance.blockingWrite(&i2cInstance, SLAVE_ADDR, txData, 3);
+//
+//  txData[0] = 0x31;
+//  txData[1] = 0xDE;
+//  txData[2] = 0xC0;
+//  i2cInstance.blockingWrite(&i2cInstance, SLAVE_ADDR, txData, 3);
+
+  i2cInstance->blockingRead(i2cInstance, SLAVE_ADDR, 0x90, rxData, 4);
+
+
+//  txData[0] = 0x35;
+//  txData[1] = 0x02;
+//  txData[2] = 0x00;
+//  i2cInstance.blockingWrite(&i2cInstance, SLAVE_ADDR, txData, 3);
+//
+//  i2cInstance.blockingRead(&i2cInstance, SLAVE_ADDR, 0x32, rxData, 2);
+//
+//  i2cInstance.blockingRead(&i2cInstance, SLAVE_ADDR, 0x93, rxData, 2);
 
 
   while ( 1 )
