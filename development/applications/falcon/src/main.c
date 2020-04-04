@@ -36,33 +36,47 @@ int main ( void )
   i2cInstance = FI2C_Initialize(FIO_MODULE_0, &fi2c_default_config);
 
 
-  fi2c_reg_t txData[] = {0x60, 0xFF, 0x00, 0x00};
-  fi2c_reg_t rxData[] = {0x00, 0x00, 0x00, 0x00};
-//  i2cInstance.blockingWrite(&i2cInstance, SLAVE_ADDR, txData, 3);
+  fi2c_reg_t txData[] = {0xFF, 0x00, 0x00};
+  fi2c_reg_t rxData[] = {0xFF, 0xFF, 0xFF, 0xFF};
 
-//  txData[0] = 0x31;
-//  txData[1] = 0x0;
-//  txData[2] = 0x0;
-//  i2cInstance.blockingWrite(&i2cInstance, SLAVE_ADDR, txData, 3);
-//
-//  txData[0] = 0x31;
-//  txData[1] = 0xDE;
-//  txData[2] = 0xC0;
-//  i2cInstance.blockingWrite(&i2cInstance, SLAVE_ADDR, txData, 3);
-
-  i2cInstance->blockingRead(i2cInstance, SLAVE_ADDR, 0x90, rxData, 4);
+  i2cInstance->blockingWrite(i2cInstance, SLAVE_ADDR, 0x60, txData, 2);
 
 
-//  txData[0] = 0x35;
-//  txData[1] = 0x02;
-//  txData[2] = 0x00;
-//  i2cInstance.blockingWrite(&i2cInstance, SLAVE_ADDR, txData, 3);
-//
-//  i2cInstance.blockingRead(&i2cInstance, SLAVE_ADDR, 0x32, rxData, 2);
-//
-//  i2cInstance.blockingRead(&i2cInstance, SLAVE_ADDR, 0x93, rxData, 2);
+  txData[0] = 0x0;
+  txData[1] = 0x0;
+  i2cInstance->blockingWrite(i2cInstance, SLAVE_ADDR, 0x31,  txData, 2);
 
 
+  txData[0] = 0xC0;
+  txData[1] = 0xDE;
+  i2cInstance->blockingWrite(i2cInstance, SLAVE_ADDR, 0x31, txData, 2);
+
+
+
+  i2cInstance->blockingRead(i2cInstance, SLAVE_ADDR, 0x32, rxData, 2);
+
+
+
+  txData[0] = 0x00;
+  txData[1] = 0x02;
+  i2cInstance->blockingWrite(i2cInstance, SLAVE_ADDR, 0x35, txData, 2);
+
+
+  i2cInstance->blockingRead(i2cInstance, SLAVE_ADDR, 0x32, rxData, 2);
+
+  i2cInstance->blockingRead(i2cInstance, SLAVE_ADDR, 0x93, rxData, 2);
+
+  txData[0] = 0x00;
+  txData[1] = 0x00;
+  i2cInstance->blockingWrite(i2cInstance, SLAVE_ADDR, 0x60, txData, 2);
+
+  txData[0] = 0x81;
+  txData[1] = 0xFF;
+  i2cInstance->blockingWrite(i2cInstance, SLAVE_ADDR, 0x30, txData, 2);
+
+  i2cInstance->blockingRead(i2cInstance, SLAVE_ADDR, 0x30, txData, 2);
+
+  i2cInstance->blockingRead(i2cInstance, SLAVE_ADDR, 0x05, rxData, 2);
   while ( 1 )
   {
     for ( uint8_t r = 0; r < 2; r++ )
