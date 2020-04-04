@@ -25,6 +25,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>bsp</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>drivers</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -33,6 +38,11 @@
 			<name>falcon.ld</name>
 			<type>1</type>
 			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/falcon.ld</locationURI>
+		</link>
+		<link>
+			<name>hal</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>src</name>
@@ -48,6 +58,16 @@
 			<name>system_msp432p401r.c</name>
 			<type>1</type>
 			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/system_msp432p401r.c</locationURI>
+		</link>
+		<link>
+			<name>bsp/fln_bsp.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/system/boards/bsp/fln_bsp.c</locationURI>
+		</link>
+		<link>
+			<name>bsp/fln_bsp.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/system/boards/bsp/fln_bsp.h</locationURI>
 		</link>
 		<link>
 			<name>drivers/adc14.c</name>
@@ -363,6 +383,31 @@
 			<name>drivers/wdt_a.h</name>
 			<type>1</type>
 			<locationURI>FALCON_ROOT_DIR/development/system/msp_sdk/source/ti/devices/msp432p4xx/driverlib/wdt_a.h</locationURI>
+		</link>
+		<link>
+			<name>hal/fiodt.h</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fiodt.h</locationURI>
+		</link>
+		<link>
+			<name>hal/fiom.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fiom.c</locationURI>
+		</link>
+		<link>
+			<name>hal/fiom.h</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fiom.h</locationURI>
+		</link>
+		<link>
+			<name>hal/i2c_master.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/i2c_master.c</locationURI>
+		</link>
+		<link>
+			<name>hal/i2c_master.h</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/i2c_master.h</locationURI>
 		</link>
 		<link>
 			<name>src/main.c</name>
