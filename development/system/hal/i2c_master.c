@@ -6,11 +6,51 @@
  * @author   Adam Bujak
  ******************************************************************************/
 
+#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 #include "i2c_master.h"
 
 
 static fi2c_t fi2cInstances[FIO_MODULE_CNT];
 
+
+static bool i2c_sendMultiByteStart ( bio_module_t baseAddr, fi2c_reg_t byte, uint32_t timeout )
+{
+  if ( timeout > 0 )
+  {
+    return MAP_I2C_masterSendMultiByteStartWithTimeout(baseAddr, byte, timeout);
+  }
+  else
+  {
+    MAP_I2C_masterSendMultiByteStart(baseAddr, byte);
+    return true;
+  }
+}
+
+static bool i2c_sendMultiByteNext ( bio_module_t baseAddr, fi2c_reg_t byte, uint32_t timeout )
+{
+  if ( timeout > 0 )
+  {
+    return MAP_I2C_masterSendMultiByteNextWithTimeout(baseAddr, byte, timeout);
+  }
+  else
+  {
+    MAP_I2C_masterSendMultiByteNext(baseAddr, byte);
+    return true;
+  }
+}
+
+static bool i2c_sendMultiByteStop ( bio_module_t baseAddr, uint32_t timeout )
+{
+  if ( timeout > 0 )
+  {
+    return MAP_I2C_masterSendMultiByteStopWithTimeout(baseAddr, timeout);
+  }
+  else
+  {
+    MAP_I2C_masterSendMultiByteStop(baseAddr);
+    return true;
+  }
+}
 
 
 /**
@@ -18,7 +58,7 @@ static fi2c_t fi2cInstances[FIO_MODULE_CNT];
   * @param   module - IO Module Base Value
   * @retval  None
   */
-bio_module_t get_board_i2c_module ( fio_module_t module )
+static bio_module_t get_board_i2c_module ( fio_module_t module )
 {
   switch ( module )
   {
@@ -36,65 +76,120 @@ bio_module_t get_board_i2c_module ( fio_module_t module )
 }
 
 /**
-  * @brief   Blocking I2C Write Function 
-  * @param * instance  - i2c instance pointer
-  * @param   slaveAddr - i2c device address of slave
-  * @param * txArray   - transfer array - data will be written from here to slave
-  * @param   size      - number of bytes to write 
-  * @retval  error     - error code
+  * @brief   Enables IRQ for specified I2C module
+  * @param   module - IO Module Base Value
+  * @retval  None
   */
-static fio_retval_e blocking_write ( fi2c_t * instance, fi2c_addr_t slaveAddr, fi2c_reg_t writeReg, fi2c_reg_t * txArray, uint32_t size )
+static void enable_i2c_irq ( fio_module_t module )
 {
-  MAP_I2C_setSlaveAddress(instance->module, slaveAddr);
-  
-  MAP_I2C_masterSendMultiByteStart(instance->module, writeReg);
-
-  for ( uint32_t xferIndex = 0; xferIndex < size; xferIndex++ )
+  switch ( module )
   {
-    MAP_I2C_masterSendMultiByteNext(instance->module, txArray[xferIndex]);
-  } 
+    case FIO_MODULE_0:
+      MAP_Interrupt_enableInterrupt(INT_EUSCIB0);
+      return;
+    case FIO_MODULE_1:
+      MAP_Interrupt_enableInterrupt(INT_EUSCIB1);
+      return;
+    case FIO_MODULE_2:
+      MAP_Interrupt_enableInterrupt(INT_EUSCIB2);
+      return;
+    case FIO_MODULE_3:
+      MAP_Interrupt_enableInterrupt(INT_EUSCIB3);
+      return;
+    default:
+      return;
+  }
+}
 
-  MAP_I2C_masterSendMultiByteStop(instance->module);
+/**
+  * @brief   Disables IRQ for specified I2C module
+  * @param   module - IO Module Base Value
+  * @retval  None
+  */
+static void disable_i2c_irq ( fio_module_t module )
+{
+  switch ( module )
+  {
+    case FIO_MODULE_0:
+      MAP_Interrupt_disableInterrupt(INT_EUSCIB0);
+      return;
+    case FIO_MODULE_1:
+      MAP_Interrupt_disableInterrupt(INT_EUSCIB1);
+      return;
+    case FIO_MODULE_2:
+      MAP_Interrupt_disableInterrupt(INT_EUSCIB2);
+      return;
+    case FIO_MODULE_3:
+      MAP_Interrupt_disableInterrupt(INT_EUSCIB3);
+      return;
+    default:
+      return;
+  }
+}
+
+
+/**
+  * @brief   Blocking I2C Write Function
+  * @param * instance     - i2c instance pointer
+  * @param * transferData - i2c transfer data
+  * @retval  error        - error code
+  */
+static fio_retval_e blocking_write ( fi2c_t * instance, fi2c_transfer_t * transferData )
+{
+  uint32_t timeout = transferData->timeout;
+
+  MAP_I2C_setSlaveAddress(instance->baseAddr, transferData->slaveAddr);
+
+  if (i2c_sendMultiByteStart(instance->baseAddr, transferData->writeReg, timeout) == false )
+  {
+    return FIO_RETVAL_ERROR;
+  }
+
+  for ( uint32_t xferIndex = 0; xferIndex < transferData->length; xferIndex++ )
+  {
+    if ( i2c_sendMultiByteNext(instance->baseAddr, transferData->txBuf[xferIndex], timeout) == false )
+    {
+      return FIO_RETVAL_ERROR;
+    }
+  }
+
+  if ( i2c_sendMultiByteStop(instance->baseAddr, timeout) )
+  {
+    return FIO_RETVAL_ERROR;
+  }
 
   return FIO_RETVAL_SUCCESS;  // ToDo add NAK detection
 }
 
 /**
   * @brief   Non-Blocking I2C Read Function
-  * @param * instance  - i2c instance pointer
-  * @param   slaveAddr - i2c device address of slave
-  * @param   readReg   - address to read from
-  * @param * rxArray   - transfer array - read data will be copied into here
-  * @param   size      - number of bytes to read
-  * @retval  error     - error code
+  * @param * instance     - i2c instance pointer
+  * @param * transferData - i2c transfer data
+  * @retval  error        - error code
   */
-static fio_retval_e non_blocking_read ( fi2c_t * instance, fi2c_addr_t slaveAddr, fi2c_reg_t readReg, fi2c_reg_t * rxArray, uint32_t size )
+static fio_retval_e non_blocking_read ( fi2c_t * instance, fi2c_transfer_t * transferData )
 {
   if ( instance->isTransferring )
   {
     return FIO_RETVAL_ERROR;
   }
 
+  instance->transferData = transferData;
   instance->isTransferring = true;
+  instance->xferIndex = 0;
+  instance->transferData->direction = FI2C_TRANSFER_DIR_READ;
 
-  instance->currentTransferData.size = size;
-  instance->currentTransferData.xferIndex = 0;
-  instance->currentTransferData.slaveAddr = slaveAddr;
-  instance->currentTransferData.packet.type = FI2C_TRANSFER_TYPE_READ;
-  instance->currentTransferData.packet.packetUnion.readPacket.readReg = readReg;
-  instance->currentTransferData.packet.packetUnion.readPacket.rxArray = rxArray;
+  enable_i2c_irq(instance->module);
+  MAP_I2C_enableInterrupt(instance->baseAddr, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
 
+  MAP_I2C_setSlaveAddress(instance->baseAddr, instance->transferData->slaveAddr);
 
-  MAP_Interrupt_enableInterrupt(INT_EUSCIB0);
-  MAP_I2C_enableInterrupt(EUSCI_B0_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+  if ( i2c_sendMultiByteStart(instance->baseAddr, instance->transferData->readReg, transferData->timeout) == false )
+  {
+    return FIO_RETVAL_ERROR;
+  }
 
-  MAP_I2C_setSlaveAddress(instance->module, slaveAddr);
-  MAP_I2C_setMode(instance->module, EUSCI_B_I2C_TRANSMIT_MODE);
-  MAP_I2C_masterSendMultiByteStart(instance->module, readReg);
-
-  MAP_I2C_setMode(instance->module, EUSCI_B_I2C_RECEIVE_MODE);
-  MAP_I2C_masterReceiveStart(instance->module);
-
+  MAP_I2C_masterReceiveStart(instance->baseAddr);
 
   return FIO_RETVAL_SUCCESS; // ToDo add NAK detection
 }
@@ -102,25 +197,30 @@ static fio_retval_e non_blocking_read ( fi2c_t * instance, fi2c_addr_t slaveAddr
 
 /**
   * @brief   Blocking I2C Read Function
-  * @param * instance  - i2c instance pointer
-  * @param   slaveAddr - i2c device address of slave
-  * @param   readReg   - address to read from
-  * @param * rxArray   - transfer array - read data will be copied into here
-  * @param   size      - number of bytes to read
-  * @retval  error     - error code
+  * @param * instance     - i2c instance pointer
+  * @param * transferData - i2c transfer data
+  * @retval  error        - error code
   */
-static fio_retval_e blocking_read ( fi2c_t * instance, fi2c_addr_t slaveAddr, fi2c_reg_t readReg, fi2c_reg_t * rxArray, uint32_t size )
+
+static fio_retval_e blocking_read ( fi2c_t * instance, fi2c_transfer_t * transferData )
 {
   if ( instance->isTransferring )
   {
     return FIO_RETVAL_ERROR;
   }
 
+  bool ret = non_blocking_read(instance, transferData);
 
-  bool ret = non_blocking_read(instance, slaveAddr, readReg, rxArray, size);
-
-  while ( instance->isTransferring );
-
+  uint32_t timeout = 0;
+  while ( instance->isTransferring )
+  {
+    timeout++;
+    if ( transferData->timeout != 0 && timeout >= transferData->timeout )
+    {
+      instance->isTransferring = false;
+      return FIO_RETVAL_ERROR;
+    }
+  }
   return ret; // ToDo add NAK detection
 }
 
@@ -130,17 +230,22 @@ static fio_retval_e blocking_read ( fi2c_t * instance, fi2c_addr_t slaveAddr, fi
   * @param * instance  - i2c instance pointer
   * @retval  error     - error code
   */
-static fio_retval_e deinitialize ( fi2c_t * instance )
+fi2c_t * FI2C_Deinitialize ( fi2c_t * instance )
 {
   if ( !(instance->isInitialized) )
   {
-    return FIO_RETVAL_ERROR;
+    return NULL;
   }
-  // Deinit pins
-  // Deinit i2c module
+
+  /* Clear init flag */
   instance->isInitialized = false;
-  MAP_I2C_disableModule(instance->module);
-  return FIO_RETVAL_SUCCESS;
+
+  /* Disable I2C Module */
+  MAP_I2C_disableModule(instance->baseAddr);
+
+  /* Disable I2C IRQ */
+  disable_i2c_irq(instance->module);
+  return NULL;
 }
 
 
@@ -154,27 +259,25 @@ fi2c_t * FI2C_Initialize ( fio_module_t module, const eUSCI_I2C_MasterConfig * c
 {
   fi2c_t * instance = &fi2cInstances[module];
 
-
-  bio_module_t bModule = get_board_i2c_module(module);
+  /* Initialize i2c pins in bsp */
   initialize_i2c_pins(module);
   
+  /* Get base i2c hardware address from bsp */
+  bio_module_t bModule = get_board_i2c_module(module);
+
   MAP_I2C_initMaster(bModule, config);
 
   MAP_I2C_enableModule(bModule);
 
-//  /* Enable and clear the interrupt flag */
-//  MAP_I2C_clearInterruptFlag(bModule, EUSCI_B_I2C_TRANSMIT_INTERRUPT0 + EUSCI_B_I2C_NAK_INTERRUPT);
-//
-//  /* Enable master transmit interrupt */
-//  MAP_I2C_enableInterrupt(bModule, EUSCI_B_I2C_TRANSMIT_INTERRUPT0 + EUSCI_B_I2C_NAK_INTERRUPT);
-//  MAP_Interrupt_enableInterrupt(INT_EUSCIB0);
 
-  instance->module         =  bModule;
+  instance->module         =  module;
+  instance->baseAddr       =  bModule;
   instance->isInitialized  =  true;
+  instance->isTransferring =  false;
   instance->blockingWrite  = &blocking_write;
   instance->blockingRead   = &blocking_read;
-  instance->isTransferring = false;
-  instance->deinitialize   = &deinitialize;
+//  instance->blockingWrite  = &non_blocking_write;
+//  instance->blockingRead   = &non_blocking_read;
 
   return instance;
 }
@@ -183,40 +286,41 @@ static void i2c_interrupt_handler ( fi2c_t * instance )
 {
   uint_fast16_t status;
 
-  status = MAP_I2C_getEnabledInterruptStatus(instance->module);
-  MAP_I2C_clearInterruptFlag(instance->module, status);
+  status = MAP_I2C_getEnabledInterruptStatus(instance->baseAddr);
+  MAP_I2C_clearInterruptFlag(instance->baseAddr, status);
 
-  uint32_t     size = instance->currentTransferData.size;
-  uint32_t   * xferIndex = &(instance->currentTransferData.xferIndex);
-  fi2c_reg_t * rxArray = instance->currentTransferData.packet.packetUnion.readPacket.rxArray;
+  fi2c_len_t   length = instance->transferData->length;
+  fi2c_len_t * xferIndex = &(instance->xferIndex);
+  fi2c_reg_t * rxArray = instance->transferData->rxBuf;
 
   /* Receives bytes into the receive buffer. If we have received all bytes,
    * send a STOP condition */
   if ( status & EUSCI_B_I2C_RECEIVE_INTERRUPT0 )
   {
-    if ( (*xferIndex) ==  size - 2 )
+    if ( (*xferIndex) ==  length - 2 )
     {
-      MAP_I2C_disableInterrupt(instance->module, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
-      MAP_I2C_enableInterrupt(instance->module, EUSCI_B_I2C_STOP_INTERRUPT);
+      MAP_I2C_disableInterrupt(instance->baseAddr, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+      MAP_I2C_enableInterrupt(instance->baseAddr, EUSCI_B_I2C_STOP_INTERRUPT);
 
       /*
        * Switch order so that stop is being set during reception of last
        * byte read byte so that next byte can be read.
        */
-      MAP_I2C_masterReceiveMultiByteStop(instance->module);
-      rxArray[(*xferIndex)++] = MAP_I2C_masterReceiveMultiByteNext(instance->module);
+      MAP_I2C_masterReceiveMultiByteStop(instance->baseAddr);
+      rxArray[(*xferIndex)++] = MAP_I2C_masterReceiveMultiByteNext(instance->baseAddr);
 
     }
     else
     {
-      rxArray[(*xferIndex)++] = MAP_I2C_masterReceiveMultiByteNext(instance->module);
+      rxArray[(*xferIndex)++] = MAP_I2C_masterReceiveMultiByteNext(instance->baseAddr);
     }
   }
   else if ( status & EUSCI_B_I2C_STOP_INTERRUPT )
   {
-    rxArray[(*xferIndex)++] = MAP_I2C_masterReceiveMultiByteNext(instance->module);
-    MAP_I2C_disableInterrupt(instance->module, EUSCI_B_I2C_STOP_INTERRUPT);
+    rxArray[(*xferIndex)++] = MAP_I2C_masterReceiveMultiByteNext(instance->baseAddr);
+    MAP_I2C_disableInterrupt(instance->baseAddr, EUSCI_B_I2C_STOP_INTERRUPT);
     instance->isTransferring = false;
+    disable_i2c_irq(instance->module);
   }
 }
 

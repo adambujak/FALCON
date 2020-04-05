@@ -1,6 +1,6 @@
 /******************************************************************************
  * @file     i2c_master.h
- * @brief    Falcon I2C Hardware Abstraction Layer Header File
+ * @brief   Falcon I2C Hardware Abstraction Layer Header File
  * @version  1.0
  * @date     2020-04-01
  * @author   Adam Bujak
@@ -9,68 +9,77 @@
 #ifndef FI2C_MASTER_HAL_H
 #define FI2C_MASTER_HAL_H
 
-#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+
 #include "fln_bsp.h"
 #include "fiodt.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
-typedef uint8_t  fi2c_addr_t;
-typedef uint8_t  fi2c_reg_t;
+
+#define FI2C_MAX_TRANSFER_LENGTH 65535 
+#define FI2C_NO_TIMEOUT          0
+
+typedef uint8_t   fi2c_addr_t;
+typedef uint8_t   fi2c_reg_t;
+typedef uint16_t  fi2c_len_t;
 
 typedef struct fi2c_struct fi2c_t;
+typedef struct fi2c_transfer_data_struct fi2c_transfer_t;
 
- typedef enum
- {
-   FI2C_TRANSFER_TYPE_WRITE = 0,
-   FI2C_TRANSFER_TYPE_READ,
-   FI2C_TRANSFER_CNT
- } fi2c_transfer_type_e;
+typedef void          ( * fi2c_cb_t )    ( fi2c_t * instance );                                                     /* Callback function pointer type */
+typedef fio_retval_e  ( * fi2c_btf_t )   ( fi2c_t * instance, fi2c_transfer_t * transferData );                     /* Blocking transfer function pointer type */
+typedef fio_retval_e  ( * fi2c_nbtf_t )  ( fi2c_t * instance, fi2c_transfer_t * transferData, fi2c_cb_t callback);  /* Non blocking transfer function pointer type */
 
- typedef struct
- {
-   fi2c_addr_t   readReg;
-   fi2c_reg_t  * rxArray;
- } fi2c_read_packet_t;
+typedef enum
+{
+  FI2C_TRANSFER_DIR_WRITE = 0,
+  FI2C_TRANSFER_DIR_READ,
+  FI2C_TRANSFER_DIR_CNT
+} fi2c_transfer_dir_e;
 
- typedef struct
- {
-   fi2c_addr_t   writeReg;
-   fi2c_reg_t  * txArray;
- } fi2c_write_packet_t;
 
- typedef union
- {
-   fi2c_read_packet_t  readPacket;
-   fi2c_write_packet_t writePacket;
- } fi2c_packet_u;
 
- typedef struct
- {
-   fi2c_packet_u        packetUnion;
-   fi2c_transfer_type_e type;
- } fi2c_packet_t;
 
- typedef struct
- {
-   fi2c_addr_t     slaveAddr;
-   fi2c_packet_t   packet;
-   uint32_t        size;
-   uint32_t        xferIndex;
- } fi2c_transfer_data_t;
+struct fi2c_transfer_data_struct
+{
+  /* @public */
+  fi2c_addr_t            slaveAddr;  /* Address of slave device */
+
+  fi2c_addr_t            readReg;    /* Register address to be read from */
+  fi2c_reg_t           * rxBuf;      /* Buffer to be written to */
+
+  fi2c_addr_t            writeReg;   /* Register address to be written to */
+  fi2c_reg_t           * txBuf;      /* Buffer to be read from */
+
+  fi2c_len_t             length;     /* Length of transfer */
+
+  uint32_t               timeout;    /* Timeout value */
+
+  /* @private */
+  fi2c_transfer_dir_e    direction;  /* Receive or Trasmit */
+  fi2c_cb_t              xferDoneCB; /* Callback function for when transfer is done */
+};
 
 struct fi2c_struct
 {
-  bio_module_t           module;
-  bool                   isInitialized;
-  bool                   isTransferring;
-  fi2c_transfer_data_t   currentTransferData;
-  fio_retval_e       ( * blockingWrite )    ( fi2c_t * instance, fi2c_addr_t slaveAddr, fi2c_reg_t writeReg, fi2c_reg_t * txArray, uint32_t size );
-  fio_retval_e       ( * blockingRead )     ( fi2c_t * instance, fi2c_addr_t slaveAddr, fi2c_reg_t readReg,  fi2c_reg_t * rxArray, uint32_t size );
-  fio_retval_e       ( * deinitialize )     ( fi2c_t * instance );
+  /* @public */
+  fi2c_btf_t        blockingWrite;        /* Write function pointer */
+  fi2c_btf_t        blockingRead;         /* Read function pointer */
+
+  fi2c_nbtf_t       nonBlockingWrite;     /* Write function pointer */
+  fi2c_nbtf_t       nonBlockingRead;      /* Read function pointer */
+
+  /* @private */
+  bool              isInitialized;        /* Module is initialized flag */
+  volatile bool     isTransferring;       /* Currently transferring flag */
+  fio_module_t      module;               /* I2C module value */
+  bio_module_t      baseAddr;             /* Hardware I2C module base address */
+  fi2c_len_t        xferIndex;            /* Current index of current transfer */
+  fi2c_transfer_t * transferData;         /* Transfer Data of current packet */
 };
 
 
-fi2c_t * FI2C_Initialize ( fio_module_t module, const eUSCI_I2C_MasterConfig * config );
+fi2c_t * FI2C_Initialize   ( fio_module_t module, const eUSCI_I2C_MasterConfig * config );
+fi2c_t * FI2C_Deinitialize ( fi2c_t * instance );
 
 #endif // FI2C_MASTER_HAL_H
