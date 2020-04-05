@@ -26,7 +26,7 @@ typedef uint16_t  fi2c_len_t;
 typedef struct fi2c_struct fi2c_t;
 typedef struct fi2c_transfer_data_struct fi2c_transfer_t;
 
-typedef void          ( * fi2c_cb_t )    ( fi2c_t * instance );                                                     /* Callback function pointer type */
+typedef void          ( * fi2c_cb_t )    ( fi2c_t * instance, bool success );                                       /* Callback function pointer type */
 typedef fio_retval_e  ( * fi2c_btf_t )   ( fi2c_t * instance, fi2c_transfer_t * transferData );                     /* Blocking transfer function pointer type */
 typedef fio_retval_e  ( * fi2c_nbtf_t )  ( fi2c_t * instance, fi2c_transfer_t * transferData, fi2c_cb_t callback);  /* Non blocking transfer function pointer type */
 
