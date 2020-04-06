@@ -27,7 +27,7 @@
 		<link>
 			<name>bsp</name>
 			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<locationURI>FALCON_ROOT_DIR/development/system/boards/bsp</locationURI>
 		</link>
 		<link>
 			<name>drivers</name>
@@ -45,6 +45,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>libraries</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>src</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -58,16 +63,6 @@
 			<name>system_msp432p401r.c</name>
 			<type>1</type>
 			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/system_msp432p401r.c</locationURI>
-		</link>
-		<link>
-			<name>bsp/fln_bsp.c</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/system/boards/bsp/fln_bsp.c</locationURI>
-		</link>
-		<link>
-			<name>bsp/fln_bsp.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/system/boards/bsp/fln_bsp.h</locationURI>
 		</link>
 		<link>
 			<name>drivers/adc14.c</name>
@@ -385,34 +380,49 @@
 			<locationURI>FALCON_ROOT_DIR/development/system/msp_sdk/source/ti/devices/msp432p4xx/driverlib/wdt_a.h</locationURI>
 		</link>
 		<link>
-			<name>hal/fiodt.h</name>
+			<name>hal/fi2c_hal.c</name>
 			<type>1</type>
-			<locationURI>FALCON_ROOT_DIR/development/system/hal/fiodt.h</locationURI>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fi2c_hal.c</locationURI>
 		</link>
 		<link>
-			<name>hal/fiom.c</name>
+			<name>hal/fi2c_hal.h</name>
 			<type>1</type>
-			<locationURI>FALCON_ROOT_DIR/development/system/hal/fiom.c</locationURI>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fi2c_hal.h</locationURI>
 		</link>
 		<link>
-			<name>hal/fiom.h</name>
+			<name>hal/fio_common.h</name>
 			<type>1</type>
-			<locationURI>FALCON_ROOT_DIR/development/system/hal/fiom.h</locationURI>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fio_common.h</locationURI>
 		</link>
 		<link>
-			<name>hal/i2c_master.c</name>
+			<name>hal/fio_hal.c</name>
 			<type>1</type>
-			<locationURI>FALCON_ROOT_DIR/development/system/hal/i2c_master.c</locationURI>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fio_hal.c</locationURI>
 		</link>
 		<link>
-			<name>hal/i2c_master.h</name>
+			<name>hal/fio_hal.h</name>
 			<type>1</type>
-			<locationURI>FALCON_ROOT_DIR/development/system/hal/i2c_master.h</locationURI>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fio_hal.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/fiom</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>src/main.c</name>
 			<type>1</type>
 			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/src/main.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/fiom/fiom.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/libraries/fiom/fiom.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/fiom/fiom.h</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/libraries/fiom/fiom.h</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>

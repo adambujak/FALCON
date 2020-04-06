@@ -22,25 +22,25 @@ void setpin ( uint_fast8_t port, uint_fast16_t pin, uint8_t state )
   }
 }
 fi2c_t * i2cInstance;
-fi2c_transfer_t transferData;
+fio_transfer_t transferData;
 
-fio_retval_e i2c_write ( fi2c_addr_t slave, fi2c_reg_t reg, fi2c_reg_t *txData, fi2c_len_t length )
+fio_retval_e i2c_write ( fio_addr_t slave, fio_reg_t reg, fio_reg_t *txData, fio_len_t length )
 {
-  transferData.slaveAddr = slave;
   transferData.writeReg  = reg;
   transferData.txBuf     = txData;
   transferData.length    = length;
   transferData.timeout   = SYS_MS_TO_TICK(25);
+  transferData.peerInfo.i2cSlaveAddr = slave;
 
   return i2cInstance->blockingWrite(i2cInstance, &transferData);
 }
-fio_retval_e i2c_read ( fi2c_addr_t slave, fi2c_reg_t reg, fi2c_reg_t *txData, fi2c_len_t length )
+fio_retval_e i2c_read ( fio_addr_t slave, fio_reg_t reg, fio_reg_t *txData, fio_len_t length )
 {
-  transferData.slaveAddr = slave;
   transferData.readReg   = reg;
   transferData.rxBuf     = txData;
   transferData.length    = length;
   transferData.timeout   = SYS_MS_TO_TICK(25);
+  transferData.peerInfo.i2cSlaveAddr = slave;
 
   return i2cInstance->blockingRead(i2cInstance, &transferData);
 }
@@ -68,8 +68,8 @@ int main ( void )
 
   fio_retval_e success;
 
-  fi2c_reg_t txData[] = {0xFF, 0x00, 0x00};
-  fi2c_reg_t rxData[] = {0xFF, 0xFF, 0xFF, 0xFF};
+  fio_reg_t txData[] = {0xFF, 0x00, 0x00};
+  fio_reg_t rxData[] = {0xFF, 0xFF, 0xFF, 0xFF};
 //  i2c_read(SLAVE_ADDR, 0x00, rxData, 2);
 
   success = i2c_write(SLAVE_ADDR, 0x60, txData, 2);
