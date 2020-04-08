@@ -31,9 +31,10 @@ typedef uint8_t fio_mode_t;
 
 
 #define FIO_ERROR_NONE        0
-#define FIO_ERROR_TIMEOUT     1
-#define FIO_ERROR_NOT_INIT   (1 << 1)
-#define FIO_ERROR_MISC       (1 << 2)
+#define FIO_ERROR_GENERAL    (1)      /* General error */
+#define FIO_ERROR_INIT       (1 << 1) /* Initialization related error */
+#define FIO_ERROR_NAK        (1 << 2) /* NAK error */
+#define FIO_ERROR_TIMEOUT    (1 << 3) /* Timeout error */
 typedef uint8_t fio_error_t;
 
 #define FIO_TRANSFER_DIR_WRITE  0

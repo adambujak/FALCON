@@ -49,13 +49,13 @@ fio_error_t FIOM_Initialize   ( fiom_t * instance, fio_module_t module, const fi
 {
   if ( FIO_IsModuleInit(module) )
   {
-    return FIO_ERROR_MISC;
+    return FIO_ERROR_GENERAL;
   }
 
   fio_hal_t * hal = FIO_Initialize(module, config);
   if ( hal == NULL )
   {
-    return FIO_ERROR_MISC;
+    return FIO_ERROR_GENERAL;
   }
 
   instance->halInstance = hal;

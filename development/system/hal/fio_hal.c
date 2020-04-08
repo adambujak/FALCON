@@ -180,7 +180,7 @@ fio_error_t FIO_IsModuleInit ( fio_module_t module )
   }
   if ( fioModules[module].isInitialized )
   {
-    return FIO_ERROR_MISC;
+    return FIO_ERROR_GENERAL;
   }
   return FIO_ERROR_NONE;
 }
@@ -197,7 +197,7 @@ fio_error_t FIO_Transfer ( fio_hal_t * instance, fio_transfer_t * transferData )
 {
   if ( instance == NULL || !(instance->isInitialized) )
   {
-    return FIO_ERROR_NOT_INIT;
+    return FIO_ERROR_INIT;
   }
 
   instance->transferData   = transferData;
@@ -213,7 +213,7 @@ fio_error_t FIO_Transfer ( fio_hal_t * instance, fio_transfer_t * transferData )
       FI2C_Transfer(&(instance->peripheralModule.i2cModule), transferData, tempcallback);
       return FIO_ERROR_NONE;
     default:
-      return FIO_ERROR_MISC;
+      return FIO_ERROR_GENERAL;
   }
 }
 

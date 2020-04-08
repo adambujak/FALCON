@@ -109,7 +109,7 @@ int main ( void )
 
 
 //  error = i2c_read(SLAVE_ADDR, 0x32, rxData, 2);
-  error = i2c_readb(SLAVE_ADDR, 0x32, rxData, 2);
+  error = i2c_write(SLAVE_ADDR, 0x60, txData, 4);
   while(1);
 
 //
