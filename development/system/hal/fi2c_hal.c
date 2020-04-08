@@ -63,6 +63,7 @@ static inline void i2c_write ( fi2c_t * instance )
   MAP_I2C_masterSendMultiByteStart(instance->baseAddr, instance->transferData->writeReg );
 
   MAP_I2C_enableInterrupt(instance->baseAddr, EUSCI_B_I2C_TRANSMIT_INTERRUPT0);
+  MAP_I2C_enableInterrupt(instance->baseAddr, EUSCI_B_I2C_NAK_INTERRUPT);
   MAP_I2C_enableInterrupt(instance->baseAddr, EUSCI_B_I2C_CLOCK_LOW_TIMEOUT_INTERRUPT);
 }
 
@@ -144,7 +145,43 @@ void FI2C_IRQ_Handler ( fi2c_t * instance )
 
   if ( instance->transferData->direction == FIO_TRANSFER_DIR_WRITE )
   {
+    uint16_t   length = instance->transferData->length;
+    uint16_t * xferIndex = &(instance->xferIndex);
+    uint8_t  * rxArray = instance->transferData->rxBuf;
 
+    /* If transmit interrupt 0 received, send another start to initiate receive */
+    if ( status & EUSCI_B_I2C_TRANSMIT_INTERRUPT0 )
+    {
+      if ( (*xferIndex) == length )
+      {
+//        MAP_I2C_disableInterrupt(instance->baseAddr, EUSCI_B_I2C_TRANSMIT_INTERRUPT0);
+        MAP_I2C_enableInterrupt(instance->baseAddr, EUSCI_B_I2C_STOP_INTERRUPT);
+        MAP_I2C_masterSendMultiByteStop(instance->baseAddr);
+      }
+      else
+      {
+        MAP_I2C_masterSendMultiByteNext(instance->baseAddr, instance->transferData->txBuf[(*xferIndex)++]);
+      }
+    }
+    else if ( status & EUSCI_B_I2C_STOP_INTERRUPT )
+    {
+      MAP_I2C_disableInterrupt(instance->baseAddr, EUSCI_B_I2C_STOP_INTERRUPT);
+
+      if (instance->transferData->xferDoneCB.callbackFunction != NULL)
+      {
+        instance->callback.callbackFunction(instance->callback.context, FIO_ERROR_NONE);
+      }
+    }
+    else if ( status & EUSCI_B_I2C_NAK_INTERRUPT )
+    {
+      MAP_I2C_disableInterrupt(instance->baseAddr, EUSCI_B_I2C_NAK_INTERRUPT);
+      MAP_I2C_disableInterrupt(instance->baseAddr, EUSCI_B_I2C_STOP_INTERRUPT);
+      MAP_I2C_masterSendMultiByteStop(instance->baseAddr);
+      if (instance->transferData->xferDoneCB.callbackFunction != NULL)
+      {
+        instance->callback.callbackFunction(instance->callback.context, FIO_ERROR_NAK);
+      }
+    }
   }
   else if ( instance->transferData->direction == FIO_TRANSFER_DIR_READ )
   {
