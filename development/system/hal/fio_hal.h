@@ -76,6 +76,7 @@ struct fio_struct
 fio_hal_t * FIO_Initialize   ( fio_module_t module, const fio_config_t * config );
 void        FIO_Deinitialize ( fio_hal_t * instance );
 fio_error_t FIO_Transfer     ( fio_hal_t * instance, fio_transfer_t * transferData );
+fio_error_t FIO_IsModuleInit ( fio_module_t module );
 
 
 #endif // FIO_HAL_H

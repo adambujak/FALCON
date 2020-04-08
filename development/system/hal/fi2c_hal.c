@@ -190,7 +190,7 @@ void FI2C_IRQ_Handler ( fi2c_t * instance )
 
       if (instance->transferData->xferDoneCB.callbackFunction != NULL)
       {
-        instance->transferData->xferDoneCB.callbackFunction(instance->transferData->xferDoneCB.context, FIO_ERROR_NONE);
+        instance->callback.callbackFunction(instance->callback.context, FIO_ERROR_NONE);
       }
     }
 

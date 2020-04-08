@@ -10,9 +10,11 @@
 #include "fln_bsp.h"
 #include <string.h>
 
+
+#define INITIAL_FLAG_SET 0x3E
 fio_callback_t nullCallback = {NULL, 0};
 static fio_hal_t fioModules[FIO_MODULE_CNT];
-static uint8_t   initialFlag = 0x3E; // Random value since there was a bug when I set it to 0 TODO: find issue
+static uint8_t   initialFlag = INITIAL_FLAG_SET; // Random value since there was a bug when I set it to 0 TODO: find issue
 
 
 /**
@@ -160,6 +162,29 @@ static inline void deinit_peripheral_module ( fio_peripheral_t * module, fio_mod
     }
 }
 
+/**
+  * @brief   Check if module is initialized
+  * @param   module - FIO module to check
+  * @retval  error  - error status
+  */
+fio_error_t FIO_IsModuleInit ( fio_module_t module )
+{
+  /* If FIO_Init has never been called, the ioModule structs have not been set to all 0,
+   * therefore, we may get false positives.
+   *
+   * So if the initial flag is still set, the module is not initialized yet.
+   */
+  if ( initialFlag == INITIAL_FLAG_SET )
+  {
+    return FIO_ERROR_NONE;
+  }
+  if ( fioModules[module].isInitialized )
+  {
+    return FIO_ERROR_MISC;
+  }
+  return FIO_ERROR_NONE;
+}
+
 
 /**
   * @brief   I/O Transfer
@@ -192,10 +217,17 @@ fio_error_t FIO_Transfer ( fio_hal_t * instance, fio_transfer_t * transferData )
   }
 }
 
+
+/**
+  * @brief   FIO Initialization function
+  * @param   module   - FIO module value
+  * @param   config   - FIO config
+  * @retval  instance - FIO HAL instance pointer
+  */
 fio_hal_t * FIO_Initialize ( fio_module_t module, const fio_config_t * config )
 {
   /* Only do this the first time FIO_Initialize is called */
-  if ( initialFlag == 0x3E )
+  if ( initialFlag == INITIAL_FLAG_SET )
   {
     initialFlag = 1;
     memset(fioModules, 0, sizeof(fioModules));
@@ -241,6 +273,11 @@ fio_hal_t * FIO_Initialize ( fio_module_t module, const fio_config_t * config )
   }
 }
 
+/**
+  * @brief    FIO Deinitialization function
+  * @param  * instance - FIO HAL instance pointer
+  * @retval   None
+  */
 void FIO_Deinitialize ( fio_hal_t * instance )
 {
   if ( !(instance->isInitialized) )
@@ -256,6 +293,11 @@ void FIO_Deinitialize ( fio_hal_t * instance )
 //  deinit_pins
 }
 
+/**
+  * @brief    Interrupt handler for io modules
+  * @param  * instance - FIO HAL instance pointer
+  * @retval   None
+  */
 static inline void IRQ_Handler ( fio_hal_t * instance )
 {
   switch ( instance->mode )

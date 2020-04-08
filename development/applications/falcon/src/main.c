@@ -2,7 +2,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "i2c_master.h"
+#include "fiom.h"
+#include "fln_bsp.h"
 
 #define SYS_CLOCK    300000
 #define SYS_MS_TO_TICK(ms)  ( ms*SYS_CLOCK/1000 )
@@ -21,28 +22,62 @@ void setpin ( uint_fast8_t port, uint_fast16_t pin, uint8_t state )
     MAP_GPIO_setOutputHighOnPin(port, pin);
   }
 }
-fi2c_t * i2cInstance;
+
+fiom_t fioModuleInstance;
+fiom_t * fiom = &fioModuleInstance;
 fio_transfer_t transferData;
 
-fio_retval_e i2c_write ( fio_addr_t slave, fio_reg_t reg, fio_reg_t *txData, fio_len_t length )
+fio_reg_t txData[] = {0xFF, 0x00, 0x00};
+fio_reg_t rxData[] = {0xFF, 0xFF, 0xFF, 0xFF};
+
+void transferDone ( void * context, uint8_t status )
+{
+  if (context != NULL)
+  {
+
+  }
+}
+
+fio_error_t i2c_write ( fio_addr_t slave, fio_reg_t reg, fio_reg_t *txData, fio_len_t length )
 {
   transferData.writeReg  = reg;
   transferData.txBuf     = txData;
   transferData.length    = length;
+  transferData.direction = FIO_TRANSFER_DIR_WRITE;
   transferData.timeout   = SYS_MS_TO_TICK(25);
   transferData.peerInfo.i2cSlaveAddr = slave;
+  transferData.xferDoneCB.callbackFunction = &transferDone;
+  transferData.xferDoneCB.context          = fiom;
 
-  return i2cInstance->blockingWrite(i2cInstance, &transferData);
+  return fiom->nonBlockingTransfer(fiom, &transferData);
 }
-fio_retval_e i2c_read ( fio_addr_t slave, fio_reg_t reg, fio_reg_t *txData, fio_len_t length )
+fio_error_t i2c_read ( fio_addr_t slave, fio_reg_t reg, fio_reg_t *rxData, fio_len_t length )
 {
   transferData.readReg   = reg;
-  transferData.rxBuf     = txData;
+  transferData.rxBuf     = rxData;
   transferData.length    = length;
+  transferData.direction = FIO_TRANSFER_DIR_READ;
   transferData.timeout   = SYS_MS_TO_TICK(25);
   transferData.peerInfo.i2cSlaveAddr = slave;
 
-  return i2cInstance->blockingRead(i2cInstance, &transferData);
+  transferData.xferDoneCB.callbackFunction = &transferDone;
+  transferData.xferDoneCB.context          = fiom;
+
+  return fiom->nonBlockingTransfer(fiom, &transferData);
+}
+fio_error_t i2c_readb ( fio_addr_t slave, fio_reg_t reg, fio_reg_t *rxData, fio_len_t length )
+{
+  transferData.readReg   = reg;
+  transferData.rxBuf     = rxData;
+  transferData.length    = length;
+  transferData.direction = FIO_TRANSFER_DIR_READ;
+  transferData.timeout   = SYS_MS_TO_TICK(25);
+  transferData.peerInfo.i2cSlaveAddr = slave;
+
+  transferData.xferDoneCB.callbackFunction = &transferDone;
+  transferData.xferDoneCB.context          = fiom;
+
+  return fiom->blockingTransfer(fiom, &transferData);
 }
 
 int main ( void )
@@ -63,59 +98,68 @@ int main ( void )
   MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P3, GPIO_PIN7);
 
 
+  fio_error_t error;
 
-  i2cInstance = FI2C_Initialize(FIO_MODULE_0, &fi2c_default_config);
+  error = FIOM_Initialize(fiom, FIO_MODULE_4, &fio_default_i2c_config);
 
-  fio_retval_e success;
-
-  fio_reg_t txData[] = {0xFF, 0x00, 0x00};
-  fio_reg_t rxData[] = {0xFF, 0xFF, 0xFF, 0xFF};
-//  i2c_read(SLAVE_ADDR, 0x00, rxData, 2);
-
-  success = i2c_write(SLAVE_ADDR, 0x60, txData, 2);
-
-
-  txData[0] = 0x0;
-  txData[1] = 0x0;
-  success = i2c_write(SLAVE_ADDR, 0x31,  txData, 2);
-
-
-  txData[0] = 0xC0;
-  txData[1] = 0xDE;
-  success = i2c_write(SLAVE_ADDR, 0x31, txData, 2);
-
-
-
-//  MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN7);
-
-  success = i2c_read(SLAVE_ADDR, 0x32, rxData, 2);
-
-
-
-  txData[0] = 0x00;
-  txData[1] = 0x02;
-  success = i2c_write(SLAVE_ADDR, 0x35, txData, 2);
-
-
-  success = i2c_read(SLAVE_ADDR, 0x32, rxData, 2);
-
-  success = i2c_read(SLAVE_ADDR, 0x93, rxData, 2);
-
-  txData[0] = 0x00;
-  txData[1] = 0x00;
-  success = i2c_write(SLAVE_ADDR, 0x60, txData, 2);
-
-  txData[0] = 0x81;
-  txData[1] = 0xFF;
-  success = i2c_write(SLAVE_ADDR, 0x30, txData, 2);
-
-  success = i2c_read(SLAVE_ADDR, 0x30, txData, 2);
-
-  while (1)
+  if ( error )
   {
-    success = i2c_read(SLAVE_ADDR, 0x00, rxData, 2);
-    success = i2c_read(SLAVE_ADDR, 0x05, rxData+2, 2);
+    while(1);
   }
+
+
+//  error = i2c_read(SLAVE_ADDR, 0x32, rxData, 2);
+  error = i2c_readb(SLAVE_ADDR, 0x32, rxData, 2);
+  while(1);
+
+//
+//
+////  i2c_read(SLAVE_ADDR, 0x00, rxData, 2);
+//
+//  success = i2c_write(SLAVE_ADDR, 0x60, txData, 2);
+//
+//
+//  txData[0] = 0x0;
+//  txData[1] = 0x0;
+//  success = i2c_write(SLAVE_ADDR, 0x31,  txData, 2);
+//
+//
+//  txData[0] = 0xC0;
+//  txData[1] = 0xDE;
+//  success = i2c_write(SLAVE_ADDR, 0x31, txData, 2);
+//
+//
+//
+////  MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN7);
+//
+//  success = i2c_read(SLAVE_ADDR, 0x32, rxData, 2);
+//
+//
+//
+//  txData[0] = 0x00;
+//  txData[1] = 0x02;
+//  success = i2c_write(SLAVE_ADDR, 0x35, txData, 2);
+//
+//
+//  success = i2c_read(SLAVE_ADDR, 0x32, rxData, 2);
+//
+//  success = i2c_read(SLAVE_ADDR, 0x93, rxData, 2);
+//
+//  txData[0] = 0x00;
+//  txData[1] = 0x00;
+//  success = i2c_write(SLAVE_ADDR, 0x60, txData, 2);
+//
+//  txData[0] = 0x81;
+//  txData[1] = 0xFF;
+//  success = i2c_write(SLAVE_ADDR, 0x30, txData, 2);
+//
+//  success = i2c_read(SLAVE_ADDR, 0x30, txData, 2);
+//
+//  while (1)
+//  {
+//    success = i2c_read(SLAVE_ADDR, 0x00, rxData, 2);
+//    success = i2c_read(SLAVE_ADDR, 0x05, rxData+2, 2);
+//  }
 
 //  while ( 1 )
 //  {
