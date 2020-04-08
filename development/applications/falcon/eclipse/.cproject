@@ -117,6 +117,8 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/system/boards/bsp&quot;"/>
                                     									
+                                    <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/libraries/fiom&quot;"/>
+
                                     <listOptionValue builtIn="false" value="&quot;${MSP_SDK_DIR}/source&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${MSP_SDK_DIR}/source/third_party/CMSIS/Include&quot;"/>

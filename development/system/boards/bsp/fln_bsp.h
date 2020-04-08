@@ -10,22 +10,28 @@
 #define FALCON_BSP_H
 
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
-#include "fiodt.h"
+
+#include "fio_hal.h"
 
 extern const eUSCI_I2C_MasterConfig fi2c_default_config;
 
+extern const fio_config_t fio_default_i2c_config;
+
 /**
-  * @brief   Deinitialize I2C module GPIO pins
-  * @param   module - I2C Module Base Value
+  * @brief   Deinitialize IO module GPIO pins
+  * @param   module - IO Module Base Value
+  * @param   mode   - IO Mode - I2C, SPI, etc
   * @retval  None
   */
-void deinitialize_i2c_pins ( fio_module_t module );
+void deinitialize_io_pins ( fio_module_t module, fio_mode_t mode );
+
 /**
-  * @brief   Setup I2C module GPIO pins
-  * @param   module - I2C Module Base Value
+  * @brief   Setup IO module GPIO pins
+  * @param   module - IO Module Base Value
+  * @param   mode   - IO Mode - I2C, SPI, etc
   * @retval  None
   */
-void initialize_i2c_pins ( fio_module_t module );
+void initialize_io_pins ( fio_module_t module, fio_mode_t mode );
 
 
 
