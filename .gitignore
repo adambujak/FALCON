@@ -3,6 +3,9 @@
 
 # Object files
 *.o
+*.out
+*.map
+*.in
 *.obj
 *.bin
 *.hex
