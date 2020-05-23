@@ -13,9 +13,8 @@
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
 static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instance completed the transfer. */
 
-#define TEST_STRING "Nordic"
-static uint8_t       m_tx_buf[] = TEST_STRING;           /**< TX buffer. */
-static uint8_t       m_rx_buf[sizeof(TEST_STRING) + 1];    /**< RX buffer. */
+static uint8_t       m_tx_buf[2];           /**< TX buffer. */
+static uint8_t       m_rx_buf[sizeof(m_tx_buf) + 1];  /**< RX buffer. */
 static const uint8_t m_length = sizeof(m_tx_buf);        /**< Transfer length. */
 
 /**
@@ -29,8 +28,45 @@ void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
     NRF_LOG_INFO("Transfer completed.");
     if (m_rx_buf[0] != 0)
     {
-        NRF_LOG_INFO(" Received:");
-        NRF_LOG_HEXDUMP_INFO(m_rx_buf, strlen((const char *)m_rx_buf));
+   //     NRF_LOG_INFO(" Received:");
+   //     NRF_LOG_HEXDUMP_INFO(m_rx_buf, strlen((const char *)m_rx_buf));
+    }
+}
+
+uint8_t read(uint8_t addr) 
+{
+    memset(m_rx_buf, 0, m_length);
+    spi_xfer_done = false;
+   
+    m_tx_buf[0] =  addr & 0x1F;
+
+    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, 1, m_rx_buf, m_length));
+
+    while (!spi_xfer_done)
+    {
+        __WFE();
+    }
+    NRF_LOG_INFO("Received read data 0: %x", m_rx_buf[0]);
+    NRF_LOG_INFO("Received read data 1: %x", m_rx_buf[1]);
+    return m_rx_buf[1];
+}
+
+void write(uint8_t addr, uint8_t val) 
+{
+    memset(m_rx_buf, 0, m_length);
+    spi_xfer_done = false;
+    
+    m_tx_buf[0] = 0x20 | (addr & 0x1F);
+    m_tx_buf[1] = val;
+
+    NRF_LOG_INFO("Writing data 0: %x", m_tx_buf[0]);
+    NRF_LOG_INFO("Writing data 1: %x", m_tx_buf[1]);
+    
+    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, 2, m_rx_buf, m_length));
+
+    while (!spi_xfer_done)
+    {
+        __WFE();
     }
 }
 
@@ -49,20 +85,27 @@ int main(void)
     APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL));
 
     NRF_LOG_INFO("SPI example started.");
+    
+    uint8_t val = 0x02;
+
+    uint8_t reg = read(0x00); 
+
+    if ((reg & 0x01) != 0) 
+    {
+        val = 0x0; 
+    }
+    
+    nrf_delay_ms(2000);
+    NRF_LOG_INFO("Sending %x to write ", (reg & 0xFD) |val);
+
+    write(0x00, (reg & 0xFD) |val);
+
+    nrf_delay_ms(2000);
+    reg = read(0x00);
 
     while (1)
     {
-        // Reset rx buffer and transfer done flag
-        memset(m_rx_buf, 0, m_length);
-        spi_xfer_done = false;
-
-        APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, m_length, m_rx_buf, m_length));
-
-        while (!spi_xfer_done)
-        {
-            __WFE();
-        }
-
+        
         NRF_LOG_FLUSH();
 
         bsp_board_led_invert(BSP_BOARD_LED_0);
