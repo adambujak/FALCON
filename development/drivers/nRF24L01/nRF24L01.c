@@ -737,7 +737,9 @@ uint8_t nRF24L01_read_reg(nRF24L01_t *instance, uint8_t reg)
   uint8_t rx_buf[2];
   tx_buf[0] = NRF24L01_R_REGISTER | reg;
 
+  CSN_LOW();
   instance->blockingTransfer(instance->spiCtx, tx_buf, 1, rx_buf, 2);
+  CSN_HIGH();
 
   return rx_buf[1];
 }
@@ -749,7 +751,9 @@ uint8_t nRF24L01_write_reg(nRF24L01_t *instance, uint8_t reg, uint8_t value)
   tx_buf[0] = NRF24L01_W_REGISTER | reg;
   tx_buf[1] = value;
 
+  CSN_LOW();
   instance->blockingTransfer(instance->spiCtx, tx_buf, 2, &retval, 1);
+  CSN_HIGH();
   return retval;
 }
 
@@ -773,8 +777,7 @@ uint16_t nRF24L01_read_multibyte_reg(nRF24L01_t *instance, uint8_t reg, uint8_t 
       if (reg < 7U)
       {
         length = nRF24L01_read_rx_payload_width(instance);
-        CSN_LOW();
-        nRF24L01_rw(instance, NRF24L01_R_RX_PAYLOAD);
+        command = NRF24L01_R_RX_PAYLOAD;
       }
       else
       {
