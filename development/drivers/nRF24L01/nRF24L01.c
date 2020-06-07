@@ -753,141 +753,73 @@ uint8_t nRF24L01_write_reg(nRF24L01_t *instance, uint8_t reg, uint8_t value)
   return retval;
 }
 
-#define NRF_READ_MULTIBYTE_REG_COMMON_BODY \
-    do \
-    { \
-      NRF24L01_HW_SPI_WRITE(0U); \
-      if (!first_round) \
-      { \
-        *buf = read_byte; \
-        buf++; \
-      } \
-      else \
-      { \
-        first_round = false; \
-      } \
-      /* wait for byte transfer finished */ \
-      while(NRF24L01_HW_SPI_BUSY){} \
-      read_byte = NRF24L01_HW_SPI_READ(); \
-    } while (--ctr); \
-    *buf = read_byte;
-
 uint16_t nRF24L01_read_multibyte_reg(nRF24L01_t *instance, uint8_t reg, uint8_t *pbuf)
 {
-  // uint8_t ctr, length;
-  // uint8_t memtype;
-  // uint8_t read_byte; /*lint -esym(530,read_byte) symbol not initialized*/
-  // bool first_round;
-  // first_round = true;
+  uint8_t length;
+  uint8_t command;
 
-  // memtype = *(uint8_t*)(&pbuf);
+  switch(reg)
+  {
+    case NRF24L01_PIPE0:
+    case NRF24L01_PIPE1:
+    case NRF24L01_TX:
+      length = nRF24L01_get_address_width(instance);
+      
+      command = NRF24L01_RX_ADDR_P0 + reg;
+      break;
 
-  // switch(reg)
-  // {
-  //   case NRF24L01_PIPE0:
-  //   case NRF24L01_PIPE1:
-  //   case NRF24L01_TX:
-  //     length = ctr = nRF24L01_get_address_width(instance, );
-  //     CSN_LOW();
-  //     nRF24L01_rw(instance, NRF24L01_RX_ADDR_P0 + reg);
-  //     break;
+    case NRF24L01_RX_PLOAD:
+      reg = nRF24L01_get_rx_data_source(instance);
+      if (reg < 7U)
+      {
+        length = nRF24L01_read_rx_payload_width(instance);
+        CSN_LOW();
+        nRF24L01_rw(instance, NRF24L01_R_RX_PAYLOAD);
+      }
+      else
+      {
+        length = 0U;
+      }
+      break;
 
-  //   case NRF24L01_RX_PLOAD:
-  //     reg = nRF24L01_get_rx_data_source(instance, );
-  //     if (reg < 7U)
-  //     {
-  //       length = ctr = nRF24L01_read_rx_payload_width(instance, );
-  //       CSN_LOW();
-  //       nRF24L01_rw(instance, NRF24L01_R_RX_PAYLOAD);
-  //     }
-  //     else
-  //     {
-  //       ctr = length = 0U;
-  //     }
-  //     break;
+    default:
+      length = 0U;
+      break;
+  }
 
-  //   default:
-  //     ctr = length = 0U;
-  //     break;
-  // }
+  if (length == 0) 
+  {
+    return (uint16_t)reg << 8;
+  }
+  CSN_LOW();
+  uint8_t status;
+  instance->blockingTransfer(instance->spiCtx, &command, 1, &status, 1);
+  instance->blockingTransfer(instance->spiCtx, NULL, 0, pbuf, length);
+  CSN_HIGH();
 
-  // if (memtype == 0x00U)
-  // {
-  //   uint8_t data *buf = (uint8_t data *)pbuf;
-  //   NRF_READ_MULTIBYTE_REG_COMMON_BODY
-  // }
-  // else if (memtype == 0x01U)
-  // {
-  //   uint8_t xdata *buf = (uint8_t xdata *)pbuf;
-  //   NRF_READ_MULTIBYTE_REG_COMMON_BODY
-  // }
-  // else if (memtype == 0xFEU)
-  // {
-  //   uint8_t pdata *buf = (uint8_t pdata *)pbuf;
-  //   NRF_READ_MULTIBYTE_REG_COMMON_BODY
-  // }
-  // else
-  // {
-  //   uint8_t *buf = (uint8_t *)pbuf;
-  //   NRF_READ_MULTIBYTE_REG_COMMON_BODY
-  // }
-
-  // CSN_HIGH();
-
-  // return (((uint16_t) reg << 8) | length);
-  return 1;
+  return (((uint16_t) reg << 8) | length);
 }
 
-#define NRF_WRITE_MULTIBYTE_REG_COMMON_BODY \
-  do \
-  { \
-    next = *buf; \
-    buf++; \
-    while(NRF24L01_HW_SPI_BUSY) {}  /* wait for byte transfer finished */ \
-    dummy = NRF24L01_HW_SPI_READ(); \
-    NRF24L01_HW_SPI_WRITE(next); \
-  } while (--length);
-/*lint -esym(550,dummy) symbol not accessed*/ \
-/*lint -esym(438,dummy) last assigned value not used*/ \
-/*lint -esym(838,dummy) previously assigned value not used*/ \
 void nRF24L01_write_multibyte_reg(nRF24L01_t *instance, uint8_t reg, const uint8_t *pbuf, uint8_t length)
 {
-  // uint8_t memtype;
-  // uint8_t next;
-  // uint8_t volatile dummy;
 
-  // memtype = *(uint8_t*)(&pbuf);
-
-  // CSN_LOW();
-  // NRF24L01_HW_SPI_WRITE(reg);
-
-
-
-  // if (memtype == 0x00U)
-  // {
-  //   const uint8_t data *buf = (const uint8_t data *)pbuf;
-  //   NRF_WRITE_MULTIBYTE_REG_COMMON_BODY
-  // }
-  // else if (memtype == 0x01U)
-  // {
-  //   const uint8_t xdata *buf = (const uint8_t xdata *)pbuf;
-  //   NRF_WRITE_MULTIBYTE_REG_COMMON_BODY
-  // }
-  // else if (memtype == 0xFEU)
-  // {
-  //   const uint8_t pdata *buf = (const uint8_t pdata *)pbuf;
-  //   NRF_WRITE_MULTIBYTE_REG_COMMON_BODY
-  // }
-  // else
-  // {
-  //   const uint8_t *buf = (const uint8_t *)pbuf;
-  //   NRF_WRITE_MULTIBYTE_REG_COMMON_BODY
-  // }
-
-  // while(NRF24L01_HW_SPI_BUSY) {} /* wait for byte transfer finished */
-  // dummy = NRF24L01_HW_SPI_READ();
-  // CSN_HIGH();
+  CSN_LOW();
+  uint8_t status;
+  instance->blockingTransfer(instance->spiCtx, &reg, 1, &status, 1);
+  instance->blockingTransfer(instance->spiCtx, (uint8_t *)pbuf, length, NULL, 0);
+  CSN_HIGH();
 }
+
+uint8_t nRF24L01_rw(nRF24L01_t *instance, uint8_t value)
+{
+  CSN_LOW();
+  uint8_t status;
+  instance->blockingTransfer(instance->spiCtx, &value, 1, &status, 1);
+  CSN_HIGH();
+
+  return status;
+}
+
 void nRF24L01_initialize ( nRF24L01_t * instance, drv_spi_tf_t blockingTransfer, void * spiCtx )
 {
   instance->blockingTransfer = blockingTransfer;
