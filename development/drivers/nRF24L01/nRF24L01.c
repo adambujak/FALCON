@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "drv_common.h"
+#include "drivers_common.h"
 #include "nRF24L01.h"
 
 #define NRF24L01_SET_BIT(pos) ((uint8_t) (1U<<( (uint8_t) (pos) )))
@@ -261,9 +261,9 @@ uint8_t nRF24L01_get_clear_irq_flags(nRF24L01_t *instance)
 {
   uint8_t retval;
 
-  retval = nRF24L01_write_reg (instance, NRF24L01_STATUS, (BIT_6|BIT_5|BIT_4));
+  retval = nRF24L01_write_reg (instance, NRF24L01_STATUS, (DRV_BIT6|DRV_BIT5|DRV_BIT4));
 
-  return (retval & (BIT_6|BIT_5|BIT_4));
+  return (retval & (DRV_BIT6|DRV_BIT5|DRV_BIT4));
 }
 
 uint8_t nRF24L01_clear_irq_flags_get_status(nRF24L01_t *instance)
@@ -271,8 +271,8 @@ uint8_t nRF24L01_clear_irq_flags_get_status(nRF24L01_t *instance)
   uint8_t retval;
 
   // When RFIRQ is cleared (when calling write_reg), pipe information is unreliable (read again with read_reg)
-  retval = nRF24L01_write_reg (instance, NRF24L01_STATUS, (BIT_6|BIT_5|BIT_4)) & (BIT_6|BIT_5|BIT_4);
-  retval |= nRF24L01_read_reg (instance, NRF24L01_STATUS) & (BIT_3|BIT_2|BIT_1|BIT_0);
+  retval = nRF24L01_write_reg (instance, NRF24L01_STATUS, (DRV_BIT6|DRV_BIT5|DRV_BIT4)) & (DRV_BIT6|DRV_BIT5|DRV_BIT4);
+  retval |= nRF24L01_read_reg (instance, NRF24L01_STATUS) & (DRV_BIT3|DRV_BIT2|DRV_BIT1|DRV_BIT0);
 
   return (retval);
 }
@@ -285,7 +285,7 @@ void nRF24L01_clear_irq_flag(nRF24L01_t *instance, nRF24L01_irq_source_t int_sou
 
 uint8_t nRF24L01_get_irq_flags(nRF24L01_t *instance)
 {
-  return nRF24L01_nop(instance) & (BIT_6|BIT_5|BIT_4);
+  return nRF24L01_nop(instance) & (DRV_BIT6|DRV_BIT5|DRV_BIT4);
 }
 
 void nRF24L01_open_pipe(nRF24L01_t *instance, nRF24L01_address_t pipe_num, bool auto_ack)
@@ -316,11 +316,11 @@ void nRF24L01_open_pipe(nRF24L01_t *instance, nRF24L01_address_t pipe_num, bool 
       break;
 
     case NRF24L01_ALL:
-      en_rxaddr.value = (uint8_t)(~(BIT_6|BIT_7));
+      en_rxaddr.value = (uint8_t)(~(DRV_BIT6|DRV_BIT7));
 
       if(auto_ack)
       {
-        en_aa.value = (uint8_t)(~(BIT_6|BIT_7));
+        en_aa.value = (uint8_t)(~(DRV_BIT6|DRV_BIT7));
       }
       else
       {
@@ -485,7 +485,7 @@ uint8_t nRF24L01_get_auto_retr_status(nRF24L01_t *instance)
 
 uint8_t nRF24L01_get_packet_lost_ctr(nRF24L01_t *instance)
 {
-  return ((nRF24L01_read_reg(instance, NRF24L01_OBSERVE_TX) & (BIT_7|BIT_6|BIT_5|BIT_4)) >> 4);
+  return ((nRF24L01_read_reg(instance, NRF24L01_OBSERVE_TX) & (DRV_BIT7|DRV_BIT6|DRV_BIT5|DRV_BIT4)) >> 4);
 }
 
 uint8_t nRF24L01_get_rx_payload_width(nRF24L01_t *instance, uint8_t pipe_num)
@@ -600,7 +600,7 @@ uint8_t nRF24L01_get_fifo_status(nRF24L01_t *instance)
 
 uint8_t nRF24L01_get_transmit_attempts(nRF24L01_t *instance)
 {
-  return (nRF24L01_read_reg(instance, NRF24L01_OBSERVE_TX) & (BIT_3|BIT_2|BIT_1|BIT_0));
+  return (nRF24L01_read_reg(instance, NRF24L01_OBSERVE_TX) & (DRV_BIT3|DRV_BIT2|DRV_BIT1|DRV_BIT0));
 }
 
 bool nRF24L01_get_carrier_detect(nRF24L01_t *instance)
@@ -673,7 +673,7 @@ uint16_t nRF24L01_read_rx_payload(nRF24L01_t *instance, uint8_t *rx_pload)
 
 uint8_t nRF24L01_get_rx_data_source(nRF24L01_t *instance)
 {
-  return ((nRF24L01_nop(instance) & (BIT_3|BIT_2|BIT_1)) >> 1);
+  return ((nRF24L01_nop(instance) & (DRV_BIT3|DRV_BIT2|DRV_BIT1)) >> 1);
 }
 
 void nRF24L01_reuse_tx(nRF24L01_t *instance)
