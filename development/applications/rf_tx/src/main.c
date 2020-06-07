@@ -9,8 +9,10 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+#include "nRF24L01.h"
+
 #define SPI_INSTANCE  0 /**< SPI instance index. */
-static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
+static nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
 static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instance completed the transfer. */
 
 static uint8_t       m_tx_buf[2];           /**< TX buffer. */
@@ -70,6 +72,22 @@ void write(uint8_t addr, uint8_t val)
     }
 }
 
+static inline void transfer ( void * context, uint8_t * tx_buf, uint16_t tx_len, uint8_t * rx_buf, uint16_t rx_len )
+{
+    spi_xfer_done = false;
+    //NRF_LOG_INFO("tx_buf: %x somer\n", tx_buf[0]);
+    //NRF_LOG_INFO("tx_buf: %x somer\n", tx_buf[1]);
+    //NRF_LOG_INFO("tx_len: %x somer\n", tx_len);
+    //NRF_LOG_INFO("rx_buf: %x somer\n", rx_buf[0]);
+    //NRF_LOG_INFO("rx_buf: %x somer\n", rx_buf[1]);
+    //NRF_LOG_INFO("rx_len: %x somer\n", rx_len);
+    nrf_drv_spi_transfer(context, tx_buf, tx_len, rx_buf, rx_len);
+    while (!spi_xfer_done)
+    {
+        __WFE();
+    }
+}
+
 int main(void)
 {
     bsp_board_init(BSP_INIT_LEDS);
@@ -84,25 +102,28 @@ int main(void)
     spi_config.sck_pin  = SPI_SCK_PIN;
     APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL));
 
+    nRF24L01_t rfModule;
+    nRF24L01_initialize(&rfModule, transfer, &spi);
+
+
     NRF_LOG_INFO("SPI example started.");
     
-    uint8_t val = 0x02;
 
     uint8_t reg = read(0x00); 
 
-    if ((reg & 0x01) != 0) 
-    {
-        val = 0x0; 
-    }
+    NRF_LOG_INFO("CONfig %d: \n", reg);
+
+
+  
     
-    nrf_delay_ms(2000);
-    NRF_LOG_INFO("Sending %x to write ", (reg & 0xFD) |val);
+    nrf_delay_ms(200);
 
-    write(0x00, (reg & 0xFD) |val);
+    nRF24L01_set_power_mode(&rfModule, NRF24L01_PWR_UP);
 
-    nrf_delay_ms(2000);
+    nrf_delay_ms(200);
     reg = read(0x00);
 
+    NRF_LOG_INFO("CONfig %d: \n", reg);
     while (1)
     {
         
