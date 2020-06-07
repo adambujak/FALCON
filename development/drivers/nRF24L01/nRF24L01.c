@@ -768,7 +768,7 @@ uint16_t nRF24L01_read_multibyte_reg(nRF24L01_t *instance, uint8_t reg, uint8_t 
     case NRF24L01_PIPE1:
     case NRF24L01_TX:
       length = nRF24L01_get_address_width(instance);
-      
+
       command = NRF24L01_RX_ADDR_P0 + reg;
       break;
 
@@ -790,10 +790,11 @@ uint16_t nRF24L01_read_multibyte_reg(nRF24L01_t *instance, uint8_t reg, uint8_t 
       break;
   }
 
-  if (length == 0) 
+  if (length == 0)
   {
     return (uint16_t)reg << 8;
   }
+
   CSN_LOW();
   uint8_t status;
   instance->blockingTransfer(instance->spiCtx, &command, 1, &status, 1);
@@ -805,7 +806,6 @@ uint16_t nRF24L01_read_multibyte_reg(nRF24L01_t *instance, uint8_t reg, uint8_t 
 
 void nRF24L01_write_multibyte_reg(nRF24L01_t *instance, uint8_t reg, const uint8_t *pbuf, uint8_t length)
 {
-
   CSN_LOW();
   uint8_t status;
   instance->blockingTransfer(instance->spiCtx, &reg, 1, &status, 1);
@@ -823,7 +823,7 @@ uint8_t nRF24L01_rw(nRF24L01_t *instance, uint8_t value)
   return status;
 }
 
-void nRF24L01_initialize ( nRF24L01_t *instance, drv_spi_tf_t blockingTransfer, void *spiCtx, 
+void nRF24L01_initialize ( nRF24L01_t *instance, drv_spi_tf_t blockingTransfer, void *spiCtx,
   void (*setCS)(uint8_t val))
 {
   instance->blockingTransfer = blockingTransfer;

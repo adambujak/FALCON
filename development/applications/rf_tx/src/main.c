@@ -31,19 +31,17 @@ void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
                        void *                    p_context)
 {
     spi_xfer_done = true;
-    NRF_LOG_INFO("Transfer completed.");
     if (m_rx_buf[0] != 0)
     {
-   //     NRF_LOG_INFO(" Received:");
-   //     NRF_LOG_HEXDUMP_INFO(m_rx_buf, strlen((const char *)m_rx_buf));
+
     }
 }
 
-uint8_t read(uint8_t addr) 
+uint8_t read(uint8_t addr)
 {
     memset(m_rx_buf, 0, m_length);
     spi_xfer_done = false;
-   
+
     m_tx_buf[0] =  addr & 0x1F;
 
     setCS(0);
@@ -53,17 +51,15 @@ uint8_t read(uint8_t addr)
     {
         __WFE();
     }
-    NRF_LOG_INFO("Received read data 0: %x", m_rx_buf[0]);
-    NRF_LOG_INFO("Received read data 1: %x", m_rx_buf[1]);
     setCS(1);
     return m_rx_buf[1];
 }
 
-void write(uint8_t addr, uint8_t val) 
+void write(uint8_t addr, uint8_t val)
 {
     memset(m_rx_buf, 0, m_length);
     spi_xfer_done = false;
-    
+
     m_tx_buf[0] = 0x20 | (addr & 0x1F);
     m_tx_buf[1] = val;
 
@@ -153,26 +149,20 @@ int main(void)
 
 
     NRF_LOG_INFO("SPI example started.");
-    
 
-    uint8_t reg = read(0x00); 
+
+    uint8_t reg = read(0x00);
 
     NRF_LOG_INFO("CONfig %d: \n", reg);
 
-
-  
-    
-    nrf_delay_ms(200);
-
     nRF24L01_set_power_mode(&rfModule, NRF24L01_PWR_UP);
 
-    nrf_delay_ms(200);
     reg = read(0x00);
 
     NRF_LOG_INFO("CONfig %d: \n", reg);
     while (1)
     {
-        
+
         NRF_LOG_FLUSH();
 
         bsp_board_led_invert(BSP_BOARD_LED_0);
