@@ -40,6 +40,13 @@
 #define DRV_BIT14 0x4000U /**< The value of bit 14 */
 #define DRV_BIT15 0x8000U /**< The value of bit 15 */
 
+typedef void ( * drv_gpio_set_t ) ( void * context, uint8_t state );
+
+typedef struct {
+  drv_gpio_set_t setter;
+  void *gpioCtx;
+} drv_gpio_t;
+
 typedef void ( * drv_i2c_tf_t ) ( void * context, uint8_t slave, uint8_t reg, uint8_t * buf, uint16_t len );
 typedef void ( * drv_spi_tf_t ) ( void * context, uint8_t * tx_buf, uint16_t tx_len, uint8_t * rx_buf, uint16_t rx_len );
 
