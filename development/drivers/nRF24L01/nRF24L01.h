@@ -12,6 +12,7 @@ typedef struct
 {
   drv_spi_tf_t blockingTransfer;
   void * spiCtx;
+  void (*setCS)(uint8_t value);
 } nRF24L01_t;
 
 /** @name Setup */
@@ -494,7 +495,8 @@ void nRF24L01_enable_continious_wave (nRF24L01_t *instance, bool enable);
 */
 uint8_t nRF24L01_rw(nRF24L01_t *instance, uint8_t value);
 
-void nRF24L01_initialize   (nRF24L01_t *instance, drv_spi_tf_t blockingTransfer, void * spiCtx );
+void nRF24L01_initialize (nRF24L01_t *instance, drv_spi_tf_t blockingTransfer, void *spiCtx, 
+  void (*setCS)(uint8_t val));
 
 void nRF24L01_deinitialize (nRF24L01_t *instance );
 

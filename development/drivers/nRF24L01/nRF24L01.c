@@ -17,8 +17,8 @@
 #define NRF24L01_SET_BIT(pos) ((uint8_t) (1U<<( (uint8_t) (pos) )))
 #define NRF24L01_UINT8(t) ((uint8_t) (t))
 
-#define CSN_LOW()
-#define CSN_HIGH()
+#define CSN_LOW() (instance->setCS(0))
+#define CSN_HIGH() (instance->setCS(1))
 
 /** Basis function read_reg.
  * Use this function to read the contents
@@ -820,12 +820,14 @@ uint8_t nRF24L01_rw(nRF24L01_t *instance, uint8_t value)
   return status;
 }
 
-void nRF24L01_initialize ( nRF24L01_t * instance, drv_spi_tf_t blockingTransfer, void * spiCtx )
+void nRF24L01_initialize ( nRF24L01_t *instance, drv_spi_tf_t blockingTransfer, void *spiCtx, 
+  void (*setCS)(uint8_t val))
 {
   instance->blockingTransfer = blockingTransfer;
   instance->spiCtx = spiCtx;
+  instance->setCS = setCS;
 }
-void nRF24L01_deinitialize ( nRF24L01_t * instance )
+void nRF24L01_deinitialize ( nRF24L01_t *instance )
 {
   instance->blockingTransfer = NULL;
   instance->spiCtx = NULL;

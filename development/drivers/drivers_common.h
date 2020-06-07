@@ -43,7 +43,7 @@
 typedef void ( * drv_gpio_set_t ) ( void * context, uint8_t state );
 
 typedef struct {
-  drv_gpio_set_t setter;
+  drv_gpio_set_t set;
   void *gpioCtx;
 } drv_gpio_t;
 

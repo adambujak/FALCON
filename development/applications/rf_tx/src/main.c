@@ -72,6 +72,11 @@ void write(uint8_t addr, uint8_t val)
     }
 }
 
+static inline void setCS(uint8_t val)
+{
+
+}
+
 static inline void transfer ( void * context, uint8_t * tx_buf, uint16_t tx_len, uint8_t * rx_buf, uint16_t rx_len )
 {
     spi_xfer_done = false;
@@ -103,7 +108,7 @@ int main(void)
     APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL));
 
     nRF24L01_t rfModule;
-    nRF24L01_initialize(&rfModule, transfer, &spi);
+    nRF24L01_initialize(&rfModule, transfer, &spi, setCS);
 
 
     NRF_LOG_INFO("SPI example started.");
