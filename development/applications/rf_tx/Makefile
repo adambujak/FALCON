@@ -1,9 +1,11 @@
-GNU_INSTALL_ROOT := ${NORDIC_TOOLCHAIN_ROOT_PATH}/bin/
+FALCON_ROOT      := ../../..
+GNU_INSTALL_ROOT := ${FALCON_ROOT}/dependencies/gcc/gcc-arm-none-eabi-9-2020-q2-update/bin/
 PROJECT_NAME     := spi_pca10056
 TARGETS          := nrf52840_xxaa
 OUTPUT_DIRECTORY := _build
 
-SDK_ROOT := ../../system/nordic/nrf5_sdk
+SDK_ROOT := ${FALCON_ROOT}/dependencies/nordic/nrf5_sdk
+DEV_ROOT := ${FALCON_ROOT}/development
 PROJ_DIR := ./
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
@@ -12,6 +14,7 @@ $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   $(PROJ_DIR)/src/main.c \
+  $(DEV_ROOT)/system/drivers/nRF24L01/nRF24L01.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52840.S \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
@@ -57,6 +60,8 @@ SRC_FILES += \
 INC_FOLDERS += \
   $(PROJ_DIR) \
   $(PROJ_DIR)/include \
+  $(DEV_ROOT)/system/drivers \
+  $(DEV_ROOT)/system/drivers/nRF24L01 \
   $(SDK_ROOT)/components \
   $(SDK_ROOT)/modules/nrfx/mdk \
   $(SDK_ROOT)/components/libraries/scheduler \
