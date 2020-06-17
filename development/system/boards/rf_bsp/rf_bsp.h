@@ -19,7 +19,7 @@
 #define RF_TX_CE_PIN       7
 #define RF_RX_SPI_SS_PIN   6
 #define RF_RX_CE_PIN       5
-#define RF_RX_IRQ_PIN      9
+#define RF_RX_IRQ_PIN      12
 
 /**
   * @brief   Setup GPIO pins
