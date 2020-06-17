@@ -127,7 +127,7 @@ int main(void)
             NRF_LOG_INFO("%d\r\n",data_array[3]);
         }
         tx_buffer[3]++;
-        nrf_delay_ms(1500);
+        nrf_delay_ms(100);
         frf_send(&rfTxModule, tx_buffer, 4);
 
         /* Wait for transmission to end */
