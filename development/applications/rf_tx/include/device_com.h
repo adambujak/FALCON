@@ -3,5 +3,17 @@
  * @brief    Device Com Layer Header File
  * @version  1.0
  * @date     2020-06-16
- * @author   Adam Bujak
+ * @author   Adam Bujak - transcribed by Devin Bell
  ******************************************************************************/
+
+void device_com_init(void);
+
+uint32_t device_com_getStatus(void);
+
+uint32_t device_com_read(uint8_t *data);
+
+uint32_t device_com_write(uint8_t *data, uint16_t length);
+
+uint32_t device_com_test(void);
+
+
