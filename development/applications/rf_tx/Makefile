@@ -17,6 +17,7 @@ SRC_FILES += \
   $(DEV_ROOT)/drivers/nRF24L01/nRF24L01.c \
   $(DEV_ROOT)/system/boards/rf_bsp/rf_bsp.c \
   $(DEV_ROOT)/libraries/frf/frf.c \
+  $(DEV_ROOT)/src/device_com.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52840.S \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \

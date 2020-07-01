@@ -8,10 +8,20 @@
 
 #include "device_com.h"
 
-#include "frf.h"
+#include "nrf_drv_spi.h"
+#include "app_util_platform.h"
+#include "nrf_gpio.h"
+#include "nrf_drv_gpiote.h"
+#include "nrf_delay.h"
 #include "boards.h"
 #include "rf_bsp.h"
 #include "app_error.h"
+#include <string.h>
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+
+#include "frf.h"
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 static nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
@@ -21,9 +31,6 @@ static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instanc
 static uint8_t       m_tx_buf[2];           /**< TX buffer. */
 static uint8_t       m_rx_buf[sizeof(m_tx_buf) + 1];  /**< RX buffer. */
 
-static uint8_t rx_buffer[4];
-static uint8_t tx_buffer[4] = {22,23,24,0};
-
 static uint8_t tx_address[5] = {0xD7,0xD7,0xD7,0xD7,0xD7};
 static uint8_t rx_address[5] = {0xE7,0xE7,0xE7,0xE7,0xE7};
 
@@ -32,13 +39,11 @@ static frf_t rfModule;
 static frf_t rftestModule;
 
 
-
 /**
  * @brief SPI user event handler.
  * @param event
  */
-static void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
-                       void *                    p_context)
+static void spi_event_handler(nrf_drv_spi_evt_t const * p_event, void * p_context)
 {
     spi_xfer_done = true;
     if (m_rx_buf[0] != 0)
@@ -66,6 +71,7 @@ static void rf_irq_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t a
     NRF_LOG_INFO("IRQ rx pin fired interrupt");
 }
 
+//TODO delete
 static void device_com_test_init(void)
 {
     frf_config_t rftestConfig = {
@@ -115,22 +121,100 @@ void device_com_init(void)
 
 }
 
-
-
-
-
 uint32_t device_com_getStatus(void)
 {
-
-
+    return 0;
 }
 
 uint32_t device_com_read(uint8_t *read_buf)
 {
-    frf_getData(&rfModule, read_buf);
+    if(frf_dataReady(&rfModule))
+        {
+        frf_getData(&rfModule, read_buf);
+        NRF_LOG_INFO("> ");
+        NRF_LOG_INFO("%d ",read_buf[0]);
+        NRF_LOG_INFO("%d ",read_buf[1]);
+        NRF_LOG_INFO("%d ",read_buf[2]);
+        NRF_LOG_INFO("%d\r\n",read_buf[3]);
+        }
     return 0;
 }
 
-uint32_t device_com_write(uint8_t *data, uint16_t length);
+uint32_t device_com_write(uint8_t *data, uint16_t length)
+{
+    frf_send(&rfModule, data, length);
+    /* Wait for transmission to end */
+    while(frf_isSending(&rfModule));
 
-uint32_t device_com_test(void);
+    uint8_t temp = frf_lastMessageStatus(&rfModule);
+
+    if(temp == FRF_TRANSMISSON_OK)
+    {
+        NRF_LOG_INFO("Transmission success!\r\n");
+        NRF_LOG_FLUSH();
+    }
+    else if(temp == FRF_MESSAGE_LOST)
+    {
+        NRF_LOG_INFO("Transmission failed!\r\n");
+        NRF_LOG_FLUSH();
+    }
+
+        if (rxIRQFiredFlag == 1)
+    {
+        NRF_LOG_INFO("Clear Interrupts");
+        frf_clearInterrupts(&rfModule);
+        rxIRQFiredFlag = 0;
+    } 
+
+    NRF_LOG_FLUSH();
+    return 0;
+}
+
+uint32_t device_com_test_read(uint8_t *read_buf)
+{
+    if(frf_dataReady(&rftestModule))
+        {
+        frf_getData(&rftestModule, read_buf);
+        NRF_LOG_INFO("> ");
+        NRF_LOG_INFO("%d ",read_buf[0]);
+        NRF_LOG_INFO("%d ",read_buf[1]);
+        NRF_LOG_INFO("%d ",read_buf[2]);
+        NRF_LOG_INFO("%d\r\n",read_buf[3]);
+        }
+    return 0;
+}
+
+uint32_t device_com_test_write(uint8_t *data, uint16_t length)
+{
+    frf_send(&rftestModule, data, length);
+    /* Wait for transmission to end */
+    while(frf_isSending(&rftestModule));
+
+    uint8_t temp = frf_lastMessageStatus(&rftestModule);
+
+    if(temp == FRF_TRANSMISSON_OK)
+    {
+        NRF_LOG_INFO("Transmission from test success!\r\n");
+        NRF_LOG_FLUSH();
+    }
+    else if(temp == FRF_MESSAGE_LOST)
+    {
+        NRF_LOG_INFO("Transmission from test failed!\r\n");
+        NRF_LOG_FLUSH();
+    }
+
+        if (rxIRQFiredFlag == 1)
+    {
+        NRF_LOG_INFO("Clear from test Interrupts");
+        frf_clearInterrupts(&rftestModule);
+        rxIRQFiredFlag = 0;
+    } 
+
+    NRF_LOG_FLUSH();
+    return 0;
+}
+
+uint32_t device_com_test(void)
+{
+    return 0;
+}
