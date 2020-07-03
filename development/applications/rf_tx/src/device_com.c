@@ -167,14 +167,13 @@ uint32_t device_com_write(uint8_t *data, uint16_t length)
         frf_clearInterrupts(&rfModule);
         rxIRQFiredFlag = 0;
     } 
-
+    frf_powerUpRx(&rfModule);
     NRF_LOG_FLUSH();
     return 0;
 }
 
 uint32_t device_com_test_read(uint8_t *read_buf)
 {   
-    // frf_powerUpRx(&rftestModule);
     if(frf_dataReady(&rftestModule))
         {
         frf_getData(&rftestModule, read_buf);
@@ -214,6 +213,7 @@ uint32_t device_com_test_write(uint8_t *data, uint16_t length)
         rxIRQFiredFlag = 0;
     } 
 
+    frf_powerUpRx(&rftestModule);
     NRF_LOG_FLUSH();
     return 0;
 }

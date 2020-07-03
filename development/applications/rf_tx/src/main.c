@@ -46,12 +46,12 @@ int main(void)
 
         nrf_delay_ms(100);
 
-        // device_com_write(tx_buffer, 4);
+        device_com_write(tx_buffer, 4);
 
-        // nrf_delay_ms(100);
+        nrf_delay_ms(100);
 
-        // device_com_test_read(rx_test_buffer);
-        // tx_buffer[3]++;
+        device_com_test_read(rx_test_buffer);
+        tx_buffer[3]++;
 
         NRF_LOG_FLUSH();
         bsp_board_led_invert(BSP_BOARD_LED_0);
