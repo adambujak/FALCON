@@ -1,5 +1,20 @@
 #include "device_com.h"
 
+#include "nrf_drv_spi.h"
+#include "app_util_platform.h"
+#include "nrf_gpio.h"
+#include "nrf_drv_gpiote.h"
+#include "nrf_delay.h"
+#include "boards.h"
+#include "rf_bsp.h"
+#include "app_error.h"
+#include <string.h>
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+
+#include "frf.h"
+
 static uint8_t rx_buffer[4];    
 static uint8_t tx_buffer[4] = {22,23,24,0};
 static uint8_t rx_test_buffer[4];    
@@ -17,6 +32,7 @@ int main(void)
 
     device_com_init();
 
+    NRF_LOG_INFO("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nApp Start\r\n");
 
 
     while(1)
@@ -30,12 +46,12 @@ int main(void)
 
         nrf_delay_ms(100);
 
-        device_com_write(tx_buffer, 4);
+        // device_com_write(tx_buffer, 4);
 
-        nrf_delay_ms(100);
+        // nrf_delay_ms(100);
 
-        device_com_test_read(rx_test_buffer);
-        tx_buffer[3]++;
+        // device_com_test_read(rx_test_buffer);
+        // tx_buffer[3]++;
 
         NRF_LOG_FLUSH();
         bsp_board_led_invert(BSP_BOARD_LED_0);

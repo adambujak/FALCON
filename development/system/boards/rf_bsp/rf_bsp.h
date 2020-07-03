@@ -25,8 +25,7 @@
   * @brief   Setup GPIO pins
   * @retval  None
   */
-void initialize_rf_pins(void (*rx_irq_handler) (nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action),
-                        void (*tx_irq_handler) (nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action));
+void initialize_rf_pins(void (*rf_irq_handler) (nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action));
 
 void set_rf_tx_cs_pin(uint8_t val);
 
@@ -35,5 +34,8 @@ void set_rf_tx_ce_pin(uint8_t val);
 void set_rf_rx_cs_pin(uint8_t val);
 
 void set_rf_rx_ce_pin(uint8_t val);
+
+//TODO delete test
+void initialize_rftest_pins(void);
 
 #endif // FALCON_BSP_H

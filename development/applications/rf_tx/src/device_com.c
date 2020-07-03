@@ -128,6 +128,7 @@ uint32_t device_com_getStatus(void)
 
 uint32_t device_com_read(uint8_t *read_buf)
 {
+    // frf_powerUpRx(&rfModule);
     if(frf_dataReady(&rfModule))
         {
         frf_getData(&rfModule, read_buf);
@@ -145,6 +146,7 @@ uint32_t device_com_write(uint8_t *data, uint16_t length)
     frf_send(&rfModule, data, length);
     /* Wait for transmission to end */
     while(frf_isSending(&rfModule));
+    // frf_powerDown(&rfModule);
 
     uint8_t temp = frf_lastMessageStatus(&rfModule);
 
@@ -159,7 +161,7 @@ uint32_t device_com_write(uint8_t *data, uint16_t length)
         NRF_LOG_FLUSH();
     }
 
-        if (rxIRQFiredFlag == 1)
+    if (rxIRQFiredFlag == 1)
     {
         NRF_LOG_INFO("Clear Interrupts");
         frf_clearInterrupts(&rfModule);
@@ -171,7 +173,8 @@ uint32_t device_com_write(uint8_t *data, uint16_t length)
 }
 
 uint32_t device_com_test_read(uint8_t *read_buf)
-{
+{   
+    // frf_powerUpRx(&rftestModule);
     if(frf_dataReady(&rftestModule))
         {
         frf_getData(&rftestModule, read_buf);
@@ -189,6 +192,7 @@ uint32_t device_com_test_write(uint8_t *data, uint16_t length)
     frf_send(&rftestModule, data, length);
     /* Wait for transmission to end */
     while(frf_isSending(&rftestModule));
+    // frf_powerDown(&rftestModule);
 
     uint8_t temp = frf_lastMessageStatus(&rftestModule);
 
