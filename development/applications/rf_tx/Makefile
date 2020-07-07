@@ -14,6 +14,7 @@ $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   $(PROJ_DIR)/src/main.c \
+  $(PROJ_DIR)/src/device_com.c \
   $(DEV_ROOT)/drivers/nRF24L01/nRF24L01.c \
   $(DEV_ROOT)/system/boards/rf_bsp/rf_bsp.c \
   $(DEV_ROOT)/libraries/frf/frf.c \

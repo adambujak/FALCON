@@ -113,6 +113,7 @@ void frf_tx_address(frf_t *instance, uint8_t* addr)
 /* Returns 1 if data is ready ... */
 uint8_t frf_dataReady(frf_t *instance)
 {
+  
   // See note in getData() function - just checking NRF24L01_RX_DR isn't good enough
   uint8_t status = nRF24L01_nop(&instance->rfInstance);
 
@@ -123,6 +124,7 @@ uint8_t frf_dataReady(frf_t *instance)
       return 1;
   }
 
+  
   return !frf_rxFifoEmpty(instance);
 }
 
@@ -141,7 +143,10 @@ uint8_t frf_payloadLength(frf_t *instance)
 /* Reads payload bytes into data array */
 void frf_getData(frf_t *instance, uint8_t* data)
 {
+  // frf_powerDown(instance);
+  // frf_powerUpRx(instance);
   nRF24L01_read_rx_payload(&instance->rfInstance, data);
+  // frf_powerDown(instance);
 }
 
 /* Returns the number of retransmissions occured for the last message */
