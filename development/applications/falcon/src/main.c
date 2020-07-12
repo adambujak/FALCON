@@ -6,7 +6,7 @@
 #include "fln_bsp.h"
 
 #define SYS_CLOCK    300000
-#define SYS_MS_TO_TICK(ms)  ( ms*SYS_CLOCK/1000 )
+#define SYS_MS_TO_TICK(ms)  ( (ms)*SYS_CLOCK/1000 )
 
 #define SLAVE_ADDR 0x52
 
