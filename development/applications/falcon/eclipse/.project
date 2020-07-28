@@ -30,11 +30,6 @@
 			<locationURI>FALCON_ROOT_DIR/development/system/boards/bsp</locationURI>
 		</link>
 		<link>
-			<name>ccs</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>driverlib</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -45,22 +40,7 @@
 			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/falcon.ld</locationURI>
 		</link>
 		<link>
-			<name>gcc</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>hal</name>
-			<type>2</type>
-			<locationURI>FALCON_ROOT_DIR/development/system/hal</locationURI>
-		</link>
-		<link>
-			<name>iar</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>keil</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -93,21 +73,6 @@
 			<name>bsp/fln_bsp.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/system/boards/bsp/fln_bsp.h</locationURI>
-		</link>
-		<link>
-			<name>ccs/Makefile</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/ccs/Makefile</locationURI>
-		</link>
-		<link>
-			<name>ccs/msp432p4xx_driverlib.lib</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/ccs/msp432p4xx_driverlib.lib</locationURI>
-		</link>
-		<link>
-			<name>ccs/msp432p4xx_driverlib.projectspec</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/ccs/msp432p4xx_driverlib.projectspec</locationURI>
 		</link>
 		<link>
 			<name>driverlib/adc14.c</name>
@@ -425,59 +390,9 @@
 			<locationURI>FALCON_ROOT_DIR/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/wdt_a.h</locationURI>
 		</link>
 		<link>
-			<name>gcc/Makefile</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/gcc/Makefile</locationURI>
-		</link>
-		<link>
-			<name>gcc/msp432p4xx_driverlib.a</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/gcc/msp432p4xx_driverlib.a</locationURI>
-		</link>
-		<link>
-			<name>iar/msp432_driverlib.dep</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/iar/msp432_driverlib.dep</locationURI>
-		</link>
-		<link>
-			<name>iar/msp432_driverlib.ewd</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/iar/msp432_driverlib.ewd</locationURI>
-		</link>
-		<link>
-			<name>iar/msp432_driverlib.ewp</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/iar/msp432_driverlib.ewp</locationURI>
-		</link>
-		<link>
-			<name>iar/msp432_driverlib.ewt</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/iar/msp432_driverlib.ewt</locationURI>
-		</link>
-		<link>
-			<name>iar/msp432_driverlib.eww</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/iar/msp432_driverlib.eww</locationURI>
-		</link>
-		<link>
-			<name>iar/msp432p4xx_driverlib.a</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/iar/msp432p4xx_driverlib.a</locationURI>
-		</link>
-		<link>
-			<name>keil/msp432_driverlib.uvoptx</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/keil/msp432_driverlib.uvoptx</locationURI>
-		</link>
-		<link>
-			<name>keil/msp432_driverlib.uvprojx</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/keil/msp432_driverlib.uvprojx</locationURI>
-		</link>
-		<link>
-			<name>keil/msp432p4xx_driverlib.lib</name>
-			<type>1</type>
-			<locationURI>PARENT-2-ECLIPSE_HOME/Workspace/FALCON/dependencies/ti/msp_sdk/source/ti/devices/msp432p4xx/driverlib/keil/msp432p4xx_driverlib.lib</locationURI>
+			<name>hal/fio</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>libraries/fiom</name>
@@ -488,6 +403,31 @@
 			<name>src/main.c</name>
 			<type>1</type>
 			<locationURI>FALCON_ROOT_DIR/development/applications/falcon/src/main.c</locationURI>
+		</link>
+		<link>
+			<name>hal/fio/fi2c_hal.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fio/fi2c_hal.c</locationURI>
+		</link>
+		<link>
+			<name>hal/fio/fi2c_hal.h</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fio/fi2c_hal.h</locationURI>
+		</link>
+		<link>
+			<name>hal/fio/fio_common.h</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fio/fio_common.h</locationURI>
+		</link>
+		<link>
+			<name>hal/fio/fio_hal.c</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fio/fio_hal.c</locationURI>
+		</link>
+		<link>
+			<name>hal/fio/fio_hal.h</name>
+			<type>1</type>
+			<locationURI>FALCON_ROOT_DIR/development/system/hal/fio/fio_hal.h</locationURI>
 		</link>
 		<link>
 			<name>libraries/fiom/fiom.c</name>
