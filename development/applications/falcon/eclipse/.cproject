@@ -11,7 +11,7 @@
                     					
                     <stringMacro name="FALCON_APP_DIR" type="VALUE_TEXT" value="${FALCON_DEV_DIR}/applications/falcon"/>
                     					
-                    <stringMacro name="MSP_SDK_DIR" type="VALUE_TEXT" value="${FALCON_DEV_DIR}/system/msp_sdk"/>
+                    <stringMacro name="MSP_SDK_DIR" type="VALUE_TEXT" value="${FALCON_DEV_DIR}/../dependencies/ti/msp_sdk"/>
                     					
                     <stringMacro name="FALCON_DEV_DIR" type="VALUE_TEXT" value="${ProjDirPath}/../../../"/>
                     				
@@ -69,7 +69,7 @@
                             							
                             <option id="ilg.gnuarmeclipse.managedbuild.cross.option.architecture.1653603939" name="Architecture" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.architecture" useByScannerDiscovery="false" value="ilg.gnuarmeclipse.managedbuild.cross.option.architecture.arm" valueType="enumerated"/>
                             							
-                            <option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family.255758814" name="ARM family" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family" useByScannerDiscovery="false" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.mcpu.cortex-m4" valueType="enumerated"/>
+                            <option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family.255758814" name="ARM family (-mcpu)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family" useByScannerDiscovery="false" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.mcpu.cortex-m4" valueType="enumerated"/>
                             							
                             <option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.instructionset.1143330946" name="Instruction set" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.instructionset" useByScannerDiscovery="false" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.instructionset.thumb" valueType="enumerated"/>
                             							
@@ -114,6 +114,8 @@
                                     <listOptionValue builtIn="false" value="&quot;${FALCON_APP_DIR}/src&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/system/hal&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/system/hal/fio&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${FALCON_DEV_DIR}/system/boards/bsp&quot;"/>
                                     									
@@ -273,7 +275,7 @@
                             							
                             <option id="ilg.gnuarmeclipse.managedbuild.cross.option.architecture.1620967325" name="Architecture" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.architecture" value="ilg.gnuarmeclipse.managedbuild.cross.option.architecture.arm" valueType="enumerated"/>
                             							
-                            <option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family.1820203598" name="ARM family" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.mcpu.cortex-m3" valueType="enumerated"/>
+                            <option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family.1820203598" name="ARM family (-mcpu)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.mcpu.cortex-m3" valueType="enumerated"/>
                             							
                             <option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.instructionset.2034491653" name="Instruction set" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.instructionset" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.instructionset.thumb" valueType="enumerated"/>
                             							
