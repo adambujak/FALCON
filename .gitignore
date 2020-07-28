@@ -9,14 +9,16 @@
 *.obj
 *.bin
 *.hex
+*.settings
 
 # VIM
 *.swp
 
 # Build directory
+dependencies/gcc/gcc-arm-none-eabi-9-2020-q2-update
 development/system/msp_sdk/examples
 development/system/msp_sdk/tools
 development/system/msp_sdk/docs
-development/applications/drone/Debug
-development/applications/falcon/Debug
-development/applications/falcon/eclipse/.settings
+**/Debug
+**/build
+
