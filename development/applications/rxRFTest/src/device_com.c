@@ -124,33 +124,22 @@ void device_com_init(void)
     rf_spi_config.miso_pin = RF_SPI_MISO_PIN;
     rf_spi_config.mosi_pin = RF_SPI_MOSI_PIN;
     rf_spi_config.sck_pin  = RF_SPI_SCK_PIN;
-    NRF_LOG_INFO("started device com init");
-    NRF_LOG_FLUSH();
+
     APP_ERROR_CHECK(nrf_drv_spi_init(&rf_spi, &rf_spi_config, rf_spi_event_handler, NULL));
 
-    NRF_LOG_INFO("init spi");
-    NRF_LOG_FLUSH();
     initialize_rf_pins(rf_irq_pin_handler, RF_SPI_SS_PIN, RF_CE_PIN, RF_IRQ_PIN);
 
     frf_config_t rfConfig = {
-        .direction = FRF_DIR_RX,
+        .rxAddr = rx_address,
+        .txAddr = tx_address,
         .setCE = set_rf_ce_pin,
         .setCS = set_rf_cs_pin,
         .blockingTransfer = rf_spi_transfer,
         .spiCtx = &rf_spi
     };
 
-    rxData[MAX_STRING_LENGTH-1]='\0';
-
-    NRF_LOG_INFO("init pins");
-    NRF_LOG_FLUSH();
-
     frf_init(&rfModule, rfConfig);
     frf_start(&rfModule, 2, MAX_STRING_LENGTH); //TODO channel, payloadlength
-    frf_tx_address(&rfModule, tx_address);
-    frf_rx_address(&rfModule, rx_address);
-    NRF_LOG_INFO("frf started");
-    NRF_LOG_FLUSH();
 }
 
 /**
@@ -163,51 +152,15 @@ uint32_t device_com_getStatus(void)
     return 0;
 }
 
-static uint32_t rf_read(uint8_t *rxBuf)
-{
-    if(frf_dataReady(&rfModule))
-    {
-        uint8_t rxByteCnt = frf_payloadLength(&rfModule);
-        frf_getData(&rfModule, rxBuf);
-        NRF_LOG_INFO("%d bytes read from rf module", rxByteCnt);
-        return rxByteCnt;
-    }
-    return 0;
-}
-
-static uint32_t rf_write(uint8_t *data, uint16_t length)
-{
-    frf_send(&rfModule, data, length);
-    /* Wait for transmission to end */
-    while(frf_isSending(&rfModule));
-
-    uint8_t temp = frf_lastMessageStatus(&rfModule);
-
-    if(temp == FRF_TRANSMISSON_OK)
-    {
-        NRF_LOG_INFO("Transmission success!\r\n");
-        NRF_LOG_FLUSH();
-    }
-    else if(temp == FRF_MESSAGE_LOST)
-    {
-        NRF_LOG_INFO("Transmission failed!\r\n");
-        NRF_LOG_FLUSH();
-    }
-
-    if (rfIRQFiredFlag == 1)
-    {
-        NRF_LOG_INFO("Clear Interrupts");
-        frf_clearInterrupts(&rfModule);
-        rfIRQFiredFlag = 0;
-    }
-    frf_powerUpRx(&rfModule);
-    NRF_LOG_FLUSH();
-    return 0;
-}
-
 void device_com_process()
 {
-    int status = rf_read((uint8_t *) rxData);
-    NRF_LOG_INFO("Rx address: %x || Read data: '%s' from %x", rx_address[0], rxData, tx_address[0]);
-    NRF_LOG_FLUSH();
+    uint8_t readByteCnt = frf_blockingRead(&rfModule, (uint8_t *) rxData, 0);
+    if(readByteCnt == 0)
+    {
+      NRF_LOG_INFO("Error reading!");
+    }
+    else
+    {
+      NRF_LOG_INFO("Rx address: %x || Read data: '%s' from %x", rx_address[0], rxData, tx_address[0]);
+    }
 }
