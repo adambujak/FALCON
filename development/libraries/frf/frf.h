@@ -18,13 +18,16 @@ typedef void (*gpio_setter_t) (uint8_t val);
 typedef void (*spi_transfer_t) (void *context, uint8_t *tx_buf, uint16_t tx_len,
                                 uint8_t *rx_buf, uint16_t rx_len);
 
-typedef enum {
-  FRF_DIR_RX = 0,
-  FRF_DIR_TX
-} frf_direction_t;
+enum frf_state_e {
+  FRF_PWR_STATE_OFF = 0,
+  FRF_PWR_STATE_STANDBY,
+  FRF_PWR_STATE_RX,
+  FRF_PWR_STATE_TX
+};
 
 typedef struct {
-  frf_direction_t direction;
+  uint8_t         rxAddr[5];
+  uint8_t         txAddr[5];
   gpio_setter_t   setCE;
   gpio_setter_t   setCS;
   spi_transfer_t  blockingTransfer;
@@ -32,22 +35,27 @@ typedef struct {
 } frf_config_t;
 
 typedef struct {
-  frf_direction_t direction;
+  enum frf_state_e state;
+  bool            ceState;
   gpio_setter_t   setCE;
   nRF24L01_t      rfInstance;
-  uint8_t         rxAddr[5];
-  uint8_t         txAddr[5];
 } frf_t;
 
 void frf_init(frf_t *instance, frf_config_t config);
 
 void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len);
 
-void frf_powerUpRx(frf_t *instance);
-
-void frf_powerUpTx(frf_t *instance);
+void frf_standby(frf_t *instance);
 
 void frf_powerDown(frf_t *instance);
+
+void frf_read(frf_t *instance, uint8_t *rxBuf);
+
+uint8_t frf_blockingRead(frf_t *instance, uint8_t *rxBuf, uint16_t timeout);
+
+void frf_write(frf_t *instance, uint8_t *txBuf, uint8_t payloadLen);
+
+uint8_t frf_blockingWrite(frf_t *instance, uint8_t *txBuf, uint8_t payloadLen, uint16_t timeout);
 
 /* Set the RX address */
 void frf_rx_address(frf_t *instance, uint8_t *addr);
