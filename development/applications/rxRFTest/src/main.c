@@ -21,7 +21,7 @@ int main(void)
 
     nrf_delay_ms(100);
 
-    NRF_LOG_INFO("Started TX test app");
+    NRF_LOG_INFO("Started RX test app");
     NRF_LOG_FLUSH();
     device_com_init();
     NRF_LOG_INFO("Device com init");
