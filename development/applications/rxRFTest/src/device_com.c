@@ -130,8 +130,6 @@ void device_com_init(void)
     initialize_rf_pins(rf_irq_pin_handler, RF_SPI_SS_PIN, RF_CE_PIN, RF_IRQ_PIN);
 
     frf_config_t rfConfig = {
-        .rxAddr = rx_address,
-        .txAddr = tx_address,
         .setCE = set_rf_ce_pin,
         .setCS = set_rf_cs_pin,
         .blockingTransfer = rf_spi_transfer,
@@ -139,7 +137,7 @@ void device_com_init(void)
     };
 
     frf_init(&rfModule, rfConfig);
-    frf_start(&rfModule, 2, MAX_STRING_LENGTH); //TODO channel, payloadlength
+    frf_start(&rfModule, 2, MAX_STRING_LENGTH, rx_address, tx_address); //TODO channel, payloadlength
 }
 
 /**
