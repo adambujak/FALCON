@@ -26,8 +26,6 @@ enum frf_state_e {
 };
 
 typedef struct {
-  uint8_t         rxAddr[5];
-  uint8_t         txAddr[5];
   gpio_setter_t   setCE;
   gpio_setter_t   setCS;
   spi_transfer_t  blockingTransfer;
@@ -43,7 +41,13 @@ typedef struct {
 
 void frf_init(frf_t *instance, frf_config_t config);
 
-void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len);
+void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t *rxAddr, uint8_t *txAddr);
+
+void frf_powerUp(frf_t *instance);
+
+void frf_powerUpRx(frf_t *instance);
+
+void frf_powerUpTx(frf_t *instance);
 
 void frf_standby(frf_t *instance);
 
