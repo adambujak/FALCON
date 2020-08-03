@@ -153,6 +153,10 @@ uint32_t device_com_getStatus(void)
 void device_com_process()
 {
     NRF_LOG_INFO("Sending data: '%s'", txData);
+    static uint8_t i = 0;
+    i++;
+    sprintf(txData, "send:%d", i);
+
     if (frf_blockingWrite(&rfModule, (uint8_t *)txData, MAX_STRING_LENGTH, 0) == FRF_TRANSMISSON_OK)
     {
         NRF_LOG_INFO("Data sent successfully");
