@@ -11,6 +11,9 @@
 *.hex
 *.settings
 
+# MacOS 
+**/.DS_Store
+
 # VIM
 *.swp
 
