@@ -1,11 +1,8 @@
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "timers.h"
-#include "semphr.h"
+#include "falcon_common.h"
 
 #include "stm32f4xx_hal.h"
 #include "stm32412g_discovery.h"
+#include "leds.h"
 
 #include <stdint.h>
 
@@ -18,31 +15,13 @@ void vApplicationTickHook( void )
   HAL_IncTick();
 }
 
-static void led_task (void *pvParameters)
-{
-  while(1) {
-    HAL_GPIO_TogglePin(LEDx_GPIO_PORT, LED1_PIN);
-    vTaskDelay(500);
-    HAL_GPIO_TogglePin(LEDx_GPIO_PORT, LED2_PIN);
-  }
-}
-
 int main (void)
 {
   HAL_Init();
 
   SystemClock_Config();
 
-  LEDx_GPIO_CLK_ENABLE();
-
-
-  GPIO_InitTypeDef  GPIO_InitStruct;
-  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-
-  GPIO_InitStruct.Pin = LED1_PIN | LED2_PIN;
-  HAL_GPIO_Init(LEDx_GPIO_PORT, &GPIO_InitStruct);
+  led_task_setup();
 
   if (xTaskCreate(led_task,
               "led_task",
@@ -85,8 +64,7 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLR = 2;
   ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-  if(ret != HAL_OK)
-  {
+  if(ret != HAL_OK) {
     while(1);
   }
 
@@ -98,8 +76,7 @@ static void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3);
-  if(ret != HAL_OK)
-  {
+  if(ret != HAL_OK) {
     while(1);
   }
 }
