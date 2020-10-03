@@ -21,9 +21,10 @@ C_SOURCES += \
 $(HAL_DIR)/Src/stm32f4xx_hal.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_cortex.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_gpio.c \
+$(HAL_DIR)/Src/stm32f4xx_hal_rcc.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_tim.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_tim_ex.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_rcc.c \
+$(HAL_DIR)/Src/stm32f4xx_hal_uart.c \
 $(BSP_DIR)/stm32412g_discovery.c \
 $(FREERTOS_ROOT)/tasks.c \
 $(FREERTOS_ROOT)/queue.c \
@@ -37,6 +38,7 @@ $(PROJ_DIR)/src/main.c \
 $(PROJ_DIR)/src/stm32f4xx_it.c \
 $(PROJ_DIR)/src/system_stm32f4xx.c \
 $(PROJ_DIR)/src/leds.c \
+$(PROJ_DIR)/src/logger.c \
 
 # ASM sources
 ASM_SOURCES = startup_stm32f412zx.s

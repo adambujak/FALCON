@@ -3,14 +3,16 @@
 #include "stm32f4xx_hal.h"
 #include "stm32412g_discovery.h"
 #include "leds.h"
+#include "logger.h"
 
 #include <stdint.h>
 
-#define led_TASK_PRIORITY     ( tskIDLE_PRIORITY + 1 )
+#define led_TASK_PRIORITY        ( tskIDLE_PRIORITY + 2 )
+#define logger_TASK_PRIORITY     ( tskIDLE_PRIORITY + 1 )
 
-static void SystemClock_Config(void);
+static void SystemClock_Config (void);
 
-void vApplicationTickHook( void )
+void vApplicationTickHook (void)
 {
   HAL_IncTick();
 }
@@ -22,15 +24,26 @@ int main (void)
   SystemClock_Config();
 
   led_task_setup();
+  logger_task_setup();
 
-  if (xTaskCreate(led_task,
-              "led_task",
-              configMINIMAL_STACK_SIZE,
-              NULL,
-              led_TASK_PRIORITY,
-              NULL) != pdPASS) {
-    while(1);
-  }
+  int32_t taskStatus;
+  taskStatus = xTaskCreate(led_task,
+                           "led_task",
+                            configMINIMAL_STACK_SIZE,
+                            NULL,
+                            led_TASK_PRIORITY,
+                            NULL);
+
+  ERR_CHECK(taskStatus);
+ 
+  taskStatus = xTaskCreate(logger_task,
+                           "logger_task",
+                           configMINIMAL_STACK_SIZE,
+                           NULL,
+                           logger_TASK_PRIORITY,
+                           NULL);
+
+  ERR_CHECK(taskStatus); 
 
   vTaskStartScheduler();
 
@@ -38,7 +51,7 @@ int main (void)
   while (1);
 }
 
-static void SystemClock_Config(void)
+static void SystemClock_Config (void)
 {
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_OscInitTypeDef RCC_OscInitStruct;
