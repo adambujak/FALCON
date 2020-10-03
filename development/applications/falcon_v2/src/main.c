@@ -18,7 +18,7 @@ void vApplicationTickHook( void )
   HAL_IncTick();
 }
 
-static void led_task( void *pvParameters )
+static void led_task (void *pvParameters)
 {
   while(1) {
     HAL_GPIO_TogglePin(LEDx_GPIO_PORT, LED1_PIN);
@@ -27,7 +27,7 @@ static void led_task( void *pvParameters )
   }
 }
 
-int main(void)
+int main (void)
 {
   HAL_Init();
 
