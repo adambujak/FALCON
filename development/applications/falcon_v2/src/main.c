@@ -94,6 +94,11 @@ static void SystemClock_Config (void)
   }
 }
 
+void error_handler(void)
+{
+  while(1);
+}
+
 
 #ifdef  USE_FULL_ASSERT
 
