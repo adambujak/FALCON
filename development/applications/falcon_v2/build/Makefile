@@ -1,11 +1,14 @@
 TARGET = FALCON
 DEBUG = 1
-OPT = 
+OPT =
 BUILD_DIR = _build
 
 
 FALCON_ROOT = ../../../..
+DEV_ROOT = $(FALCON_ROOT)/development
+LIB_ROOT = $(DEV_ROOT)/libraries
 PROJ_DIR = ..
+FLN_BSP_DIR = $(DEV_ROOT)/system/boards/stm_dev_bsp
 SDK_ROOT = $(FALCON_ROOT)/dependencies/stm/STM32F4_Cube
 FREERTOS_ROOT = $(FALCON_ROOT)/dependencies/freertos/FreeRTOSv10.4.1/FreeRTOS/Source
 FREERTOS_PORTABLE = $(FREERTOS_ROOT)/portable/GCC/ARM_CM4F
@@ -26,6 +29,7 @@ $(HAL_DIR)/Src/stm32f4xx_hal_tim.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_tim_ex.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_uart.c \
 $(BSP_DIR)/stm32412g_discovery.c \
+$(FLN_BSP_DIR)/bsp.c \
 $(FREERTOS_ROOT)/tasks.c \
 $(FREERTOS_ROOT)/queue.c \
 $(FREERTOS_ROOT)/list.c \
@@ -50,6 +54,7 @@ AS_INCLUDES =
 C_INCLUDES += \
 			-I$(HAL_DIR)/Inc \
 			-I$(BSP_DIR)/ \
+			-I$(FLN_BSP_DIR)/ \
 			-I$(PROJ_DIR)/include \
 			-I$(CMSIS_DIR)/Device/ST/STM32F4xx/Include \
 			-I$(CMSIS_DIR)/Include \
