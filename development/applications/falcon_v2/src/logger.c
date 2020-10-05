@@ -13,7 +13,7 @@ fln_uart_handle_t UartHandle;
 #define MUTEX_RETRY_TICK_CNT 10
 
 typedef struct {
-  uint8_t txBuffer[UART_TX_BUFFER_SIZE];
+  uint8_t  txBuffer[UART_TX_BUFFER_SIZE];
   uint16_t txByteCnt;
   uint16_t txReadIndex;
   uint16_t txWriteIndex;
@@ -23,7 +23,7 @@ typedef struct {
 
 static state_t s;
 
-void logger_write (char *string)
+void logger_write(char *string)
 {
   while (xSemaphoreTake(s.rxBufferMutex, (TickType_t) MUTEX_RETRY_TICK_CNT) == pdFALSE);
 
@@ -35,7 +35,7 @@ void logger_write (char *string)
     s.txBuffer[s.txWriteIndex] = *string;
     s.txWriteIndex = (s.txWriteIndex + 1) % UART_TX_BUFFER_SIZE;
 
-    s.txByteCnt ++;
+    s.txByteCnt++;
     string++;
     if (s.txByteCnt >= UART_TX_BUFFER_SIZE - 1) {
       break;
@@ -46,7 +46,7 @@ void logger_write (char *string)
   xSemaphoreGive(s.rxBufferMutex);
 }
 
-void logger_task_setup (void)
+void logger_task_setup(void)
 {
   s.txByteCnt = 0;
   s.txWriteIndex = 0;
@@ -60,7 +60,7 @@ void logger_task_setup (void)
   FLN_ERR_CHECK(bsp_uart_init(&UartHandle));
 }
 
-void logger_task (void *pvParameters)
+void logger_task(void *pvParameters)
 {
   while(1) {
     if (xSemaphoreTake(s.rxBufferMutex, (TickType_t) MUTEX_RETRY_TICK_CNT) == pdFALSE) {
@@ -69,7 +69,7 @@ void logger_task (void *pvParameters)
 
     if (s.txByteCnt > 0) {
       bsp_uart_write(&UartHandle, &(s.txBuffer[s.txReadIndex]), 1);
-      s.txReadIndex= (s.txReadIndex + 1) % UART_TX_BUFFER_SIZE;
+      s.txReadIndex = (s.txReadIndex + 1) % UART_TX_BUFFER_SIZE;
       s.txByteCnt--;
     }
     xSemaphoreGive(s.rxBufferMutex);

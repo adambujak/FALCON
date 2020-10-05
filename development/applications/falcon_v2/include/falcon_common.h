@@ -9,25 +9,27 @@
 
 #include "logger.h"
 
-#define FLN_OK   0
+#define FLN_OK  0
 #define FLN_ERR -1
 
 #define DEBUG_LOG(str) logger_write(str)
 
-#define RTOS_ERR_CHECK(x) do { \
-  int retval = (x); \
-  if (retval != pdPASS) { \
-    error_handler();\
-  } \
-} while (0)
+#define RTOS_ERR_CHECK(x)   \
+  do {                      \
+    int retval = (x);       \
+    if (retval != pdPASS) { \
+      error_handler();      \
+    }                       \
+  } while (0)
 
-#define FLN_ERR_CHECK(x) do { \
-  int retval = (x); \
-  if (retval != FLN_OK) { \
-    error_handler();\
-  } \
-} while (0)
+#define FLN_ERR_CHECK(x)    \
+  do {                      \
+    int retval = (x);       \
+    if (retval != FLN_OK) { \
+      error_handler();      \
+    }                       \
+  } while (0)
 
 void error_handler(void);
 
-#endif // FALCON_COMMON_H
+#endif  // FALCON_COMMON_H
