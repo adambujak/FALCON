@@ -23,19 +23,19 @@ int main (void)
 
   SystemClock_Config();
 
-  led_task_setup();
+  leds_task_setup();
   logger_task_setup();
 
   int32_t taskStatus;
-  taskStatus = xTaskCreate(led_task,
+  taskStatus = xTaskCreate(leds_task,
                            "led_task",
                             configMINIMAL_STACK_SIZE,
                             NULL,
                             led_TASK_PRIORITY,
                             NULL);
 
-  ERR_CHECK(taskStatus);
- 
+  RTOS_ERR_CHECK(taskStatus);
+
   taskStatus = xTaskCreate(logger_task,
                            "logger_task",
                            configMINIMAL_STACK_SIZE,
@@ -43,7 +43,7 @@ int main (void)
                            logger_TASK_PRIORITY,
                            NULL);
 
-  ERR_CHECK(taskStatus); 
+  RTOS_ERR_CHECK(taskStatus);
 
   vTaskStartScheduler();
 
