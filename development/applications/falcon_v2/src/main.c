@@ -9,8 +9,6 @@
 #define led_TASK_PRIORITY    (tskIDLE_PRIORITY + 2)
 #define logger_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 
-static void SystemClock_Config(void);
-
 int main(void)
 {
   bsp_board_bringup();
