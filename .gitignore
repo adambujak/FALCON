@@ -18,10 +18,6 @@
 *.swp
 **/tags
 
-# Main Eclipse Project
-.cproject
-.project
-
 # Build directory
 dependencies/gcc/gcc-arm-none-eabi-9-2020-q2-update
 development/system/msp_sdk/examples
