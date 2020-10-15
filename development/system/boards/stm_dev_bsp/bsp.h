@@ -51,6 +51,7 @@ typedef UART_HandleTypeDef fln_uart_handle_t;
 #define FLN_USARTx_RX_AF        GPIO_AF7_USART2
 
 int  bsp_uart_init(fln_uart_handle_t *handle);
-void bsp_uart_put_char(fln_uart_handle_t *handle, uint8_t c);
+void bsp_uart_put_char(fln_uart_handle_t *handle, uint8_t *c);
+void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length);
 
 #endif  // FALCON_BSP_H
