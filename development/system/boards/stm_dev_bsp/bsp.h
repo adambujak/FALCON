@@ -10,6 +10,7 @@
 #define FALCON_BSP_H
 
 #include <stdint.h>
+#include <string.h>
 
 #include "stm32f4xx_hal.h"
 #include "stm32412g_discovery.h"
@@ -52,5 +53,47 @@ typedef UART_HandleTypeDef fln_uart_handle_t;
 
 int  bsp_uart_init(fln_uart_handle_t *handle);
 void bsp_uart_put_char(fln_uart_handle_t *handle, uint8_t c);
+void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length);
+
+/*I2C*/
+typedef I2C_HandleTypeDef fln_i2c_handle_t;
+
+// #define FLN_I2C 						I2C2
+// #define I2Cx_CLK_ENABLE()               __HAL_RCC_I2C2_CLK_ENABLE()
+// #define I2Cx_SDA_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
+// #define I2Cx_SCL_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
+
+// #define I2Cx_FORCE_RESET()              __HAL_RCC_I2C2_FORCE_RESET()
+// #define I2Cx_RELEASE_RESET()            __HAL_RCC_I2C2_RELEASE_RESET()
+
+// /* Definition for I2Cx Pins */
+// #define FLN_I2Cx_SCL_PIN                    GPIO_PIN_10 /*D15*/
+// #define FLN_I2Cx_SCL_GPIO_PORT              GPIOB 		
+// #define FLN_I2Cx_SDA_PIN                    GPIO_PIN_9 /*D14*/
+// #define FLN_I2Cx_SDA_GPIO_PORT              GPIOB
+// #define FLN_I2Cx_SCL_SDA_AF                 GPIO_AF4_I2C2
+
+#define FLN_I2C                            I2C1
+#define I2Cx_CLK_ENABLE()               __HAL_RCC_I2C1_CLK_ENABLE()
+#define I2Cx_SDA_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
+#define I2Cx_SCL_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE() 
+
+#define I2Cx_FORCE_RESET()              __HAL_RCC_I2C1_FORCE_RESET()
+#define I2Cx_RELEASE_RESET()            __HAL_RCC_I2C1_RELEASE_RESET()
+
+/* Definition for I2Cx Pins */
+#define FLN_I2Cx_SCL_PIN                    GPIO_PIN_8 /*D9*/
+#define FLN_I2Cx_SCL_GPIO_PORT              GPIOB
+#define FLN_I2Cx_SDA_PIN                    GPIO_PIN_9 /*D14*/
+#define FLN_I2Cx_SDA_GPIO_PORT              GPIOB
+#define FLN_I2Cx_SCL_SDA_AF                 GPIO_AF4_I2C1
+
+/* I2C SPEEDCLOCK define to max value: 400 KHz on STM32F4xx*/
+#define I2C_SPEEDCLOCK   400000
+#define I2C_DUTYCYCLE    I2C_DUTYCYCLE_2
+
+int bsp_i2c_init(fln_i2c_handle_t *handle);
+int bsp_i2c_write(fln_i2c_handle_t *handle, unsigned char slave_addr, unsigned char reg_addr, unsigned char length, unsigned char *data);
+int bsp_i2c_read(fln_i2c_handle_t *handle, unsigned char slave_addr, unsigned char reg_addr, unsigned char length, unsigned char *data);
 
 #endif  // FALCON_BSP_H

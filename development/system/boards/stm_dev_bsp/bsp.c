@@ -126,6 +126,104 @@ void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length)
   HAL_UART_Transmit(handle, data, length, 0xFFFF);
 }
 
+int bsp_i2c_init(fln_i2c_handle_t *handle) 
+{
+  GPIO_InitTypeDef  GPIO_InitStruct;
+  
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* Enable GPIO TX/RX clock */
+  I2Cx_SCL_GPIO_CLK_ENABLE();
+  I2Cx_SDA_GPIO_CLK_ENABLE();
+  /* Enable I2Cx clock */
+  I2Cx_CLK_ENABLE();
+
+//  I2Cx_FORCE_RESET();
+//  I2Cx_RELEASE_RESET();
+
+  /*##-2- Configure peripheral GPIO ##########################################*/  
+  /* I2C TX GPIO pin configuration  */
+  GPIO_InitStruct.Pin       = FLN_I2Cx_SCL_PIN;
+  GPIO_InitStruct.Mode      = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull      = GPIO_PULLUP;
+  GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+  GPIO_InitStruct.Alternate = FLN_I2Cx_SCL_SDA_AF;
+  HAL_GPIO_Init(FLN_I2Cx_SCL_GPIO_PORT, &GPIO_InitStruct);
+    
+  /* I2C RX GPIO pin configuration  */
+  GPIO_InitStruct.Pin       = FLN_I2Cx_SDA_PIN;
+  GPIO_InitStruct.Alternate = FLN_I2Cx_SCL_SDA_AF;
+  HAL_GPIO_Init(FLN_I2Cx_SDA_GPIO_PORT, &GPIO_InitStruct);
+
+  /*##-1- Configure the I2C peripheral ######################################*/
+  handle->Instance             = FLN_I2C;
+  handle->Init.ClockSpeed      = I2C_SPEEDCLOCK;
+  handle->Init.DutyCycle       = I2C_DUTYCYCLE;
+  handle->Init.OwnAddress1     = 0xFF;
+  handle->Init.AddressingMode  = I2C_ADDRESSINGMODE_7BIT;
+  handle->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  handle->Init.OwnAddress2     = 0xFF;
+  handle->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  handle->Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;  
+  
+  if(HAL_I2C_Init(handle) != HAL_OK)
+  {
+    return FLN_ERR;
+  }
+  return FLN_OK;
+}
+
+int bsp_i2c_write(fln_i2c_handle_t *handle,
+             unsigned char slave_addr,
+             unsigned char reg_addr,
+             unsigned char length,
+             unsigned char *data)
+{
+  uint8_t txBuffer[17];
+  txBuffer[0] = reg_addr;
+  memcpy((txBuffer+1), data, length);
+  length++;
+  while(HAL_I2C_Master_Transmit(handle, ((uint16_t)slave_addr<<1), txBuffer, (uint16_t)length, 2000U))
+  {
+    /* Error_Handler() function is called when Timeout error occurs.
+       When Acknowledge failure occurs (Slave don't acknowledge its address)
+       Master restarts communication */
+    if (HAL_I2C_GetError(handle) != HAL_I2C_ERROR_AF)
+    {
+      return FLN_ERR;
+    }
+    else
+    {
+      return 1;
+    }
+  }
+  return FLN_OK;
+}
+
+int bsp_i2c_read(fln_i2c_handle_t *handle,
+             unsigned char slave_addr,
+             unsigned char reg_addr,
+             unsigned char length,
+             unsigned char *data)
+{
+  HAL_I2C_Master_Transmit(handle, ((uint16_t)slave_addr<<1), &reg_addr, 1, 2000U);
+  while(HAL_I2C_Master_Receive(handle, ((uint16_t)slave_addr<<1), (uint8_t *)data, (uint16_t)length, 2000U))
+  {
+    /* Error_Handler() function is called when Timeout error occurs.
+       When Acknowledge failure occurs (Slave don't acknowledge its address)
+       Master restarts communication */
+    if (HAL_I2C_GetError(handle) != HAL_I2C_ERROR_AF)
+    {
+      return FLN_ERR;
+    }
+    else
+    {
+      return 1;
+    }
+  }
+  return FLN_OK;
+}
+
+
 void error_handler(void)
 {
   while (1);
