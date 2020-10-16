@@ -43,6 +43,7 @@ $(PROJ_DIR)/src/main.c \
 $(PROJ_DIR)/src/stm32f4xx_it.c \
 $(PROJ_DIR)/src/system_stm32f4xx.c \
 $(PROJ_DIR)/src/leds.c \
+$(PROJ_DIR)/src/motors.c \
 $(PROJ_DIR)/src/logger.c \
 
 # ASM sources

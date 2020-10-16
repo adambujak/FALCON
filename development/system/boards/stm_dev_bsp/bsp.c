@@ -203,6 +203,83 @@ int bsp_i2c_read(fln_i2c_handle_t *handle,
   return FLN_OK;
 }
 
+/************************************************************
+ ************************** Motors **************************
+ ***********************************************************/
+
+TIM_HandleTypeDef motorTimerHandle;
+
+int bsp_motors_init(void)
+{
+  GPIO_InitTypeDef   GPIO_InitStruct;
+
+  FLN_MOTOR_TIMER_CLK_ENABLE();
+  FLN_MOTOR_GPIO_CLK_ENABLE();
+
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+
+  GPIO_InitStruct.Alternate = FLN_MOTOR_GPIO_AF_CHANNEL1;
+  GPIO_InitStruct.Pin = FLN_MOTOR_GPIO_PIN_CHANNEL1;
+  HAL_GPIO_Init(FLN_MOTOR_GPIO_PORT_CHANNEL1, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Alternate = FLN_MOTOR_GPIO_AF_CHANNEL2;
+  GPIO_InitStruct.Pin = FLN_MOTOR_GPIO_PIN_CHANNEL2;
+  HAL_GPIO_Init(FLN_MOTOR_GPIO_PORT_CHANNEL2, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Alternate = FLN_MOTOR_GPIO_AF_CHANNEL3;
+  GPIO_InitStruct.Pin = FLN_MOTOR_GPIO_PIN_CHANNEL3;
+  HAL_GPIO_Init(FLN_MOTOR_GPIO_PORT_CHANNEL3, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Alternate = FLN_MOTOR_GPIO_AF_CHANNEL4;
+  GPIO_InitStruct.Pin = FLN_MOTOR_GPIO_PIN_CHANNEL4;
+  HAL_GPIO_Init(FLN_MOTOR_GPIO_PORT_CHANNEL4, &GPIO_InitStruct);
+
+
+  uint32_t motorTimerPrescalerValue = (uint32_t)(SystemCoreClock / 1000000) - 1;
+
+  motorTimerHandle.Instance = FLN_MOTOR_TIMER;
+
+  motorTimerHandle.Init.Prescaler         = motorTimerPrescalerValue;
+  motorTimerHandle.Init.Period            = 20000;
+  motorTimerHandle.Init.ClockDivision     = 0;
+  motorTimerHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
+  motorTimerHandle.Init.RepetitionCounter = 0;
+  motorTimerHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+
+  if (HAL_TIM_PWM_Init(&motorTimerHandle) != HAL_OK) {
+    return FLN_ERR;
+  }
+	return FLN_OK;
+}
+
+
+void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us)
+{
+  ASSERT(us >= 1000 && us <= 2000);
+
+  static uint32_t motorChannels[] = {TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_4};
+  static TIM_OC_InitTypeDef pwmConfig = {
+    .OCMode       = TIM_OCMODE_PWM1,
+    .OCPolarity   = TIM_OCPOLARITY_HIGH,
+    .OCFastMode   = TIM_OCFAST_DISABLE,
+    .OCNPolarity  = TIM_OCNPOLARITY_HIGH,
+    .OCNIdleState = TIM_OCNIDLESTATE_RESET,
+    .OCIdleState  = TIM_OCIDLESTATE_RESET
+  };
+
+  pwmConfig.Pulse = us;
+  uint32_t channel = motorChannels[motor-1];
+
+  if (HAL_TIM_PWM_ConfigChannel(&motorTimerHandle, &pwmConfig, channel) != HAL_OK) {
+    error_handler();
+  }
+
+  if (HAL_TIM_PWM_Start(&motorTimerHandle, channel) != HAL_OK) {
+    error_handler();
+  }
+}
 
 void error_handler(void)
 {
