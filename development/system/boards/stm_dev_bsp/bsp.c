@@ -136,9 +136,9 @@ int bsp_i2c_init(fln_i2c_handle_t *handle)
   I2Cx_SDA_GPIO_CLK_ENABLE();
   /* Enable I2Cx clock */
   I2Cx_CLK_ENABLE();
-
-//  I2Cx_FORCE_RESET();
-//  I2Cx_RELEASE_RESET();
+  
+  I2Cx_FORCE_RESET();
+  I2Cx_RELEASE_RESET();
 
   /*##-2- Configure peripheral GPIO ##########################################*/  
   /* I2C TX GPIO pin configuration  */
@@ -173,51 +173,37 @@ int bsp_i2c_init(fln_i2c_handle_t *handle)
 }
 
 int bsp_i2c_write(fln_i2c_handle_t *handle,
-             unsigned char slave_addr,
-             unsigned char reg_addr,
-             unsigned char length,
-             unsigned char *data)
+             uint8_t slave_addr,
+             uint8_t reg_addr,
+             uint8_t length,
+             uint8_t *data)
 {
-  uint8_t txBuffer[17];
+  uint8_t txBuffer[length+1];
   txBuffer[0] = reg_addr;
   memcpy((txBuffer+1), data, length);
   length++;
   while(HAL_I2C_Master_Transmit(handle, ((uint16_t)slave_addr<<1), txBuffer, (uint16_t)length, 2000U))
   {
-    /* Error_Handler() function is called when Timeout error occurs.
-       When Acknowledge failure occurs (Slave don't acknowledge its address)
-       Master restarts communication */
     if (HAL_I2C_GetError(handle) != HAL_I2C_ERROR_AF)
     {
       return FLN_ERR;
-    }
-    else
-    {
-      return 1;
     }
   }
   return FLN_OK;
 }
 
 int bsp_i2c_read(fln_i2c_handle_t *handle,
-             unsigned char slave_addr,
-             unsigned char reg_addr,
-             unsigned char length,
-             unsigned char *data)
+             uint8_t slave_addr,
+             uint8_t reg_addr,
+             uint8_t length,
+             uint8_t *data)
 {
   HAL_I2C_Master_Transmit(handle, ((uint16_t)slave_addr<<1), &reg_addr, 1, 2000U);
   while(HAL_I2C_Master_Receive(handle, ((uint16_t)slave_addr<<1), (uint8_t *)data, (uint16_t)length, 2000U))
   {
-    /* Error_Handler() function is called when Timeout error occurs.
-       When Acknowledge failure occurs (Slave don't acknowledge its address)
-       Master restarts communication */
     if (HAL_I2C_GetError(handle) != HAL_I2C_ERROR_AF)
     {
       return FLN_ERR;
-    }
-    else
-    {
-      return 1;
     }
   }
   return FLN_OK;
