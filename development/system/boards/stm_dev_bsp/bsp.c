@@ -42,6 +42,8 @@ static int SystemClock_Config(void)
   if (ret != HAL_OK) {
     return FLN_ERR;
   }
+
+  return FLN_OK;
 }
 
 void bsp_board_bringup(void)
@@ -119,6 +121,11 @@ int bsp_uart_init(fln_uart_handle_t *handle)
     return FLN_ERR;
   }
   return FLN_OK;
+}
+
+void bsp_uart_put_char(fln_uart_handle_t *handle, uint8_t *ch)
+{
+  HAL_UART_Transmit(handle, ch, 1, 0xFFFF);
 }
 
 void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length)

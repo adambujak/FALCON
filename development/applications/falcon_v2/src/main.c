@@ -13,24 +13,15 @@ int main(void)
 {
   bsp_board_bringup();
   leds_task_setup();
-  logger_task_setup();
+  logger_init();
 
   int32_t taskStatus;
   taskStatus = xTaskCreate(leds_task,
                            "led_task",
-                            configMINIMAL_STACK_SIZE,
+                            2*configMINIMAL_STACK_SIZE,
                             NULL,
                             led_TASK_PRIORITY,
                             NULL);
-
-  RTOS_ERR_CHECK(taskStatus);
-
-  taskStatus = xTaskCreate(logger_task,
-                           "logger_task",
-                           configMINIMAL_STACK_SIZE,
-                           NULL,
-                           logger_TASK_PRIORITY,
-                           NULL);
 
   RTOS_ERR_CHECK(taskStatus);
 
