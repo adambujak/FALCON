@@ -51,7 +51,7 @@ typedef UART_HandleTypeDef fln_uart_handle_t;
 #define FLN_USARTx_RX_AF        GPIO_AF7_USART2
 
 int  bsp_uart_init(fln_uart_handle_t *handle);
-void bsp_uart_put_char(fln_uart_handle_t *handle, uint8_t c);
+void bsp_uart_put_char(fln_uart_handle_t *handle, uint8_t *ch);
 void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length);
 
 /*I2C*/
@@ -77,7 +77,17 @@ typedef I2C_HandleTypeDef fln_i2c_handle_t;
 #define FLN_SENSORS_I2C_DUTYCYCLE    I2C_DUTYCYCLE_2
 
 int bsp_i2c_init(fln_i2c_handle_t *handle);
-int bsp_i2c_write(fln_i2c_handle_t *handle, unsigned char slave_addr, unsigned char reg_addr, unsigned char length, unsigned char *data);
-int bsp_i2c_read(fln_i2c_handle_t *handle, unsigned char slave_addr, unsigned char reg_addr, unsigned char length, unsigned char *data);
+
+int bsp_i2c_write(fln_i2c_handle_t *handle,
+                  uint8_t slave_addr,
+                  uint8_t reg_addr,
+                  uint16_t length,
+                  uint8_t *data);
+
+int bsp_i2c_read(fln_i2c_handle_t *handle,
+                 uint8_t slave_addr,
+                 uint8_t reg_addr,
+                 uint16_t length,
+                 uint8_t *data);
 
 #endif  // FALCON_BSP_H
