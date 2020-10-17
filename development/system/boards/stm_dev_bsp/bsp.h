@@ -57,24 +57,24 @@ void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length);
 /*I2C*/
 typedef I2C_HandleTypeDef fln_i2c_handle_t;
 
-#define FLN_I2C                            I2C1
-#define I2Cx_CLK_ENABLE()               __HAL_RCC_I2C1_CLK_ENABLE()
-#define I2Cx_SDA_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
-#define I2Cx_SCL_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE() 
+#define FLN_SENSORS_I2C                            I2C1
+#define FLN_SENSORS_I2C_CLK_ENABLE()               __HAL_RCC_I2C1_CLK_ENABLE()
+#define FLN_SENSORS_I2C_SDA_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
+#define FLN_SENSORS_I2C_SCL_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
 
-#define I2Cx_FORCE_RESET()              __HAL_RCC_I2C1_FORCE_RESET()
-#define I2Cx_RELEASE_RESET()            __HAL_RCC_I2C1_RELEASE_RESET()
+#define FLN_SENSORS_I2C_FORCE_RESET()              __HAL_RCC_I2C1_FORCE_RESET()
+#define FLN_SENSORS_I2C_RELEASE_RESET()            __HAL_RCC_I2C1_RELEASE_RESET()
 
 /* Definition for I2Cx Pins */
-#define FLN_I2Cx_SCL_PIN                    GPIO_PIN_8 /*D9*/
-#define FLN_I2Cx_SCL_GPIO_PORT              GPIOB
-#define FLN_I2Cx_SDA_PIN                    GPIO_PIN_9 /*D14*/
-#define FLN_I2Cx_SDA_GPIO_PORT              GPIOB
-#define FLN_I2Cx_SCL_SDA_AF                 GPIO_AF4_I2C1
+#define FLN_SENSORS_I2C_SCL_PIN                    GPIO_PIN_8 /*D9*/
+#define FLN_SENSORS_I2C_SCL_GPIO_PORT              GPIOB
+#define FLN_SENSORS_I2C_SDA_PIN                    GPIO_PIN_9 /*D14*/
+#define FLN_SENSORS_I2C_SDA_GPIO_PORT              GPIOB
+#define FLN_SENSORS_I2C_SCL_SDA_AF                 GPIO_AF4_I2C1
 
 /* I2C SPEEDCLOCK define: max value 400 KHz on STM32F4xx*/
-#define I2C_SPEEDCLOCK   400000
-#define I2C_DUTYCYCLE    I2C_DUTYCYCLE_2
+#define FLN_SENSORS_I2C_SPEEDCLOCK   400000
+#define FLN_SENSORS_I2C_DUTYCYCLE    I2C_DUTYCYCLE_2
 
 int bsp_i2c_init(fln_i2c_handle_t *handle);
 int bsp_i2c_write(fln_i2c_handle_t *handle, unsigned char slave_addr, unsigned char reg_addr, unsigned char length, unsigned char *data);

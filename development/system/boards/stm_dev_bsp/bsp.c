@@ -131,30 +131,30 @@ int bsp_i2c_init(fln_i2c_handle_t *handle)
   GPIO_InitTypeDef  GPIO_InitStruct;
 
   /* Enable GPIO TX/RX clock */
-  I2Cx_SCL_GPIO_CLK_ENABLE();
-  I2Cx_SDA_GPIO_CLK_ENABLE();
+  FLN_SENSORS_I2C_SCL_GPIO_CLK_ENABLE();
+  FLN_SENSORS_I2C_SDA_GPIO_CLK_ENABLE();
   /* Enable I2Cx clock */
-  I2Cx_CLK_ENABLE();
+  FLN_SENSORS_I2C_CLK_ENABLE();
 
-  I2Cx_FORCE_RESET();
-  I2Cx_RELEASE_RESET();
+  FLN_SENSORS_I2C_FORCE_RESET();
+  FLN_SENSORS_I2C_RELEASE_RESET();
 
   /* I2C TX GPIO pin configuration  */
-  GPIO_InitStruct.Pin       = FLN_I2Cx_SCL_PIN;
+  GPIO_InitStruct.Pin       = FLN_SENSORS_I2C_SCL_PIN;
   GPIO_InitStruct.Mode      = GPIO_MODE_AF_OD;
   GPIO_InitStruct.Pull      = GPIO_PULLUP;
   GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
-  GPIO_InitStruct.Alternate = FLN_I2Cx_SCL_SDA_AF;
-  HAL_GPIO_Init(FLN_I2Cx_SCL_GPIO_PORT, &GPIO_InitStruct);
+  GPIO_InitStruct.Alternate = FLN_SENSORS_I2C_SCL_SDA_AF;
+  HAL_GPIO_Init(FLN_SENSORS_I2C_SCL_GPIO_PORT, &GPIO_InitStruct);
 
   /* I2C RX GPIO pin configuration  */
-  GPIO_InitStruct.Pin       = FLN_I2Cx_SDA_PIN;
-  GPIO_InitStruct.Alternate = FLN_I2Cx_SCL_SDA_AF;
-  HAL_GPIO_Init(FLN_I2Cx_SDA_GPIO_PORT, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin       = FLN_SENSORS_I2C_SDA_PIN;
+  GPIO_InitStruct.Alternate = FLN_SENSORS_I2C_SCL_SDA_AF;
+  HAL_GPIO_Init(FLN_SENSORS_I2C_SDA_GPIO_PORT, &GPIO_InitStruct);
 
-  handle->Instance             = FLN_I2C;
-  handle->Init.ClockSpeed      = I2C_SPEEDCLOCK;
-  handle->Init.DutyCycle       = I2C_DUTYCYCLE;
+  handle->Instance             = FLN_SENSORS_I2C;
+  handle->Init.ClockSpeed      = FLN_SENSORS_I2C_SPEEDCLOCK;
+  handle->Init.DutyCycle       = FLN_SENSORS_I2C_DUTYCYCLE;
   handle->Init.OwnAddress1     = 0xFF;
   handle->Init.AddressingMode  = I2C_ADDRESSINGMODE_7BIT;
   handle->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
