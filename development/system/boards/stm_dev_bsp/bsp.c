@@ -178,11 +178,7 @@ int bsp_i2c_write(fln_i2c_handle_t *handle,
              uint8_t length,
              uint8_t *data)
 {
-  uint8_t txBuffer[length+1];
-  txBuffer[0] = reg_addr;
-  memcpy((txBuffer+1), data, length);
-  length++;
-  while(HAL_I2C_Master_Transmit(handle, ((uint16_t)slave_addr<<1), txBuffer, (uint16_t)length, 2000U))
+  while(HAL_I2C_Mem_Write(handle, ((uint16_t)slave_addr<<1), reg_addr, 1U, data, length, 25U))
   {
     if (HAL_I2C_GetError(handle) != HAL_I2C_ERROR_AF)
     {
@@ -198,8 +194,7 @@ int bsp_i2c_read(fln_i2c_handle_t *handle,
              uint8_t length,
              uint8_t *data)
 {
-  HAL_I2C_Master_Transmit(handle, ((uint16_t)slave_addr<<1), &reg_addr, 1, 2000U);
-  while(HAL_I2C_Master_Receive(handle, ((uint16_t)slave_addr<<1), (uint8_t *)data, (uint16_t)length, 2000U))
+  while(HAL_I2C_Mem_Read(handle, ((uint16_t)slave_addr<<1), reg_addr, 1U, data, length, 25U))
   {
     if (HAL_I2C_GetError(handle) != HAL_I2C_ERROR_AF)
     {
