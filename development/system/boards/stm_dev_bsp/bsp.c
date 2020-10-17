@@ -175,7 +175,7 @@ int bsp_i2c_init(fln_i2c_handle_t *handle)
 int bsp_i2c_write(fln_i2c_handle_t *handle,
              uint8_t slave_addr,
              uint8_t reg_addr,
-             uint8_t length,
+             uint16_t length,
              uint8_t *data)
 {
   while(HAL_I2C_Mem_Write(handle, ((uint16_t)slave_addr<<1), reg_addr, 1U, data, length, 25U))
@@ -191,7 +191,7 @@ int bsp_i2c_write(fln_i2c_handle_t *handle,
 int bsp_i2c_read(fln_i2c_handle_t *handle,
              uint8_t slave_addr,
              uint8_t reg_addr,
-             uint8_t length,
+             uint16_t length,
              uint8_t *data)
 {
   while(HAL_I2C_Mem_Read(handle, ((uint16_t)slave_addr<<1), reg_addr, 1U, data, length, 25U))
