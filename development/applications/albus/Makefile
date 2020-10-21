@@ -1,13 +1,17 @@
 PROJECT_NAME     := spi_pca10040
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
-GNU_INSTALL_ROOT := /Users/adambujak/Workspace/FALCON/dependencies/gcc/gcc-arm-none-eabi-9-2020-q2-update/bin/
 
-SDK_ROOT := ../../../../../..
-PROJ_DIR := ../../..
+FALCON_ROOT := ../../..
+GNU_INSTALL_ROOT := ${FALCON_ROOT}/dependencies/gcc/gcc-arm-none-eabi-9-2020-q2-update/bin/
+SDK_ROOT := ${FALCON_ROOT}/dependencies/nordic/nrf5_sdk
+DEV_ROOT := ${FALCON_ROOT}/development
+LIB_ROOT := ${DEV_ROOT}/libraries
+DRV_ROOT := ${DEV_ROOT}/drivers
+PROJ_DIR := .
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
-  LINKER_SCRIPT  := spi_gcc_nrf52.ld
+  LINKER_SCRIPT  := $(PROJ_DIR)/spi_gcc_nrf52.ld
 
 # Source files common to all targets
 SRC_FILES += \
@@ -47,11 +51,13 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
-  $(PROJ_DIR)/main.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52.c \
+  $(PROJ_DIR)/main.c \
+  $(LIB_ROOT)/frf/frf.c \
+  $(DEV_ROOT)/drivers/nRF24L01/nRF24L01.c \
 
 # Include folders common to all targets
 INC_FOLDERS += \
@@ -59,12 +65,14 @@ INC_FOLDERS += \
   $(SDK_ROOT)/modules/nrfx/mdk \
   $(SDK_ROOT)/components/libraries/scheduler \
   $(PROJ_DIR) \
+  $(LIB_ROOT)/frf \
+  $(DEV_ROOT)/drivers/nRF24L01 \
+  $(DEV_ROOT)/drivers \
   $(SDK_ROOT)/components/libraries/timer \
   $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/libraries/strerror \
   $(SDK_ROOT)/components/toolchain/cmsis/include \
   $(SDK_ROOT)/components/libraries/util \
-  ../config \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ringbuf \
   $(SDK_ROOT)/modules/nrfx/hal \
@@ -90,7 +98,7 @@ INC_FOLDERS += \
 LIB_FILES += \
 
 # Optimization flags
-OPT = -O3 -g3
+OPT = -O0 -g3
 # Uncomment the line below to enable link time optimization
 #OPT += -flto
 
@@ -106,7 +114,7 @@ CFLAGS += -DNRF52832_XXAA
 CFLAGS += -DNRF52_PAN_74
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
-CFLAGS += -Wall -Werror
+CFLAGS += -Wall 
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # keep every function in a separate section, this allows linker to discard unused ones
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
