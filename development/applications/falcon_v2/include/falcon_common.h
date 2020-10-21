@@ -28,7 +28,7 @@
 
 #define ASSERT(val)         \
   do {                      \
-    if((val)) {             \
+    if(!(val)) {            \
       error_handler();      \
     }                       \
   } while (0)

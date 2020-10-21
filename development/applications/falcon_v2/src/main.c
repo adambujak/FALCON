@@ -3,6 +3,7 @@
 
 #include "leds.h"
 #include "logger.h"
+#include "motors.h"
 
 #include <stdint.h>
 
@@ -14,6 +15,7 @@ int main(void)
   bsp_board_bringup();
   leds_task_setup();
   logger_init();
+  motors_init();
 
   int32_t taskStatus;
   taskStatus = xTaskCreate(leds_task,
