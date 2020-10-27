@@ -6598,7 +6598,7 @@ Switches electronic signals</description>
 <part name="C13" library="microbuilder" deviceset="CAP_CERAMIC" device="0805-NOOUTLINE" value="0.1µF"/>
 <part name="U$10" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$11" library="microbuilder" deviceset="GND" device=""/>
-<part name="IC1" library="microbuilder" deviceset="MPL3115A2" device="LGA"/>
+<part name="U7" library="microbuilder" deviceset="MPL3115A2" device="LGA"/>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND14" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R5" library="SparkFun-Resistors" deviceset="1.5KOHM" device="-0603-1/10W-1%" value="470"/>
@@ -6683,17 +6683,28 @@ Switches electronic signals</description>
 <part name="P5" library="falcon" deviceset="STAG_CONN" device="" value="PC5"/>
 <part name="P6" library="falcon" deviceset="STAG_CONN" device="" value="PC9"/>
 <part name="P4" library="falcon" deviceset="STAG_CONN" device="" value="PC1"/>
+<part name="C23" library="SparkFun-Capacitors" deviceset="4.7UF" device="-0603-35V-(20%)" value="47uF"/>
+<part name="C24" library="SparkFun-Capacitors" deviceset="0.22UF" device="-0603-25V-10%" value="0.1uF"/>
+<part name="C25" library="SparkFun-Capacitors" deviceset="0.22UF" device="-0603-25V-10%" value="0.1uF"/>
+<part name="GND31" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="C26" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
+<part name="GND32" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="C27" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
+<part name="C28" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
 </parts>
 <sheets>
 <sheet>
 <plain>
-<text x="-81.28" y="53.34" size="1.27" layer="97">BOOT0 should either be pulled up or pulled down
+<text x="-119.38" y="22.86" size="1.27" layer="97">BOOT0 should either be pulled up or pulled down
 NEVER Both
 Only populate one of these resistors</text>
+<text x="55.88" y="17.78" size="5.08" layer="91">Breakout Pins</text>
+<text x="-119.38" y="78.74" size="5.08" layer="91">STM32F412</text>
+<text x="58.42" y="78.74" size="5.08" layer="91">Debug Out</text>
 </plain>
 <instances>
-<instance part="GND13" gate="1" x="81.28" y="48.26" smashed="yes">
-<attribute name="VALUE" x="78.74" y="45.72" size="1.524" layer="96"/>
+<instance part="GND13" gate="1" x="101.6" y="55.88" smashed="yes">
+<attribute name="VALUE" x="99.06" y="53.34" size="1.524" layer="96"/>
 </instance>
 <instance part="GND4" gate="1" x="7.62" y="-45.72" smashed="yes">
 <attribute name="VALUE" x="5.08" y="-48.26" size="1.778" layer="96"/>
@@ -6701,9 +6712,9 @@ Only populate one of these resistors</text>
 <instance part="U$1" gate="G$1" x="-15.24" y="10.16" smashed="yes">
 <attribute name="NAME" x="-2.54" y="-50.8" size="1.778" layer="95"/>
 </instance>
-<instance part="P1" gate="G$1" x="64.262" y="43.942" smashed="yes" rot="R180">
-<attribute name="NAME" x="71.12" y="29.21" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="71.12" y="60.96" size="1.778" layer="96" rot="R180"/>
+<instance part="P1" gate="G$1" x="84.582" y="51.562" smashed="yes" rot="R180">
+<attribute name="NAME" x="91.44" y="36.83" size="1.778" layer="95" rot="R180"/>
+<attribute name="VALUE" x="91.44" y="68.58" size="1.778" layer="96" rot="R180"/>
 </instance>
 <instance part="X1" gate="G$1" x="-50.8" y="-38.1" smashed="yes">
 <attribute name="NAME" x="-51.562" y="-36.068" size="1.27" layer="95"/>
@@ -6757,8 +6768,8 @@ Only populate one of these resistors</text>
 <attribute name="NAME" x="-80.264" y="35.56" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
 <attribute name="VALUE" x="-77.216" y="35.56" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
 </instance>
-<instance part="+3V7" gate="G$1" x="-45.72" y="67.056" smashed="yes">
-<attribute name="VALUE" x="-48.26" y="61.976" size="1.778" layer="96" rot="R90"/>
+<instance part="+3V7" gate="G$1" x="-38.1" y="67.056" smashed="yes">
+<attribute name="VALUE" x="-40.64" y="61.976" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="GND" gate="G$1" x="7.62" y="-33.02" smashed="yes">
 <attribute name="NAME" x="6.35" y="-31.75" size="1.778" layer="95"/>
@@ -6773,14 +6784,29 @@ Only populate one of these resistors</text>
 <attribute name="LAST_DATE_TIME" x="85.09" y="-76.2" size="2.286" layer="94"/>
 <attribute name="SHEET" x="98.425" y="-81.28" size="2.54" layer="94"/>
 </instance>
-<instance part="+3V13" gate="G$1" x="94.742" y="38.1" smashed="yes">
-<attribute name="VALUE" x="92.202" y="33.02" size="1.778" layer="96" rot="R90"/>
+<instance part="+3V13" gate="G$1" x="115.062" y="45.72" smashed="yes">
+<attribute name="VALUE" x="112.522" y="40.64" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="P2" gate="G$1" x="96.52" y="12.7" smashed="yes"/>
-<instance part="P3" gate="G$1" x="96.52" y="-2.54" smashed="yes"/>
-<instance part="P5" gate="G$1" x="96.52" y="-33.02" smashed="yes"/>
-<instance part="P6" gate="G$1" x="96.52" y="-48.26" smashed="yes"/>
-<instance part="P4" gate="G$1" x="96.52" y="-17.78" smashed="yes"/>
+<instance part="P2" gate="G$1" x="96.52" y="7.62" smashed="yes"/>
+<instance part="P3" gate="G$1" x="96.52" y="-7.62" smashed="yes"/>
+<instance part="P5" gate="G$1" x="96.52" y="-38.1" smashed="yes"/>
+<instance part="P6" gate="G$1" x="96.52" y="-53.34" smashed="yes"/>
+<instance part="P4" gate="G$1" x="96.52" y="-22.86" smashed="yes"/>
+<instance part="C26" gate="G$1" x="-43.18" y="53.34" smashed="yes" rot="R180">
+<attribute name="NAME" x="-45.466" y="50.419" size="1.778" layer="95" font="vector" rot="R180"/>
+<attribute name="VALUE" x="-44.704" y="55.499" size="1.778" layer="96" font="vector" rot="R180"/>
+</instance>
+<instance part="GND32" gate="1" x="-53.34" y="43.18" smashed="yes">
+<attribute name="VALUE" x="-55.88" y="40.64" size="1.778" layer="96"/>
+</instance>
+<instance part="C27" gate="G$1" x="-53.34" y="53.34" smashed="yes" rot="R180">
+<attribute name="NAME" x="-55.626" y="50.419" size="1.778" layer="95" font="vector" rot="R180"/>
+<attribute name="VALUE" x="-54.864" y="55.499" size="1.778" layer="96" font="vector" rot="R180"/>
+</instance>
+<instance part="C28" gate="G$1" x="-63.5" y="53.34" smashed="yes" rot="R180">
+<attribute name="NAME" x="-65.786" y="50.419" size="1.778" layer="95" font="vector" rot="R180"/>
+<attribute name="VALUE" x="-65.024" y="55.499" size="1.778" layer="96" font="vector" rot="R180"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -6806,15 +6832,15 @@ Only populate one of these resistors</text>
 <junction x="7.62" y="-35.56"/>
 </segment>
 <segment>
-<wire x1="73.66" y1="50.8" x2="81.28" y2="50.8" width="0.1524" layer="91"/>
-<wire x1="81.28" y1="55.88" x2="73.66" y2="55.88" width="0.1524" layer="91"/>
-<junction x="81.28" y="50.8"/>
+<wire x1="93.98" y1="58.42" x2="101.6" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="101.6" y1="63.5" x2="93.98" y2="63.5" width="0.1524" layer="91"/>
+<junction x="101.6" y="58.42"/>
 <pinref part="GND13" gate="1" pin="GND"/>
-<wire x1="81.28" y1="50.8" x2="81.28" y2="53.34" width="0.1524" layer="91"/>
-<junction x="81.28" y="55.88"/>
-<wire x1="81.28" y1="53.34" x2="81.28" y2="55.88" width="0.1524" layer="91"/>
-<wire x1="73.66" y1="53.34" x2="81.28" y2="53.34" width="0.1524" layer="91"/>
-<junction x="81.28" y="53.34"/>
+<wire x1="101.6" y1="58.42" x2="101.6" y2="60.96" width="0.1524" layer="91"/>
+<junction x="101.6" y="63.5"/>
+<wire x1="101.6" y1="60.96" x2="101.6" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="93.98" y1="60.96" x2="101.6" y2="60.96" width="0.1524" layer="91"/>
+<junction x="101.6" y="60.96"/>
 <pinref part="P1" gate="G$1" pin="GND@3"/>
 <pinref part="P1" gate="G$1" pin="GND@5"/>
 <pinref part="P1" gate="G$1" pin="GND@9"/>
@@ -6847,6 +6873,16 @@ Only populate one of these resistors</text>
 <wire x1="-60.96" y1="10.16" x2="-78.74" y2="10.16" width="0.1524" layer="91"/>
 <junction x="-78.74" y="10.16"/>
 </segment>
+<segment>
+<pinref part="C28" gate="G$1" pin="1"/>
+<pinref part="C27" gate="G$1" pin="1"/>
+<wire x1="-63.5" y1="48.26" x2="-53.34" y2="48.26" width="0.1524" layer="91"/>
+<pinref part="C26" gate="G$1" pin="1"/>
+<wire x1="-53.34" y1="48.26" x2="-43.18" y2="48.26" width="0.1524" layer="91"/>
+<junction x="-53.34" y="48.26"/>
+<pinref part="GND32" gate="1" pin="GND"/>
+<wire x1="-53.34" y1="48.26" x2="-53.34" y2="45.72" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="NRST" class="0">
 <segment>
@@ -6855,8 +6891,8 @@ Only populate one of these resistors</text>
 <label x="-48.26" y="20.32" size="1.524" layer="95"/>
 </segment>
 <segment>
-<wire x1="73.66" y1="35.56" x2="78.74" y2="35.56" width="0.1524" layer="91"/>
-<label x="78.74" y="35.56" size="1.524" layer="95"/>
+<wire x1="93.98" y1="43.18" x2="99.06" y2="43.18" width="0.1524" layer="91"/>
+<label x="99.06" y="43.18" size="1.524" layer="95"/>
 <pinref part="P1" gate="G$1" pin="RESETN"/>
 </segment>
 </net>
@@ -6867,8 +6903,8 @@ Only populate one of these resistors</text>
 <label x="-48.26" y="17.78" size="1.524" layer="95"/>
 </segment>
 <segment>
-<wire x1="73.66" y1="40.64" x2="78.74" y2="40.64" width="0.1524" layer="91"/>
-<label x="78.74" y="40.64" size="1.524" layer="95"/>
+<wire x1="93.98" y1="48.26" x2="99.06" y2="48.26" width="0.1524" layer="91"/>
+<label x="99.06" y="48.26" size="1.524" layer="95"/>
 <pinref part="P1" gate="G$1" pin="SWDIO"/>
 </segment>
 </net>
@@ -6879,8 +6915,8 @@ Only populate one of these resistors</text>
 <label x="-48.26" y="15.24" size="1.524" layer="95"/>
 </segment>
 <segment>
-<wire x1="73.66" y1="38.1" x2="78.74" y2="38.1" width="0.1524" layer="91"/>
-<label x="78.74" y="38.1" size="1.524" layer="95"/>
+<wire x1="93.98" y1="45.72" x2="99.06" y2="45.72" width="0.1524" layer="91"/>
+<label x="99.06" y="45.72" size="1.524" layer="95"/>
 <pinref part="P1" gate="G$1" pin="SWDCLK"/>
 </segment>
 </net>
@@ -6940,8 +6976,8 @@ Only populate one of these resistors</text>
 </segment>
 <segment>
 <pinref part="P2" gate="G$1" pin="@2"/>
-<wire x1="107.696" y1="12.7" x2="114.3" y2="12.7" width="0.1524" layer="91"/>
-<label x="109.22" y="12.7" size="1.524" layer="95"/>
+<wire x1="107.696" y1="7.62" x2="114.3" y2="7.62" width="0.1524" layer="91"/>
+<label x="109.22" y="7.62" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="RF_IRQ" class="0">
@@ -6952,8 +6988,8 @@ Only populate one of these resistors</text>
 </segment>
 <segment>
 <pinref part="P2" gate="G$1" pin="@3"/>
-<wire x1="88.9" y1="10.16" x2="83.82" y2="10.16" width="0.1524" layer="91"/>
-<label x="81.28" y="10.16" size="1.524" layer="95"/>
+<wire x1="88.9" y1="5.08" x2="83.82" y2="5.08" width="0.1524" layer="91"/>
+<label x="81.28" y="5.08" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="RF_SS" class="0">
@@ -6964,8 +7000,8 @@ Only populate one of these resistors</text>
 </segment>
 <segment>
 <pinref part="P2" gate="G$1" pin="@4"/>
-<wire x1="107.696" y1="7.62" x2="114.3" y2="7.62" width="0.1524" layer="91"/>
-<label x="109.22" y="7.62" size="1.524" layer="95"/>
+<wire x1="107.696" y1="2.54" x2="114.3" y2="2.54" width="0.1524" layer="91"/>
+<label x="109.22" y="2.54" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="RF_SCK" class="0">
@@ -6976,8 +7012,8 @@ Only populate one of these resistors</text>
 </segment>
 <segment>
 <pinref part="P3" gate="G$1" pin="@1"/>
-<wire x1="88.9" y1="0" x2="83.82" y2="0" width="0.1524" layer="91"/>
-<label x="81.28" y="0" size="1.524" layer="95"/>
+<wire x1="88.9" y1="-5.08" x2="83.82" y2="-5.08" width="0.1524" layer="91"/>
+<label x="81.28" y="-5.08" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="MOTOR1" class="0">
@@ -7034,8 +7070,8 @@ Only populate one of these resistors</text>
 </segment>
 <segment>
 <pinref part="P2" gate="G$1" pin="@1"/>
-<wire x1="83.82" y1="15.24" x2="88.9" y2="15.24" width="0.1524" layer="91"/>
-<label x="76.2" y="15.24" size="1.524" layer="95"/>
+<wire x1="83.82" y1="10.16" x2="88.9" y2="10.16" width="0.1524" layer="91"/>
+<label x="76.2" y="10.16" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="RF_CE" class="0">
@@ -7046,8 +7082,8 @@ Only populate one of these resistors</text>
 </segment>
 <segment>
 <pinref part="P3" gate="G$1" pin="@4"/>
-<wire x1="107.696" y1="-7.62" x2="114.3" y2="-7.62" width="0.1524" layer="91"/>
-<label x="109.22" y="-7.62" size="1.524" layer="95"/>
+<wire x1="107.696" y1="-12.7" x2="114.3" y2="-12.7" width="0.1524" layer="91"/>
+<label x="109.22" y="-12.7" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="RF_MISO" class="0">
@@ -7058,8 +7094,8 @@ Only populate one of these resistors</text>
 </segment>
 <segment>
 <pinref part="P3" gate="G$1" pin="@2"/>
-<wire x1="107.696" y1="-2.54" x2="114.3" y2="-2.54" width="0.1524" layer="91"/>
-<label x="109.22" y="-2.54" size="1.524" layer="95"/>
+<wire x1="107.696" y1="-7.62" x2="114.3" y2="-7.62" width="0.1524" layer="91"/>
+<label x="109.22" y="-7.62" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="RF_MOSI" class="0">
@@ -7070,8 +7106,8 @@ Only populate one of these resistors</text>
 </segment>
 <segment>
 <pinref part="P3" gate="G$1" pin="@3"/>
-<wire x1="88.9" y1="-5.08" x2="83.82" y2="-5.08" width="0.1524" layer="91"/>
-<label x="81.28" y="-5.08" size="1.524" layer="95"/>
+<wire x1="88.9" y1="-10.16" x2="83.82" y2="-10.16" width="0.1524" layer="91"/>
+<label x="81.28" y="-10.16" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="+3V3" class="0">
@@ -7106,16 +7142,22 @@ Only populate one of these resistors</text>
 <junction x="-38.1" y="53.34"/>
 <pinref part="+3V7" gate="G$1" pin="+3V3"/>
 <junction x="-38.1" y="55.88"/>
-<wire x1="-38.1" y1="55.88" x2="-38.1" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="-38.1" y1="63.5" x2="-45.72" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="-45.72" y1="63.5" x2="-45.72" y2="64.516" width="0.1524" layer="91"/>
+<wire x1="-38.1" y1="55.88" x2="-38.1" y2="64.516" width="0.1524" layer="91"/>
+<pinref part="C26" gate="G$1" pin="2"/>
+<wire x1="-38.1" y1="55.88" x2="-43.18" y2="55.88" width="0.1524" layer="91"/>
+<pinref part="C27" gate="G$1" pin="2"/>
+<wire x1="-43.18" y1="55.88" x2="-53.34" y2="55.88" width="0.1524" layer="91"/>
+<junction x="-43.18" y="55.88"/>
+<wire x1="-53.34" y1="55.88" x2="-63.5" y2="55.88" width="0.1524" layer="91"/>
+<junction x="-53.34" y="55.88"/>
+<pinref part="C28" gate="G$1" pin="2"/>
 </segment>
 <segment>
-<label x="78.74" y="33.02" size="1.524" layer="95"/>
+<label x="99.06" y="40.64" size="1.524" layer="95"/>
 <pinref part="P1" gate="G$1" pin="VREF"/>
 <pinref part="+3V13" gate="G$1" pin="+3V3"/>
-<wire x1="94.742" y1="35.56" x2="94.742" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="94.742" y1="33.02" x2="73.66" y2="33.02" width="0.1524" layer="91"/>
+<wire x1="115.062" y1="43.18" x2="115.062" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="115.062" y1="40.64" x2="93.98" y2="40.64" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="LED_SDO" class="0">
@@ -7147,7 +7189,7 @@ Only populate one of these resistors</text>
 <net name="N$18" class="0">
 <segment>
 <pinref part="P1" gate="G$1" pin="SWO"/>
-<wire x1="73.66" y1="45.72" x2="76.2" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="93.98" y1="53.34" x2="96.52" y2="53.34" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="PC1" class="0">
@@ -7157,8 +7199,8 @@ Only populate one of these resistors</text>
 <label x="7.62" y="5.08" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-15.24" size="1.524" layer="95"/>
-<wire x1="78.74" y1="-15.24" x2="88.9" y2="-15.24" width="0.1524" layer="91"/>
+<label x="81.28" y="-20.32" size="1.524" layer="95"/>
+<wire x1="78.74" y1="-20.32" x2="88.9" y2="-20.32" width="0.1524" layer="91"/>
 <pinref part="P4" gate="G$1" pin="@1"/>
 </segment>
 </net>
@@ -7169,8 +7211,8 @@ Only populate one of these resistors</text>
 <label x="7.62" y="2.54" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-17.78" size="1.524" layer="95"/>
-<wire x1="78.74" y1="-17.78" x2="107.696" y2="-17.78" width="0.1524" layer="91"/>
+<label x="81.28" y="-22.86" size="1.524" layer="95"/>
+<wire x1="78.74" y1="-22.86" x2="107.696" y2="-22.86" width="0.1524" layer="91"/>
 <pinref part="P4" gate="G$1" pin="@2"/>
 </segment>
 </net>
@@ -7181,8 +7223,8 @@ Only populate one of these resistors</text>
 <label x="7.62" y="0" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-20.32" size="1.524" layer="95"/>
-<wire x1="78.74" y1="-20.32" x2="88.9" y2="-20.32" width="0.1524" layer="91"/>
+<label x="81.28" y="-25.4" size="1.524" layer="95"/>
+<wire x1="78.74" y1="-25.4" x2="88.9" y2="-25.4" width="0.1524" layer="91"/>
 <pinref part="P4" gate="G$1" pin="@3"/>
 </segment>
 </net>
@@ -7193,8 +7235,8 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-2.54" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-22.86" size="1.524" layer="95"/>
-<wire x1="78.74" y1="-22.86" x2="107.696" y2="-22.86" width="0.1524" layer="91"/>
+<label x="81.28" y="-27.94" size="1.524" layer="95"/>
+<wire x1="78.74" y1="-27.94" x2="107.696" y2="-27.94" width="0.1524" layer="91"/>
 <pinref part="P4" gate="G$1" pin="@4"/>
 </segment>
 </net>
@@ -7205,9 +7247,9 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-5.08" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-30.48" size="1.524" layer="95"/>
+<label x="81.28" y="-35.56" size="1.524" layer="95"/>
 <pinref part="P5" gate="G$1" pin="@1"/>
-<wire x1="78.74" y1="-30.48" x2="88.9" y2="-30.48" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="-35.56" x2="88.9" y2="-35.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="PC6" class="0">
@@ -7217,9 +7259,9 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-7.62" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-33.02" size="1.524" layer="95"/>
+<label x="81.28" y="-38.1" size="1.524" layer="95"/>
 <pinref part="P5" gate="G$1" pin="@2"/>
-<wire x1="78.74" y1="-33.02" x2="107.696" y2="-33.02" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="-38.1" x2="107.696" y2="-38.1" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="PC7" class="0">
@@ -7229,9 +7271,9 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-10.16" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-35.56" size="1.524" layer="95"/>
+<label x="81.28" y="-40.64" size="1.524" layer="95"/>
 <pinref part="P5" gate="G$1" pin="@3"/>
-<wire x1="78.74" y1="-35.56" x2="88.9" y2="-35.56" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="-40.64" x2="88.9" y2="-40.64" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="PC9" class="0">
@@ -7241,9 +7283,9 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-15.24" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-45.72" size="1.524" layer="95"/>
+<label x="81.28" y="-50.8" size="1.524" layer="95"/>
 <pinref part="P6" gate="G$1" pin="@1"/>
-<wire x1="78.74" y1="-45.72" x2="88.9" y2="-45.72" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="-50.8" x2="88.9" y2="-50.8" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="PC10" class="0">
@@ -7253,9 +7295,9 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-17.78" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-48.26" size="1.524" layer="95"/>
+<label x="81.28" y="-53.34" size="1.524" layer="95"/>
 <pinref part="P6" gate="G$1" pin="@2"/>
-<wire x1="78.74" y1="-48.26" x2="107.696" y2="-48.26" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="-53.34" x2="107.696" y2="-53.34" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="PC11" class="0">
@@ -7265,9 +7307,9 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-20.32" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-50.8" size="1.524" layer="95"/>
+<label x="81.28" y="-55.88" size="1.524" layer="95"/>
 <pinref part="P6" gate="G$1" pin="@3"/>
-<wire x1="78.74" y1="-50.8" x2="88.9" y2="-50.8" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="-55.88" x2="88.9" y2="-55.88" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="PC12" class="0">
@@ -7277,9 +7319,9 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-22.86" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-53.34" size="1.524" layer="95"/>
+<label x="81.28" y="-58.42" size="1.524" layer="95"/>
 <pinref part="P6" gate="G$1" pin="@4"/>
-<wire x1="78.74" y1="-53.34" x2="107.696" y2="-53.34" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="-58.42" x2="107.696" y2="-58.42" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="PC13" class="0">
@@ -7296,15 +7338,24 @@ Only populate one of these resistors</text>
 <label x="7.62" y="-12.7" size="1.524" layer="95"/>
 </segment>
 <segment>
-<label x="81.28" y="-38.1" size="1.524" layer="95"/>
+<label x="81.28" y="-43.18" size="1.524" layer="95"/>
 <pinref part="P5" gate="G$1" pin="@4"/>
-<wire x1="78.74" y1="-38.1" x2="107.696" y2="-38.1" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="-43.18" x2="107.696" y2="-43.18" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$33" class="0">
+<segment>
+<wire x1="50.8" y1="88.9" x2="50.8" y2="27.94" width="0.1524" layer="91" style="longdash"/>
+<wire x1="50.8" y1="27.94" x2="124.46" y2="27.94" width="0.1524" layer="91" style="longdash"/>
+<wire x1="50.8" y1="27.94" x2="50.8" y2="-63.5" width="0.1524" layer="91" style="longdash"/>
+<junction x="50.8" y="27.94"/>
 </segment>
 </net>
 </nets>
 </sheet>
 <sheet>
 <plain>
+<text x="-63.5" y="58.42" size="5.08" layer="91">NRF24L01 Radio</text>
 </plain>
 <instances>
 <instance part="Q1" gate="G$1" x="63.5" y="-38.1" smashed="yes">
@@ -7685,8 +7736,8 @@ Only populate one of these resistors</text>
 <instance part="U$11" gate="G$1" x="22.86" y="20.32" smashed="yes">
 <attribute name="VALUE" x="21.336" y="17.78" size="1.27" layer="96"/>
 </instance>
-<instance part="IC1" gate="G$1" x="71.12" y="30.48" smashed="yes">
-<attribute name="NAME" x="60.96" y="50.8" size="1.27" layer="95"/>
+<instance part="U7" gate="G$1" x="71.12" y="30.48" smashed="yes">
+<attribute name="NAME" x="60.96" y="48.26" size="1.27" layer="95"/>
 <attribute name="VALUE" x="60.96" y="15.24" size="1.27" layer="96"/>
 </instance>
 <instance part="+3V3" gate="G$1" x="22.86" y="43.18" smashed="yes">
@@ -7743,7 +7794,7 @@ Only populate one of these resistors</text>
 <pinref part="U$3" gate="G$1" pin="GND"/>
 <wire x1="58.42" y1="30.48" x2="43.18" y2="30.48" width="0.1524" layer="91"/>
 <wire x1="43.18" y1="30.48" x2="43.18" y2="22.86" width="0.1524" layer="91"/>
-<pinref part="IC1" gate="G$1" pin="GND"/>
+<pinref part="U7" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="C12" gate="G$1" pin="2"/>
@@ -7778,9 +7829,9 @@ Only populate one of these resistors</text>
 <wire x1="45.72" y1="35.56" x2="22.86" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="C13" gate="G$1" pin="1"/>
 <wire x1="22.86" y1="35.56" x2="22.86" y2="33.02" width="0.1524" layer="91"/>
-<pinref part="IC1" gate="G$1" pin="VDD"/>
+<pinref part="U7" gate="G$1" pin="VDD"/>
 <wire x1="58.42" y1="27.94" x2="45.72" y2="27.94" width="0.1524" layer="91"/>
-<pinref part="IC1" gate="G$1" pin="VDDIO"/>
+<pinref part="U7" gate="G$1" pin="VDDIO"/>
 <wire x1="45.72" y1="35.56" x2="45.72" y2="27.94" width="0.1524" layer="91"/>
 <junction x="45.72" y="35.56"/>
 <pinref part="+3V3" gate="G$1" pin="+3V3"/>
@@ -7792,7 +7843,7 @@ Only populate one of these resistors</text>
 <segment>
 <wire x1="83.82" y1="35.56" x2="101.6" y2="35.56" width="0.1524" layer="91"/>
 <label x="88.9" y="35.56" size="1.778" layer="95"/>
-<pinref part="IC1" gate="G$1" pin="SCL"/>
+<pinref part="U7" gate="G$1" pin="SCL"/>
 </segment>
 <segment>
 <pinref part="Q6" gate="NMOS" pin="D"/>
@@ -7804,7 +7855,7 @@ Only populate one of these resistors</text>
 <segment>
 <wire x1="83.82" y1="33.02" x2="101.6" y2="33.02" width="0.1524" layer="91"/>
 <label x="88.9" y="33.02" size="1.778" layer="95"/>
-<pinref part="IC1" gate="G$1" pin="SDA"/>
+<pinref part="U7" gate="G$1" pin="SDA"/>
 </segment>
 <segment>
 <pinref part="Q3" gate="NMOS" pin="D"/>
@@ -7816,7 +7867,7 @@ Only populate one of these resistors</text>
 <segment>
 <pinref part="C12" gate="G$1" pin="1"/>
 <wire x1="58.42" y1="33.02" x2="33.02" y2="33.02" width="0.1524" layer="91"/>
-<pinref part="IC1" gate="G$1" pin="CAP"/>
+<pinref part="U7" gate="G$1" pin="CAP"/>
 </segment>
 </net>
 <net name="N$30" class="0">
@@ -7828,43 +7879,6 @@ Only populate one of these resistors</text>
 <net name="N$31" class="0">
 <segment>
 <wire x1="-2.54" y1="2.54" x2="121.92" y2="2.54" width="0.1524" layer="91" style="longdash"/>
-</segment>
-</net>
-<net name="1P8V" class="0">
-<segment>
-<wire x1="-109.22" y1="43.18" x2="-91.44" y2="43.18" width="0.1524" layer="91"/>
-<pinref part="C16" gate="G$1" pin="1"/>
-<wire x1="-109.22" y1="43.18" x2="-109.22" y2="40.64" width="0.1524" layer="91"/>
-<wire x1="-109.22" y1="50.8" x2="-109.22" y2="43.18" width="0.1524" layer="91"/>
-<junction x="-109.22" y="43.18"/>
-<pinref part="U6" gate="G$1" pin="VDD"/>
-<label x="-106.68" y="53.34" size="1.778" layer="95"/>
-<wire x1="-50.8" y1="38.1" x2="-50.8" y2="50.8" width="0.1524" layer="91"/>
-<wire x1="-60.96" y1="38.1" x2="-50.8" y2="38.1" width="0.1524" layer="91"/>
-<pinref part="U6" gate="G$1" pin="!CS"/>
-<wire x1="-109.22" y1="50.8" x2="-50.8" y2="50.8" width="0.1524" layer="91"/>
-<wire x1="-109.22" y1="50.8" x2="-109.22" y2="55.88" width="0.1524" layer="91"/>
-<junction x="-109.22" y="50.8"/>
-</segment>
-<segment>
-<pinref part="R14" gate="G$1" pin="2"/>
-<wire x1="-73.66" y1="-25.4" x2="-73.66" y2="-22.86" width="0.1524" layer="91"/>
-<wire x1="-73.66" y1="-12.7" x2="-73.66" y2="-22.86" width="0.1524" layer="91"/>
-<junction x="-73.66" y="-22.86"/>
-<pinref part="Q6" gate="NMOS" pin="G"/>
-<wire x1="-66.04" y1="-30.48" x2="-66.04" y2="-22.86" width="0.1524" layer="91"/>
-<wire x1="-66.04" y1="-22.86" x2="-73.66" y2="-22.86" width="0.1524" layer="91"/>
-<label x="-73.66" y="-17.78" size="1.778" layer="95" rot="R90"/>
-</segment>
-<segment>
-<pinref part="R12" gate="G$1" pin="2"/>
-<wire x1="-71.12" y1="-63.5" x2="-71.12" y2="-60.96" width="0.1524" layer="91"/>
-<wire x1="-71.12" y1="-50.8" x2="-71.12" y2="-60.96" width="0.1524" layer="91"/>
-<junction x="-71.12" y="-60.96"/>
-<pinref part="Q3" gate="NMOS" pin="G"/>
-<wire x1="-63.5" y1="-68.58" x2="-63.5" y2="-60.96" width="0.1524" layer="91"/>
-<wire x1="-63.5" y1="-60.96" x2="-71.12" y2="-60.96" width="0.1524" layer="91"/>
-<label x="-71.12" y="-55.88" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="SENSOR_SCL_LV" class="0">
@@ -7904,29 +7918,72 @@ Only populate one of these resistors</text>
 <wire x1="-4.064" y1="2.286" x2="-4.064" y2="-82.55" width="0.1524" layer="91" style="longdash"/>
 </segment>
 </net>
+<net name="1V8" class="0">
+<segment>
+<wire x1="-109.22" y1="43.18" x2="-96.52" y2="43.18" width="0.1524" layer="91"/>
+<pinref part="C16" gate="G$1" pin="1"/>
+<wire x1="-96.52" y1="43.18" x2="-91.44" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="-109.22" y1="43.18" x2="-109.22" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="-109.22" y1="50.8" x2="-109.22" y2="43.18" width="0.1524" layer="91"/>
+<junction x="-109.22" y="43.18"/>
+<pinref part="U6" gate="G$1" pin="VDD"/>
+<label x="-106.68" y="53.34" size="1.778" layer="95"/>
+<wire x1="-50.8" y1="38.1" x2="-50.8" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="-60.96" y1="38.1" x2="-50.8" y2="38.1" width="0.1524" layer="91"/>
+<pinref part="U6" gate="G$1" pin="!CS"/>
+<wire x1="-109.22" y1="50.8" x2="-50.8" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="-109.22" y1="50.8" x2="-109.22" y2="55.88" width="0.1524" layer="91"/>
+<junction x="-109.22" y="50.8"/>
+<pinref part="U6" gate="G$1" pin="VDDIO"/>
+<wire x1="-91.44" y1="40.64" x2="-96.52" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="-96.52" y1="40.64" x2="-96.52" y2="43.18" width="0.1524" layer="91"/>
+<junction x="-96.52" y="43.18"/>
+</segment>
+<segment>
+<pinref part="R14" gate="G$1" pin="2"/>
+<wire x1="-73.66" y1="-25.4" x2="-73.66" y2="-22.86" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="-12.7" x2="-73.66" y2="-22.86" width="0.1524" layer="91"/>
+<junction x="-73.66" y="-22.86"/>
+<pinref part="Q6" gate="NMOS" pin="G"/>
+<wire x1="-66.04" y1="-30.48" x2="-66.04" y2="-22.86" width="0.1524" layer="91"/>
+<wire x1="-66.04" y1="-22.86" x2="-73.66" y2="-22.86" width="0.1524" layer="91"/>
+<label x="-73.66" y="-17.78" size="1.778" layer="95" rot="R90"/>
+</segment>
+<segment>
+<pinref part="R12" gate="G$1" pin="2"/>
+<wire x1="-71.12" y1="-63.5" x2="-71.12" y2="-60.96" width="0.1524" layer="91"/>
+<wire x1="-71.12" y1="-50.8" x2="-71.12" y2="-60.96" width="0.1524" layer="91"/>
+<junction x="-71.12" y="-60.96"/>
+<pinref part="Q3" gate="NMOS" pin="G"/>
+<wire x1="-63.5" y1="-68.58" x2="-63.5" y2="-60.96" width="0.1524" layer="91"/>
+<wire x1="-63.5" y1="-60.96" x2="-71.12" y2="-60.96" width="0.1524" layer="91"/>
+<label x="-71.12" y="-55.88" size="1.778" layer="95" rot="R90"/>
+</segment>
+</net>
 </nets>
 </sheet>
 <sheet>
 <plain>
+<text x="-119.38" y="83.82" size="5.08" layer="91">USB C Connector and FTDI</text>
 </plain>
 <instances>
 <instance part="U3" gate="G$1" x="-43.18" y="10.16" smashed="yes">
 <attribute name="NAME" x="-58.42" y="40.64" size="1.778" layer="95"/>
 <attribute name="VALUE" x="-58.42" y="-22.86" size="1.778" layer="96"/>
 </instance>
-<instance part="J1" gate="G$1" x="17.78" y="15.24" smashed="yes">
-<attribute name="NAME" x="5.0414" y="33.5836" size="1.7834" layer="95"/>
-<attribute name="VALUE" x="5.0435" y="-2.5912" size="1.78311875" layer="96"/>
+<instance part="J1" gate="G$1" x="43.18" y="15.24" smashed="yes">
+<attribute name="NAME" x="30.4414" y="33.5836" size="1.7834" layer="95"/>
+<attribute name="VALUE" x="30.4435" y="-2.5912" size="1.78311875" layer="96"/>
 </instance>
-<instance part="GND15" gate="1" x="-5.08" y="2.54" smashed="yes">
-<attribute name="VALUE" x="-7.62" y="0" size="1.778" layer="96"/>
+<instance part="GND15" gate="1" x="20.32" y="2.54" smashed="yes">
+<attribute name="VALUE" x="17.78" y="0" size="1.778" layer="96"/>
 </instance>
-<instance part="GND20" gate="1" x="38.1" y="-2.54" smashed="yes">
-<attribute name="VALUE" x="35.56" y="-5.08" size="1.778" layer="96"/>
+<instance part="GND20" gate="1" x="63.5" y="-2.54" smashed="yes">
+<attribute name="VALUE" x="60.96" y="-5.08" size="1.778" layer="96"/>
 </instance>
-<instance part="USB_VCC" gate="G$1" x="-10.16" y="38.1" smashed="yes">
-<attribute name="NAME" x="-11.43" y="39.37" size="1.778" layer="95"/>
-<attribute name="TP_SIGNAL_NAME" x="-8.89" y="36.83" size="1.778" layer="97"/>
+<instance part="USB_VCC" gate="G$1" x="22.86" y="38.1" smashed="yes">
+<attribute name="NAME" x="21.59" y="39.37" size="1.778" layer="95"/>
+<attribute name="TP_SIGNAL_NAME" x="24.13" y="36.83" size="1.778" layer="97"/>
 </instance>
 <instance part="GND21" gate="1" x="-20.32" y="-30.48" smashed="yes">
 <attribute name="VALUE" x="-22.86" y="-33.02" size="1.778" layer="96"/>
@@ -7936,72 +7993,73 @@ Only populate one of these resistors</text>
 <attribute name="LAST_DATE_TIME" x="85.09" y="-68.58" size="2.286" layer="94"/>
 <attribute name="SHEET" x="98.425" y="-73.66" size="2.54" layer="94"/>
 </instance>
-<instance part="+3V11" gate="G$1" x="-22.86" y="45.72" smashed="yes">
-<attribute name="VALUE" x="-25.4" y="40.64" size="1.778" layer="96" rot="R90"/>
+<instance part="+3V11" gate="G$1" x="-20.32" y="50.8" smashed="yes">
+<attribute name="VALUE" x="-22.86" y="45.72" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="JP1" gate="G$1" x="-15.24" y="40.64" smashed="yes" rot="R90">
-<attribute name="NAME" x="-17.78" y="38.1" size="1.778" layer="95" font="vector" rot="R90"/>
-<attribute name="VALUE" x="-12.7" y="38.1" size="1.778" layer="96" font="vector" rot="R90" align="top-left"/>
+<instance part="JP1" gate="G$1" x="15.24" y="40.64" smashed="yes" rot="R90">
+<attribute name="NAME" x="12.7" y="38.1" size="1.778" layer="95" font="vector" rot="R90"/>
+<attribute name="VALUE" x="17.78" y="38.1" size="1.778" layer="96" font="vector" rot="R90" align="top-left"/>
 </instance>
-<instance part="R8" gate="R1" x="40.64" y="15.24" smashed="yes" rot="R90">
-<attribute name="NAME" x="39.116" y="15.24" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
-<attribute name="VALUE" x="42.164" y="15.24" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
+<instance part="R8" gate="R1" x="66.04" y="15.24" smashed="yes" rot="R90">
+<attribute name="NAME" x="64.516" y="15.24" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
+<attribute name="VALUE" x="67.564" y="15.24" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
 </instance>
-<instance part="R11" gate="R1" x="-5.08" y="15.24" smashed="yes" rot="R90">
-<attribute name="NAME" x="-6.604" y="15.24" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
-<attribute name="VALUE" x="-3.556" y="15.24" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
+<instance part="R11" gate="R1" x="20.32" y="15.24" smashed="yes" rot="R90">
+<attribute name="NAME" x="18.796" y="15.24" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
+<attribute name="VALUE" x="21.844" y="15.24" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
+</instance>
+<instance part="C24" gate="G$1" x="-12.7" y="35.56" smashed="yes">
+<attribute name="NAME" x="-11.176" y="38.481" size="1.778" layer="95" font="vector"/>
+<attribute name="VALUE" x="-11.176" y="33.401" size="1.778" layer="96" font="vector"/>
+</instance>
+<instance part="C25" gate="G$1" x="-2.54" y="35.56" smashed="yes">
+<attribute name="NAME" x="-1.016" y="38.481" size="1.778" layer="95" font="vector"/>
+<attribute name="VALUE" x="-1.016" y="33.401" size="1.778" layer="96" font="vector"/>
+</instance>
+<instance part="GND31" gate="1" x="-10.16" y="30.48" smashed="yes">
+<attribute name="VALUE" x="-12.7" y="27.94" size="1.778" layer="96"/>
 </instance>
 </instances>
 <busses>
 </busses>
 <nets>
-<net name="+3V3" class="0">
-<segment>
-<pinref part="U3" gate="G$1" pin="VCCIO"/>
-<pinref part="U3" gate="G$1" pin="VCC"/>
-<wire x1="-22.86" y1="35.56" x2="-22.86" y2="43.18" width="0.1524" layer="91"/>
-<pinref part="+3V11" gate="G$1" pin="+3V3"/>
-<junction x="-22.86" y="43.18"/>
-<wire x1="-22.86" y1="43.18" x2="-22.86" y2="38.1" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="N$21" class="0">
 <segment>
 <pinref part="U3" gate="G$1" pin="USBDP"/>
 <pinref part="J1" gate="G$1" pin="DA+"/>
-<wire x1="-22.86" y1="27.94" x2="0" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="27.94" x2="25.4" y2="27.94" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$22" class="0">
 <segment>
 <pinref part="U3" gate="G$1" pin="USBDM"/>
 <pinref part="J1" gate="G$1" pin="DA-"/>
-<wire x1="-22.86" y1="25.4" x2="0" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="25.4" x2="25.4" y2="25.4" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="GND" class="0">
 <segment>
 <pinref part="J1" gate="G$1" pin="GNDA"/>
 <pinref part="GND15" gate="1" pin="GND"/>
-<wire x1="0" y1="7.62" x2="-5.08" y2="7.62" width="0.1524" layer="91"/>
-<wire x1="-5.08" y1="7.62" x2="-5.08" y2="5.08" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="7.62" x2="20.32" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="20.32" y1="7.62" x2="20.32" y2="5.08" width="0.1524" layer="91"/>
 <pinref part="R11" gate="R1" pin="1"/>
-<wire x1="-5.08" y1="10.16" x2="-5.08" y2="7.62" width="0.1524" layer="91"/>
-<junction x="-5.08" y="7.62"/>
+<wire x1="20.32" y1="10.16" x2="20.32" y2="7.62" width="0.1524" layer="91"/>
+<junction x="20.32" y="7.62"/>
 </segment>
 <segment>
 <pinref part="GND20" gate="1" pin="GND"/>
 <pinref part="J1" gate="G$1" pin="GNDB"/>
-<wire x1="35.56" y1="7.62" x2="38.1" y2="7.62" width="0.1524" layer="91"/>
-<wire x1="38.1" y1="7.62" x2="38.1" y2="2.54" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="7.62" x2="63.5" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="63.5" y1="7.62" x2="63.5" y2="2.54" width="0.1524" layer="91"/>
 <pinref part="J1" gate="G$1" pin="SHIELD"/>
-<wire x1="38.1" y1="2.54" x2="38.1" y2="0" width="0.1524" layer="91"/>
-<wire x1="35.56" y1="2.54" x2="38.1" y2="2.54" width="0.1524" layer="91"/>
-<junction x="38.1" y="2.54"/>
+<wire x1="63.5" y1="2.54" x2="63.5" y2="0" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="2.54" x2="63.5" y2="2.54" width="0.1524" layer="91"/>
+<junction x="63.5" y="2.54"/>
 <pinref part="R8" gate="R1" pin="1"/>
-<wire x1="38.1" y1="7.62" x2="40.64" y2="7.62" width="0.1524" layer="91"/>
-<wire x1="40.64" y1="7.62" x2="40.64" y2="10.16" width="0.1524" layer="91"/>
-<junction x="38.1" y="7.62"/>
+<wire x1="63.5" y1="7.62" x2="66.04" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="7.62" x2="66.04" y2="10.16" width="0.1524" layer="91"/>
+<junction x="63.5" y="7.62"/>
 </segment>
 <segment>
 <pinref part="U3" gate="G$1" pin="GND"/>
@@ -8020,10 +8078,18 @@ Only populate one of these resistors</text>
 <pinref part="GND21" gate="1" pin="GND"/>
 <junction x="-20.32" y="-27.94"/>
 </segment>
+<segment>
+<pinref part="C25" gate="G$1" pin="2"/>
+<pinref part="C24" gate="G$1" pin="2"/>
+<wire x1="-2.54" y1="33.02" x2="-10.16" y2="33.02" width="0.1524" layer="91"/>
+<pinref part="GND31" gate="1" pin="GND"/>
+<wire x1="-10.16" y1="33.02" x2="-12.7" y2="33.02" width="0.1524" layer="91"/>
+<junction x="-10.16" y="33.02"/>
+</segment>
 </net>
 <net name="N$19" class="0">
 <segment>
-<junction x="38.1" y="2.54"/>
+<junction x="63.5" y="2.54"/>
 </segment>
 </net>
 <net name="USB_RX" class="0">
@@ -8044,34 +8110,53 @@ Only populate one of these resistors</text>
 <segment>
 <pinref part="J1" gate="G$1" pin="A_VBUS"/>
 <pinref part="JP1" gate="G$1" pin="1"/>
-<wire x1="-15.24" y1="30.48" x2="-15.24" y2="35.56" width="0.1524" layer="91"/>
-<label x="-12.7" y="30.48" size="1.524" layer="95"/>
-<wire x1="-15.24" y1="30.48" x2="-10.16" y2="30.48" width="0.1524" layer="91"/>
+<wire x1="15.24" y1="30.48" x2="15.24" y2="35.56" width="0.1524" layer="91"/>
+<label x="12.7" y="30.48" size="1.524" layer="95"/>
+<wire x1="15.24" y1="30.48" x2="22.86" y2="30.48" width="0.1524" layer="91"/>
 <pinref part="USB_VCC" gate="G$1" pin="TP"/>
-<wire x1="-10.16" y1="30.48" x2="0" y2="30.48" width="0.1524" layer="91"/>
-<wire x1="-10.16" y1="35.56" x2="-10.16" y2="30.48" width="0.1524" layer="91"/>
-<junction x="-10.16" y="30.48"/>
+<wire x1="22.86" y1="30.48" x2="25.4" y2="30.48" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="35.56" x2="22.86" y2="30.48" width="0.1524" layer="91"/>
+<junction x="22.86" y="30.48"/>
 </segment>
 <segment>
 <pinref part="JP1" gate="G$1" pin="2"/>
-<wire x1="-15.24" y1="45.72" x2="-15.24" y2="50.8" width="0.1524" layer="91"/>
-<label x="-15.24" y="50.8" size="1.524" layer="95"/>
+<wire x1="15.24" y1="45.72" x2="15.24" y2="50.8" width="0.1524" layer="91"/>
+<label x="15.24" y="50.8" size="1.524" layer="95"/>
 </segment>
 </net>
 <net name="N$26" class="0">
 <segment>
 <pinref part="J1" gate="G$1" pin="CC1"/>
-<wire x1="0" y1="22.86" x2="-5.08" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="22.86" x2="20.32" y2="22.86" width="0.1524" layer="91"/>
 <pinref part="R11" gate="R1" pin="2"/>
-<wire x1="-5.08" y1="22.86" x2="-5.08" y2="20.32" width="0.1524" layer="91"/>
+<wire x1="20.32" y1="22.86" x2="20.32" y2="20.32" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$15" class="0">
 <segment>
 <pinref part="J1" gate="G$1" pin="CC2"/>
 <pinref part="R8" gate="R1" pin="2"/>
-<wire x1="35.56" y1="22.86" x2="40.64" y2="22.86" width="0.1524" layer="91"/>
-<wire x1="40.64" y1="22.86" x2="40.64" y2="20.32" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="22.86" x2="66.04" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="22.86" x2="66.04" y2="20.32" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="+3V3" class="0">
+<segment>
+<pinref part="U3" gate="G$1" pin="VCCIO"/>
+<pinref part="U3" gate="G$1" pin="VCC"/>
+<wire x1="-22.86" y1="35.56" x2="-22.86" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="38.1" x2="-22.86" y2="40.64" width="0.1524" layer="91"/>
+<junction x="-22.86" y="38.1"/>
+<wire x1="-22.86" y1="40.64" x2="-22.86" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="45.72" x2="-20.32" y2="45.72" width="0.1524" layer="91"/>
+<pinref part="+3V11" gate="G$1" pin="+3V3"/>
+<wire x1="-20.32" y1="48.26" x2="-20.32" y2="45.72" width="0.1524" layer="91"/>
+<pinref part="C24" gate="G$1" pin="1"/>
+<wire x1="-22.86" y1="40.64" x2="-12.7" y2="40.64" width="0.1524" layer="91"/>
+<junction x="-22.86" y="40.64"/>
+<pinref part="C25" gate="G$1" pin="1"/>
+<wire x1="-12.7" y1="40.64" x2="-2.54" y2="40.64" width="0.1524" layer="91"/>
+<junction x="-12.7" y="40.64"/>
 </segment>
 </net>
 </nets>
@@ -8398,6 +8483,10 @@ Only populate one of these resistors</text>
 <attribute name="NAME" x="-89.916" y="-7.239" size="1.778" layer="95" font="vector"/>
 <attribute name="VALUE" x="-89.916" y="-12.319" size="1.778" layer="96" font="vector"/>
 </instance>
+<instance part="C23" gate="G$1" x="-132.08" y="-10.16" smashed="yes">
+<attribute name="NAME" x="-130.556" y="-7.239" size="1.778" layer="95" font="vector"/>
+<attribute name="VALUE" x="-130.556" y="-12.319" size="1.778" layer="96" font="vector"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -8455,8 +8544,13 @@ Only populate one of these resistors</text>
 <segment>
 <pinref part="U4" gate="G$1" pin="PG"/>
 <wire x1="-127" y1="-12.7" x2="-129.54" y2="-12.7" width="0.1524" layer="91" style="longdash"/>
-<wire x1="-129.54" y1="-12.7" x2="-129.54" y2="-17.78" width="0.1524" layer="91" style="longdash"/>
+<wire x1="-129.54" y1="-12.7" x2="-129.54" y2="-15.24" width="0.1524" layer="91" style="longdash"/>
 <pinref part="GND28" gate="1" pin="GND"/>
+<pinref part="C23" gate="G$1" pin="2"/>
+<wire x1="-129.54" y1="-15.24" x2="-129.54" y2="-17.78" width="0.1524" layer="91" style="longdash"/>
+<wire x1="-132.08" y1="-12.7" x2="-129.54" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="-129.54" y1="-12.7" x2="-129.54" y2="-15.24" width="0.1524" layer="91"/>
+<junction x="-129.54" y="-15.24"/>
 </segment>
 </net>
 <net name="MOTOR1" class="0">
@@ -8617,7 +8711,7 @@ Only populate one of these resistors</text>
 <wire x1="-60.96" y1="33.02" x2="-60.96" y2="-53.34" width="0.1524" layer="91" style="longdash"/>
 </segment>
 </net>
-<net name="1P8V" class="0">
+<net name="1V8" class="0">
 <segment>
 <pinref part="U4" gate="G$1" pin="OUT"/>
 <wire x1="-127" y1="-2.54" x2="-134.62" y2="-2.54" width="0.1524" layer="91" style="longdash"/>
@@ -8625,6 +8719,9 @@ Only populate one of these resistors</text>
 <pinref part="1.8V" gate="G$1" pin="TP"/>
 <wire x1="-127" y1="5.08" x2="-127" y2="-2.54" width="0.1524" layer="91" style="longdash"/>
 <junction x="-127" y="-2.54"/>
+<pinref part="C23" gate="G$1" pin="1"/>
+<wire x1="-132.08" y1="-5.08" x2="-132.08" y2="-2.54" width="0.1524" layer="91"/>
+<wire x1="-132.08" y1="-2.54" x2="-127" y2="-2.54" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
