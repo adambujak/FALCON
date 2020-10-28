@@ -8320,8 +8320,8 @@ Only populate one of these resistors</text>
 <sheet>
 <plain>
 <text x="-161.798" y="107.442" size="5.08" layer="91">Outputs and Input Selection</text>
-<text x="-55.88" y="106.68" size="5.08" layer="91">5V to 3.3V Conversion</text>
-<text x="-160.02" y="22.86" size="5.08" layer="91">3.3V to 1.8V Conversion</text>
+<text x="-53.34" y="106.68" size="5.08" layer="91">3.3V Power Supply</text>
+<text x="-160.02" y="20.32" size="5.08" layer="91">1.8V Power Supply</text>
 </plain>
 <instances>
 <instance part="ESC1" gate="1" x="-147.32" y="83.82" smashed="yes">
