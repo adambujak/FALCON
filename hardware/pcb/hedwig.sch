@@ -6602,8 +6602,6 @@ Switches electronic signals</description>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND14" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R5" library="SparkFun-Resistors" deviceset="1.5KOHM" device="-0603-1/10W-1%" value="470"/>
-<part name="+3V8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
-<part name="R6" library="SparkFun-Resistors" deviceset="1.5KOHM" device="-0603-1/10W-1%" value="470"/>
 <part name="+3V7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
 <part name="GND" library="testpad" library_urn="urn:adsk.eagle:library:385" deviceset="TP" device="B2,54" package3d_urn="urn:adsk.eagle:package:27948/1"/>
 <part name="C14" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
@@ -6685,7 +6683,6 @@ Switches electronic signals</description>
 <part name="P4" library="falcon" deviceset="STAG_CONN" device="" value="PC1"/>
 <part name="C23" library="SparkFun-Capacitors" deviceset="4.7UF" device="-0603-35V-(20%)" value="47uF"/>
 <part name="C24" library="SparkFun-Capacitors" deviceset="0.22UF" device="-0603-25V-10%" value="0.1uF"/>
-<part name="C25" library="SparkFun-Capacitors" deviceset="0.22UF" device="-0603-25V-10%" value="0.1uF"/>
 <part name="GND31" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C26" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
 <part name="GND32" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
@@ -6760,13 +6757,6 @@ Only populate one of these resistors</text>
 <instance part="R5" gate="G$1" x="-78.74" y="17.78" smashed="yes" rot="R90">
 <attribute name="NAME" x="-80.264" y="17.78" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
 <attribute name="VALUE" x="-77.216" y="17.78" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
-</instance>
-<instance part="+3V8" gate="G$1" x="-78.74" y="49.276" smashed="yes">
-<attribute name="VALUE" x="-81.28" y="44.196" size="1.778" layer="96" rot="R90"/>
-</instance>
-<instance part="R6" gate="G$1" x="-78.74" y="35.56" smashed="yes" rot="R90">
-<attribute name="NAME" x="-80.264" y="35.56" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
-<attribute name="VALUE" x="-77.216" y="35.56" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
 </instance>
 <instance part="+3V7" gate="G$1" x="-38.1" y="67.056" smashed="yes">
 <attribute name="VALUE" x="-40.64" y="61.976" size="1.778" layer="96" rot="R90"/>
@@ -7123,11 +7113,6 @@ Only populate one of these resistors</text>
 <junction x="31.242" y="53.34"/>
 </segment>
 <segment>
-<pinref part="R6" gate="G$1" pin="2"/>
-<pinref part="+3V8" gate="G$1" pin="+3V3"/>
-<wire x1="-78.74" y1="40.64" x2="-78.74" y2="46.736" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <pinref part="U$1" gate="G$1" pin="VBAT"/>
 <pinref part="U$1" gate="G$1" pin="VDD3"/>
 <wire x1="-38.1" y1="45.72" x2="-38.1" y2="48.26" width="0.1524" layer="91"/>
@@ -7170,12 +7155,9 @@ Only populate one of these resistors</text>
 <net name="N$16" class="0">
 <segment>
 <pinref part="R5" gate="G$1" pin="2"/>
-<pinref part="R6" gate="G$1" pin="1"/>
 <wire x1="-78.74" y1="22.86" x2="-78.74" y2="27.94" width="0.1524" layer="91"/>
 <pinref part="U$1" gate="G$1" pin="BOOT0"/>
-<wire x1="-78.74" y1="27.94" x2="-78.74" y2="30.48" width="0.1524" layer="91"/>
 <wire x1="-38.1" y1="27.94" x2="-78.74" y2="27.94" width="0.1524" layer="91"/>
-<junction x="-78.74" y="27.94"/>
 </segment>
 </net>
 <net name="N$17" class="0">
@@ -8012,10 +7994,6 @@ Only populate one of these resistors</text>
 <attribute name="NAME" x="-11.176" y="38.481" size="1.778" layer="95" font="vector"/>
 <attribute name="VALUE" x="-11.176" y="33.401" size="1.778" layer="96" font="vector"/>
 </instance>
-<instance part="C25" gate="G$1" x="-2.54" y="35.56" smashed="yes">
-<attribute name="NAME" x="-1.016" y="38.481" size="1.778" layer="95" font="vector"/>
-<attribute name="VALUE" x="-1.016" y="33.401" size="1.778" layer="96" font="vector"/>
-</instance>
 <instance part="GND31" gate="1" x="-10.16" y="30.48" smashed="yes">
 <attribute name="VALUE" x="-12.7" y="27.94" size="1.778" layer="96"/>
 </instance>
@@ -8079,12 +8057,9 @@ Only populate one of these resistors</text>
 <junction x="-20.32" y="-27.94"/>
 </segment>
 <segment>
-<pinref part="C25" gate="G$1" pin="2"/>
 <pinref part="C24" gate="G$1" pin="2"/>
-<wire x1="-2.54" y1="33.02" x2="-10.16" y2="33.02" width="0.1524" layer="91"/>
 <pinref part="GND31" gate="1" pin="GND"/>
 <wire x1="-10.16" y1="33.02" x2="-12.7" y2="33.02" width="0.1524" layer="91"/>
-<junction x="-10.16" y="33.02"/>
 </segment>
 </net>
 <net name="N$19" class="0">
@@ -8154,9 +8129,6 @@ Only populate one of these resistors</text>
 <pinref part="C24" gate="G$1" pin="1"/>
 <wire x1="-22.86" y1="40.64" x2="-12.7" y2="40.64" width="0.1524" layer="91"/>
 <junction x="-22.86" y="40.64"/>
-<pinref part="C25" gate="G$1" pin="1"/>
-<wire x1="-12.7" y1="40.64" x2="-2.54" y2="40.64" width="0.1524" layer="91"/>
-<junction x="-12.7" y="40.64"/>
 </segment>
 </net>
 </nets>
