@@ -400,19 +400,9 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>sdk/modules/nrfx/mdk/gcc_startup_nrf52.S</name>
-			<type>1</type>
-			<locationURI>FALCON_ROOT_DIR/dependencies/nordic/nrf5_sdk/modules/nrfx/mdk/gcc_startup_nrf52.S</locationURI>
-		</link>
-		<link>
 			<name>sdk/modules/nrfx/mdk/nrf_common.ld</name>
 			<type>1</type>
 			<locationURI>FALCON_ROOT_DIR/dependencies/nordic/nrf5_sdk/modules/nrfx/mdk/nrf_common.ld</locationURI>
-		</link>
-		<link>
-			<name>sdk/modules/nrfx/mdk/system_nrf52.c</name>
-			<type>1</type>
-			<locationURI>FALCON_ROOT_DIR/dependencies/nordic/nrf5_sdk/modules/nrfx/mdk/system_nrf52.c</locationURI>
 		</link>
 		<link>
 			<name>sdk/modules/nrfx/mdk/system_nrf52840.c</name>
