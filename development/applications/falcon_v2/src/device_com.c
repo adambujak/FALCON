@@ -84,7 +84,7 @@ void device_com_setup(void)
   nRF24L01_initialize(&radio, rf_spi_transfer, 0, bsp_rf_cs_set);
   uint8_t payload_len = 4;
   radio_init(2, payload_len);
-
+  nRF24L01_flush_rx(&radio);
 }
 
 void device_com_task(void *pvParameters)
@@ -96,6 +96,7 @@ void device_com_task(void *pvParameters)
       nRF24L01_read_rx_payload(&radio, rxData);
       nRF24L01_clear_irq_flags_get_status(&radio);
       DEBUG_LOG("READ Data: %d\r\n", (int)rxData[0]);
+      bsp_leds_toggle(LED3_PIN);
     }
 
     vTaskDelay(50);

@@ -150,6 +150,7 @@ int main(void)
     APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 
+    NRF_LOG_INFO("SPI example started.\r\n");
     spi_init();
 
     set_rf_ce_pin(1);
@@ -159,18 +160,14 @@ int main(void)
     uint8_t payload_len = 4;
     radio_init(2, payload_len);
 
-    NRF_LOG_INFO("SPI example started.");
-
     while (1)
     {
         radio_send(txData, payload_len);
-        nrf_delay_ms(1000);
 
         txData[0]++;
 
-        NRF_LOG_FLUSH();
-
         bsp_board_led_invert(BSP_BOARD_LED_0);
         nrf_delay_ms(200);
+        NRF_LOG_FLUSH();
     }
 }

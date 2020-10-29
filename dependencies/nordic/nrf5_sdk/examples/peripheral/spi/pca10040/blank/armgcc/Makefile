@@ -1,6 +1,7 @@
 PROJECT_NAME     := spi_pca10040
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
+GNU_INSTALL_ROOT := /Users/adambujak/Workspace/FALCON/dependencies/gcc/gcc-arm-none-eabi-9-2020-q2-update/bin/
 
 SDK_ROOT := ../../../../../..
 PROJ_DIR := ../../..
