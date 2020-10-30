@@ -67,7 +67,7 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_TX, txAddr);
 
 
-  //frf_powerUpRx(instance);
+  frf_powerUpRx(instance);
 }
 
 /*********************** Setters *************************/
@@ -119,6 +119,18 @@ uint8_t frf_dataReady(frf_t *instance)
   }
 
   return !frf_rxFifoEmpty(instance);
+}
+
+/* Checks if receive FIFO is empty or not */
+uint8_t frf_rxFifoEmpty(frf_t *instance)
+{
+  return nRF24L01_rx_fifo_empty(&instance->rfInstance);
+}
+
+/* Returns the length of data waiting in the RX fifo */
+uint8_t frf_payloadLength(frf_t *instance)
+{
+  return nRF24L01_read_rx_payload_width(&instance->rfInstance);
 }
 
 /* Reads payload bytes into data array */

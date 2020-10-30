@@ -14,7 +14,7 @@
 #define FRF_TRANSMISSON_OK 1
 #define FRF_MESSAGE_LOST 0
 
-#define FRF_MAX_SIZE_PACKET 4
+#define FRF_MAX_SIZE_PACKET 32
 #define FRF_ADDR_WIDTH NRF24L01_AW_5BYTES
 
 typedef void (*gpio_setter_t) (uint8_t val);
