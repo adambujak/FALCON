@@ -6,6 +6,8 @@ FALCON_ROOT := ../../..
 GNU_INSTALL_ROOT := ${FALCON_ROOT}/dependencies/gcc/gcc-arm-none-eabi-9-2020-q2-update/bin/
 SDK_ROOT := ${FALCON_ROOT}/dependencies/nordic/nrf5_sdk
 DEV_ROOT := ${FALCON_ROOT}/development
+LIB_ROOT := ${DEV_ROOT}/libraries
+DRV_ROOT := ${DEV_ROOT}/drivers
 PROJ_DIR := .
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
@@ -49,12 +51,13 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
-  $(PROJ_DIR)/main.c \
-  $(DEV_ROOT)/drivers/nRF24L01/nRF24L01.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52.c \
+  $(PROJ_DIR)/main.c \
+  $(LIB_ROOT)/frf/frf.c \
+  $(DEV_ROOT)/drivers/nRF24L01/nRF24L01.c \
 
 # Include folders common to all targets
 INC_FOLDERS += \
@@ -62,6 +65,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/modules/nrfx/mdk \
   $(SDK_ROOT)/components/libraries/scheduler \
   $(PROJ_DIR) \
+  $(LIB_ROOT)/frf \
   $(DEV_ROOT)/drivers/nRF24L01 \
   $(DEV_ROOT)/drivers \
   $(SDK_ROOT)/components/libraries/timer \

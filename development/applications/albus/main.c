@@ -9,7 +9,7 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
-#include "nrf24l01.h"
+#include "frf.h"
 
 #define SPI_SCK_PIN 4
 #define SPI_MISO_PIN 30
@@ -25,7 +25,7 @@ static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instanc
 #define CE_LOW() set_rf_ce_pin(0)
 #define CE_HIGH() set_rf_ce_pin(1)
 
-nRF24L01_t radio;
+frf_t radio;
 
 static uint8_t txAddr[5] = {0xD7,0xD7,0xD7,0xD7,0xD7};
 static uint8_t rxAddr[5] = {0xE7,0xE7,0xE7,0xE7,0xE7};
@@ -89,59 +89,6 @@ static void spi_init(void)
     spi_xfer_done = false;
 }
 
-static void radio_init(uint8_t channel, uint8_t payload_len)
-{
-    CE_LOW();
-    // Set RF channel
-    nRF24L01_set_rf_channel(&radio, channel);
-
-    // Set length of incoming payload
-    nRF24L01_set_rx_payload_width(&radio, 0, 0);
-    nRF24L01_set_rx_payload_width(&radio, 1, payload_len);
-    nRF24L01_set_rx_payload_width(&radio, 2, 0);
-    nRF24L01_set_rx_payload_width(&radio, 3, 0);
-    nRF24L01_set_rx_payload_width(&radio, 4, 0);
-    nRF24L01_set_rx_payload_width(&radio, 5, 0);
-
-    uint8_t width = nRF24L01_get_rx_payload_width(&radio, 1);
-    NRF_LOG_INFO("width %d\r\n", width);
-
-
-    nRF24L01_set_output_power(&radio, NRF24L01_0DBM);
-
-    nRF24L01_set_datarate(&radio, NRF24L01_1MBPS);
-
-    nRF24L01_set_crc_mode(&radio, NRF24L01_CRC_8BIT);
-
-
-    nRF24L01_open_pipe(&radio, NRF24L01_ALL, true);
-
-    nRF24L01_set_auto_retr(&radio, 0xF, 1000);
-    nRF24L01_set_address_width(&radio, 5);
-
-    // Dynamic length configurations: No dynamic length
-
-    // Start listening
-    nRF24L01_clear_irq_flags_get_status(&radio);
-    nRF24L01_set_operation_mode(&radio, NRF24L01_PRX);
-    nRF24L01_set_power_mode(&radio, NRF24L01_PWR_UP);
-
-    nRF24L01_set_address(&radio, NRF24L01_PIPE1, rxAddr);
-    nRF24L01_set_address(&radio, NRF24L01_PIPE0, txAddr);
-    nRF24L01_set_address(&radio, NRF24L01_TX, txAddr);
-
-    //CE_HIGH();
-
-    nRF24L01_set_operation_mode(&radio, NRF24L01_PTX);
-}
-
-static void radio_send(uint8_t *data, uint8_t len)
-{
-  CE_LOW();
-  nRF24L01_flush_tx(&radio);
-  nRF24L01_write_tx_payload(&radio, data, len);
-  CE_HIGH();
-}
 
 int main(void)
 {
@@ -155,14 +102,23 @@ int main(void)
 
     set_rf_ce_pin(1);
 
-    nRF24L01_initialize(&radio, spi_transfer, (void *)&spi, set_rf_cs_pin);
-    uint8_t txData[4] = {1,2,3,4};
-    uint8_t payload_len = 4;
-    radio_init(2, payload_len);
+    frf_config_t config = {
+      .setCE = set_rf_ce_pin,
+      .setCS = set_rf_cs_pin,
+      .blockingTransfer = spi_transfer,
+      .spiCtx = (void *)&spi
+    };
+
+    frf_init(&radio, config);
+    uint8_t txData[FRF_MAX_SIZE_PACKET+1] = {1,2,3,4,5};
+    uint8_t payload_len = FRF_MAX_SIZE_PACKET;
+
+    frf_start(&radio, 2, payload_len, rxAddr, txAddr);
+    frf_powerUpTx(&radio);
 
     while (1)
     {
-        radio_send(txData, payload_len);
+        frf_send(&radio, txData, payload_len);
 
         txData[0]++;
 

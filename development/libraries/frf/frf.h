@@ -14,16 +14,12 @@
 #define FRF_TRANSMISSON_OK 1
 #define FRF_MESSAGE_LOST 0
 
+#define FRF_MAX_SIZE_PACKET 4
+#define FRF_ADDR_WIDTH NRF24L01_AW_5BYTES
+
 typedef void (*gpio_setter_t) (uint8_t val);
 typedef void (*spi_transfer_t) (void *context, uint8_t *tx_buf, uint16_t tx_len,
                                 uint8_t *rx_buf, uint16_t rx_len);
-
-enum frf_state_e {
-  FRF_PWR_STATE_OFF = 0,
-  FRF_PWR_STATE_STANDBY,
-  FRF_PWR_STATE_RX,
-  FRF_PWR_STATE_TX
-};
 
 typedef struct {
   gpio_setter_t   setCE;
@@ -33,15 +29,13 @@ typedef struct {
 } frf_config_t;
 
 typedef struct {
-  enum frf_state_e state;
-  bool            ceState;
   gpio_setter_t   setCE;
   nRF24L01_t      rfInstance;
 } frf_t;
 
 void frf_init(frf_t *instance, frf_config_t config);
 
-void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t *rxAddr, uint8_t *txAddr);
+void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t rxAddr[FRF_MAX_SIZE_PACKET], uint8_t txAddr[FRF_MAX_SIZE_PACKET]);
 
 void frf_powerUp(frf_t *instance);
 
