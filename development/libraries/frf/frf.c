@@ -13,9 +13,6 @@
 #define FRF_NB_BYTES_FOR_ERROR_RATE_CALC 12500
 #define FRF_ADDR_WIDTH NRF24L01_AW_5BYTES
 
-//ToDo: add state variable to determine whether or not to toggle ce
-
-
 #define FRF_ENABLE() (RFCKEN = 1);
 #define FRF_IRQ_ENABLE() (RF = 1);
 #define FRF_IRQ_DISABLE() (RF = 0);
@@ -23,24 +20,28 @@
 #define CE_LOW()  (instance->setCE(0))
 #define CE_HIGH() (instance->setCE(1))
 
-
 /***********************************************************
 ************************ Public ****************************
 ***********************************************************/
 
 /*********************** Inits ****************************/
-void frf_init(frf_t *instance, frf_config_t config)
+void frf_isr(frf_t *instance)
 {
-  instance->setCE = config.setCE;
 
-  nRF24L01_initialize(&instance->rfInstance, config.blockingTransfer, config.spiCtx, config.setCS);
+}
+
+void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx, gpio_setter_t setCS, gpio_setter_t setCE)
+{
+  instance->setCE = setCE;
+
+  nRF24L01_initialize(&instance->rfInstance, transferFunc, spiCtx, setCS);
 }
 
 void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
                uint8_t rxAddr[FRF_ADDR_WIDTH], uint8_t txAddr[FRF_ADDR_WIDTH])
 {
   CE_LOW();
-  // Set RF channel
+
   nRF24L01_set_rf_channel(&instance->rfInstance, channel);
 
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE0, 0);
@@ -66,11 +67,16 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_PIPE0, txAddr);
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_TX, txAddr);
 
-
+  instance->powerState = FRF_POWER_STATE_ACTIVE;
   frf_powerUpRx(instance);
 }
 
 /*********************** Setters *************************/
+
+void standby(frf_t *instance)
+{
+
+}
 
 void frf_powerUpRx(frf_t *instance)
 {
@@ -156,7 +162,6 @@ uint8_t frf_isSending(frf_t *instance)
   {
       return 0; /* false */
   }
-
   return 1; /* true */
 }
 

@@ -89,7 +89,6 @@ static void spi_init(void)
     spi_xfer_done = false;
 }
 
-
 int main(void)
 {
     bsp_board_init(BSP_INIT_LEDS);
@@ -97,20 +96,13 @@ int main(void)
     APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 
-    NRF_LOG_INFO("SPI example started.\r\n");
+    NRF_LOG_INFO("Albus started.\r\n");
+
     spi_init();
 
-    set_rf_ce_pin(1);
+    frf_init(&radio, spi_transfer, (void *)&spi, set_rf_cs_pin, set_rf_ce_pin);
 
-    frf_config_t config = {
-      .setCE = set_rf_ce_pin,
-      .setCS = set_rf_cs_pin,
-      .blockingTransfer = spi_transfer,
-      .spiCtx = (void *)&spi
-    };
-
-    frf_init(&radio, config);
-    uint8_t txData[FRF_MAX_SIZE_PACKET+1] = {1,2,3,4,5};
+    char txData[FRF_MAX_SIZE_PACKET] = "Radio1";
     uint8_t payload_len = FRF_MAX_SIZE_PACKET;
 
     frf_start(&radio, 2, payload_len, rxAddr, txAddr);
@@ -119,8 +111,7 @@ int main(void)
     while (1)
     {
         frf_send(&radio, txData, payload_len);
-
-        txData[0]++;
+        txData[5] = 48+((txData[5]+1)%10);
 
         bsp_board_led_invert(BSP_BOARD_LED_0);
         nrf_delay_ms(200);

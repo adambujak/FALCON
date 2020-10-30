@@ -7,9 +7,7 @@
 static uint8_t rxAddr[5] = {0xD7,0xD7,0xD7,0xD7,0xD7};
 static uint8_t txAddr[5] = {0xE7,0xE7,0xE7,0xE7,0xE7};
 
-
-
-frf_t radio;
+static frf_t radio;
 
 static void rf_spi_transfer (void * context, uint8_t * tx_buf, uint16_t tx_len,
                              uint8_t * rx_buf, uint16_t rx_len)
@@ -17,20 +15,16 @@ static void rf_spi_transfer (void * context, uint8_t * tx_buf, uint16_t tx_len,
   bsp_rf_transceive(tx_buf, tx_len, rx_buf, rx_len);
 }
 
+static void rfISR(void)
+{
+  DEBUG_LOG("RF Interrupt fired\r\n");
+}
 
 void device_com_setup(void)
 {
-  FLN_ERR_CHECK(bsp_rf_init());
+  FLN_ERR_CHECK(bsp_rf_init(rfISR));
 
-
-  frf_config_t config = {
-    .setCE = bsp_rf_ce_set,
-    .setCS = bsp_rf_cs_set,
-    .blockingTransfer = rf_spi_transfer,
-    .spiCtx = (void *)0
-  };
-
-  frf_init(&radio, config);
+  frf_init(&radio, rf_spi_transfer, 0, bsp_rf_cs_set, bsp_rf_ce_set);
   uint8_t payload_len = FRF_MAX_SIZE_PACKET;
 
   frf_start(&radio, 2, payload_len, rxAddr, txAddr);
@@ -38,15 +32,16 @@ void device_com_setup(void)
 
 void device_com_task(void *pvParameters)
 {
-  uint8_t rxData[FRF_MAX_SIZE_PACKET];
+  char rxData[FRF_MAX_SIZE_PACKET];
   while(1) {
 
     if (frf_dataReady(&radio)) {
-      frf_getData(&radio, rxData);
-      DEBUG_LOG("READ Data: %d\r\n", (int)rxData[0]);
+      frf_getData(&radio, (uint8_t *) rxData);
+      DEBUG_LOG("READ Data: %s\r\n", rxData);
       bsp_leds_toggle(LED3_PIN);
     }
 
     vTaskDelay(50);
   }
 }
+

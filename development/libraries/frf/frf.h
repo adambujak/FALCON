@@ -20,20 +20,27 @@
 typedef void (*gpio_setter_t) (uint8_t val);
 typedef void (*spi_transfer_t) (void *context, uint8_t *tx_buf, uint16_t tx_len,
                                 uint8_t *rx_buf, uint16_t rx_len);
+typedef enum {
+  FRF_POWER_STATE_OFF = 0,
+  FRF_POWER_STATE_STANDBY,
+  FRF_POWER_STATE_ACTIVE
+} power_state_t;
+
+typedef enum {
+  FRF_TRANSFER_STATE_RX = 0,
+  FRF_TRANSFER_STATE_TX
+} transfer_state_t;
 
 typedef struct {
-  gpio_setter_t   setCE;
-  gpio_setter_t   setCS;
-  spi_transfer_t  blockingTransfer;
-  void           *spiCtx;
-} frf_config_t;
-
-typedef struct {
-  gpio_setter_t   setCE;
-  nRF24L01_t      rfInstance;
+  power_state_t    powerState;
+  transfer_state_t transferState;
+  gpio_setter_t    setCE;
+  nRF24L01_t       rfInstance;
 } frf_t;
 
-void frf_init(frf_t *instance, frf_config_t config);
+void frf_isr(frf_t *instance);
+
+void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx, gpio_setter_t setCS, gpio_setter_t setCE);
 
 void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t rxAddr[FRF_MAX_SIZE_PACKET], uint8_t txAddr[FRF_MAX_SIZE_PACKET]);
 
