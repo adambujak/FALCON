@@ -115,8 +115,7 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_irq_mode(&instance->rfInstance, 6, true);
 
   instance->powerState = FRF_POWER_STATE_ACTIVE;
-  nRF24L01_get_clear_irq_flags(&instance->rfInstance);
-  nRF24L01_flush_rx(&instance->rfInstance);
+
   frf_powerUpRx(instance);
 
 }
@@ -161,6 +160,7 @@ void frf_powerUpRx(frf_t *instance)
   nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
   nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PRX);
   nRF24L01_set_power_mode(&instance->rfInstance, NRF24L01_PWR_UP);
+  nRF24L01_flush_rx(&instance->rfInstance);
 
   CE_HIGH();
 }
