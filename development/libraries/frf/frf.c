@@ -7,7 +7,6 @@
  ******************************************************************************/
 
 #include "frf.h"
-#include "falcon_common.h"
 
 #define FRF_DEFAULT_SIZE_PACKET 32
 #define FRF_NB_BITS_FOR_ERROR_RATE_CALC 100000
@@ -80,17 +79,14 @@ void frf_isr(frf_t *instance)
   uint8_t irqFlags = nRF24L01_get_clear_irq_flags(&instance->rfInstance);
 
   if (irqFlags & (1 << 4)) {
-    DEBUG_LOG("Max RT\r\n");
     return;
   }
 
   if (irqFlags & (1 << 5)) {
-    DEBUG_LOG("tx event\r\n");
     return;
   }
 
   if (irqFlags & (1 << 6)) {
-    DEBUG_LOG("RX Event!\r\n");
     return;
   }
 }

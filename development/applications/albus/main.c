@@ -115,6 +115,7 @@ int main(void)
 
         bsp_board_led_invert(BSP_BOARD_LED_0);
         nrf_delay_ms(200);
+        nRF24L01_clear_irq_flags_get_status(&(radio.rfInstance));
         NRF_LOG_FLUSH();
     }
 }
