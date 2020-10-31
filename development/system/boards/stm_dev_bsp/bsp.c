@@ -286,12 +286,7 @@ int bsp_rf_spi_init(void)
   rfSpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
   rfSpiHandle.Init.CLKPolarity       = SPI_POLARITY_LOW;
   rfSpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
-  rfSpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
-  rfSpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
-  rfSpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
-  rfSpiHandle.Init.CRCPolynomial     = 7;
-  rfSpiHandle.Init.NSS               = SPI_NSS_SOFT;
-  rfSpiHandle.Init.Mode              = SPI_MODE_MASTER;
+  rfSpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB; rfSpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE; rfSpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE; rfSpiHandle.Init.CRCPolynomial     = 7; rfSpiHandle.Init.NSS               = SPI_NSS_SOFT; rfSpiHandle.Init.Mode              = SPI_MODE_MASTER;
 
   GPIO_InitTypeDef  GPIO_InitStruct;
 
@@ -370,11 +365,15 @@ int bsp_rf_gpio_init(void)
   bsp_rf_cs_set(1);
   bsp_rf_ce_set(0);
 
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull  = GPIO_NOPULL;
+  RF_IRQ_GPIO_CLK_ENABLE();
+
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull  = GPIO_PULLDOWN;
   GPIO_InitStruct.Pin = RF_IRQ_PIN;
   HAL_GPIO_Init(RF_IRQ_GPIO_PORT, &GPIO_InitStruct);
 
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
   return FLN_OK;
 }
 
@@ -401,14 +400,17 @@ int bsp_rf_init(void (*isrCallback) (void))
   return FLN_OK;
 }
 
-void bsp_rf_isr(void)
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  rfISRCallback();
+  if (GPIO_Pin == RF_IRQ_PIN)
+  {
+    rfISRCallback();
+  }
 }
 
-void EXTI0_IRQHandler(void)
+void EXTI15_10_IRQHandler(void)
 {
-  bsp_rf_isr();
+  HAL_GPIO_EXTI_IRQHandler(RF_IRQ_PIN);
 }
 
 void error_handler(void)

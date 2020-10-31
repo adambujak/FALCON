@@ -7,6 +7,7 @@
  ******************************************************************************/
 
 #include "frf.h"
+#include "falcon_common.h"
 
 #define FRF_DEFAULT_SIZE_PACKET 32
 #define FRF_NB_BITS_FOR_ERROR_RATE_CALC 100000
@@ -25,10 +26,6 @@
 ***********************************************************/
 
 /*********************** Inits ****************************/
-void frf_isr(frf_t *instance)
-{
-
-}
 
 void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx, gpio_setter_t setCS, gpio_setter_t setCE)
 {
@@ -67,15 +64,35 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_PIPE0, txAddr);
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_TX, txAddr);
 
+  nRF24L01_set_irq_mode(&instance->rfInstance, 4, true);
+  nRF24L01_set_irq_mode(&instance->rfInstance, 5, true);
+  nRF24L01_set_irq_mode(&instance->rfInstance, 6, true);
+
   instance->powerState = FRF_POWER_STATE_ACTIVE;
   frf_powerUpRx(instance);
 }
 
 /*********************** Setters *************************/
 
-void standby(frf_t *instance)
-{
 
+void frf_isr(frf_t *instance)
+{
+  uint8_t irqFlags = nRF24L01_get_clear_irq_flags(&instance->rfInstance);
+
+  if (irqFlags & (1 << 4)) {
+    DEBUG_LOG("Max RT\r\n");
+    return;
+  }
+
+  if (irqFlags & (1 << 5)) {
+    DEBUG_LOG("tx event\r\n");
+    return;
+  }
+
+  if (irqFlags & (1 << 6)) {
+    DEBUG_LOG("RX Event!\r\n");
+    return;
+  }
 }
 
 void frf_powerUpRx(frf_t *instance)

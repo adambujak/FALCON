@@ -118,6 +118,7 @@ void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us);
 #define RF_SPI_MISO_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOB_CLK_ENABLE()
 #define RF_SPI_MOSI_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOB_CLK_ENABLE()
 #define RF_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE(); __HAL_RCC_GPIOC_CLK_ENABLE()
+#define RF_IRQ_GPIO_CLK_ENABLE()         __HAL_RCC_GPIOB_CLK_ENABLE()
 
 #define RF_SPI_FORCE_RESET()             __HAL_RCC_SPI2_FORCE_RESET()
 #define RF_SPI_RELEASE_RESET()           __HAL_RCC_SPI2_RELEASE_RESET()

@@ -17,7 +17,7 @@ static void rf_spi_transfer (void * context, uint8_t * tx_buf, uint16_t tx_len,
 
 static void rfISR(void)
 {
-  DEBUG_LOG("RF Interrupt fired\r\n");
+  frf_isr(&radio);
 }
 
 void device_com_setup(void)
@@ -37,7 +37,6 @@ void device_com_task(void *pvParameters)
 
     if (frf_dataReady(&radio)) {
       frf_getData(&radio, (uint8_t *) rxData);
-      DEBUG_LOG("READ Data: %s\r\n", rxData);
       bsp_leds_toggle(LED3_PIN);
     }
 
