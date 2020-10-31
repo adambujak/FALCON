@@ -25,18 +25,24 @@ void device_com_setup(void)
   FLN_ERR_CHECK(bsp_rf_init(rfISR));
 
   frf_init(&radio, rf_spi_transfer, 0, bsp_rf_cs_set, bsp_rf_ce_set);
-  uint8_t payload_len = FRF_MAX_SIZE_PACKET;
+  uint8_t payload_len = FRF_PACKET_SIZE;
 
   frf_start(&radio, 2, payload_len, rxAddr, txAddr);
 }
 
 void device_com_task(void *pvParameters)
 {
-  char rxData[FRF_MAX_SIZE_PACKET];
+  /* Implement packet queue - head only popped upon tx event */
+  /* RX event - set rx flag and handle in main loop*/
   while(1) {
-
-    if (frf_dataReady(&radio)) {
-      frf_getData(&radio, (uint8_t *) rxData);
+//	char rxData[32];
+//    if (frf_dataReady(&radio)) {
+//      frf_getData(&radio, (uint8_t *) rxData);
+//      bsp_leds_toggle(LED3_PIN);
+//    }
+    frf_packet_t packet;
+    if (frf_getPacket(&radio, packet) == 0) {
+      DEBUG_LOG("REad: %s\r\n", (char*)packet);
       bsp_leds_toggle(LED3_PIN);
     }
 

@@ -5,7 +5,8 @@
  * @date     2020-06-07
  * @author   Adam Bujak
  ******************************************************************************/
-
+#ifndef FRF_H
+#define FRF_H
 #include "nRF24L01.h"
 
 #include <stdbool.h>
@@ -14,8 +15,26 @@
 #define FRF_TRANSMISSON_OK 1
 #define FRF_MESSAGE_LOST 0
 
-#define FRF_MAX_SIZE_PACKET 32
 #define FRF_ADDR_WIDTH NRF24L01_AW_5BYTES
+
+#define FRF_PACKET_SIZE 32
+/* Must be power of 2 */
+#define FRF_FIFO_SIZE 32
+
+
+typedef uint8_t frf_packet_t[FRF_PACKET_SIZE];
+typedef struct {
+  uint32_t writeIndex;
+  uint32_t readIndex;
+  uint32_t byteCnt;
+  frf_packet_t packets[FRF_FIFO_SIZE];
+} frf_fifo_t;
+
+typedef enum {
+  FRF_EVENT_TX_FAILED = 0,
+  FRF_EVENT_TX_SUCCESS,
+  FRF_EVENT_RX
+} frf_event_t;
 
 typedef void (*gpio_setter_t) (uint8_t val);
 typedef void (*spi_transfer_t) (void *context, uint8_t *tx_buf, uint16_t tx_len,
@@ -24,28 +43,33 @@ typedef enum {
   FRF_POWER_STATE_OFF = 0,
   FRF_POWER_STATE_STANDBY,
   FRF_POWER_STATE_ACTIVE
-} power_state_t;
+} frf_power_state_t;
 
 typedef enum {
   FRF_TRANSFER_STATE_RX = 0,
   FRF_TRANSFER_STATE_TX
-} transfer_state_t;
+} frf_transfer_state_t;
 
 typedef struct {
-  power_state_t    powerState;
-  transfer_state_t transferState;
+  frf_power_state_t    powerState;
+  frf_transfer_state_t transferState;
   gpio_setter_t    setCE;
   nRF24L01_t       rfInstance;
+  frf_fifo_t       rxFifo;
+  frf_fifo_t       txFifo;
 } frf_t;
 
 void frf_isr(frf_t *instance);
 
-void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx, gpio_setter_t setCS, gpio_setter_t setCE);
+void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx,
+              gpio_setter_t setCS, gpio_setter_t setCE);
 
-void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t rxAddr[FRF_MAX_SIZE_PACKET], uint8_t txAddr[FRF_MAX_SIZE_PACKET]);
+void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
+               uint8_t rxAddr[FRF_ADDR_WIDTH], uint8_t txAddr[FRF_ADDR_WIDTH]);
 
 void frf_powerUp(frf_t *instance);
 
+int frf_getPacket(frf_t *instance, frf_packet_t packet);
 void frf_powerUpRx(frf_t *instance);
 
 void frf_powerUpTx(frf_t *instance);
@@ -93,3 +117,5 @@ void frf_send(frf_t *instance, uint8_t* data, uint8_t payload_len);
 uint8_t frf_isSending(frf_t *instance);
 
 uint8_t frf_lastMessageStatus(frf_t *instance);
+
+#endif // FRF_H

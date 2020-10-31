@@ -8,6 +8,8 @@
 
 #include "frf.h"
 
+#include <string.h>
+
 #define FRF_DEFAULT_SIZE_PACKET 32
 #define FRF_NB_BITS_FOR_ERROR_RATE_CALC 100000
 #define FRF_NB_BYTES_FOR_ERROR_RATE_CALC 12500
@@ -20,13 +22,58 @@
 #define CE_LOW()  (instance->setCE(0))
 #define CE_HIGH() (instance->setCE(1))
 
+static int fifo_push(frf_fifo_t *fifo, frf_packet_t packet)
+{
+  if (fifo->byteCnt > FRF_FIFO_SIZE) {
+    return -1;
+  }
+
+  memcpy(fifo->packets[fifo->writeIndex], packet, FRF_PACKET_SIZE);
+  fifo->byteCnt++;
+  fifo->writeIndex = (fifo->writeIndex + 1) & (FRF_FIFO_SIZE - 1);
+  return 0;
+}
+
+static int fifo_drop(frf_fifo_t *fifo)
+{
+  if (fifo->byteCnt == 0) {
+    return -1;
+  }
+
+  fifo->byteCnt--;
+  fifo->readIndex = (fifo->readIndex + 1) & (FRF_FIFO_SIZE - 1);
+  return 0;
+}
+
+//static int fifo_peek(frf_fifo_t *fifo, frf_packet_t packet)
+//{
+//  if (fifo->byteCnt == 0) {
+//    return -1;
+//  }
+//
+//  memcpy(packet, fifo->packets[fifo->readIndex], FRF_PACKET_SIZE);
+//  return 0;
+//}
+
+static int fifo_pop(frf_fifo_t *fifo, frf_packet_t packet)
+{
+  if (fifo->byteCnt == 0) {
+    return -1;
+  }
+
+  memcpy(packet, fifo->packets[fifo->readIndex], FRF_PACKET_SIZE);
+  fifo->byteCnt--;
+  fifo->readIndex = (fifo->readIndex + 1) & (FRF_FIFO_SIZE - 1);
+  return 0;
+}
 /***********************************************************
 ************************ Public ****************************
 ***********************************************************/
 
 /*********************** Inits ****************************/
 
-void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx, gpio_setter_t setCS, gpio_setter_t setCE)
+void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx,
+              gpio_setter_t setCS, gpio_setter_t setCE)
 {
   instance->setCE = setCE;
 
@@ -68,26 +115,42 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_irq_mode(&instance->rfInstance, 6, true);
 
   instance->powerState = FRF_POWER_STATE_ACTIVE;
+  nRF24L01_get_clear_irq_flags(&instance->rfInstance);
+  nRF24L01_flush_rx(&instance->rfInstance);
   frf_powerUpRx(instance);
+
 }
 
 /*********************** Setters *************************/
 
+/* Reads payload bytes into data array */
+static void readPacket(frf_t *instance)
+{
+  frf_packet_t packet;
+  nRF24L01_read_rx_payload(&instance->rfInstance, packet);
+  nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+  fifo_push(&instance->rxFifo, packet);
+}
 
 void frf_isr(frf_t *instance)
 {
   uint8_t irqFlags = nRF24L01_get_clear_irq_flags(&instance->rfInstance);
 
+  /* Max RT */
   if (irqFlags & (1 << 4)) {
-    return;
+
   }
 
+  /* TX Event */
   if (irqFlags & (1 << 5)) {
-    return;
+    nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+    fifo_drop(&instance->txFifo);
+    frf_powerUpRx(instance);
   }
 
+  /* RX Event */
   if (irqFlags & (1 << 6)) {
-    return;
+    readPacket(instance);
   }
 }
 
@@ -117,6 +180,8 @@ void frf_send(frf_t *instance, uint8_t* data, uint8_t payload_len)
   /* Go to Standby-I first */
   CE_LOW();
 
+  frf_powerUpTx(instance);
+
   nRF24L01_flush_tx(&instance->rfInstance);
 
   nRF24L01_write_tx_payload(&instance->rfInstance, data, payload_len);
@@ -138,6 +203,11 @@ uint8_t frf_dataReady(frf_t *instance)
   }
 
   return !frf_rxFifoEmpty(instance);
+}
+
+int frf_getPacket(frf_t *instance, frf_packet_t packet)
+{
+  return fifo_pop(&instance->rxFifo, packet);
 }
 
 /* Checks if receive FIFO is empty or not */
@@ -178,24 +248,3 @@ uint8_t frf_isSending(frf_t *instance)
   return 1; /* true */
 }
 
-uint8_t frf_lastMessageStatus(frf_t *instance)
-{
-  uint8_t status = nRF24L01_nop(&instance->rfInstance);
-
-  /* Transmission went OK */
-  if((status & ((1 << NRF24L01_TX_DS))))
-  {
-      return FRF_TRANSMISSON_OK;
-  }
-  /* Maximum retransmission count is reached */
-  /* Last message probably went missing ... */
-  else if((status & ((1 << NRF24L01_MAX_RT))))
-  {
-      return FRF_MESSAGE_LOST;
-  }
-  /* Probably still sending ... */
-  else
-  {
-      return 0xFF;
-  }
-}
