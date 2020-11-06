@@ -6578,11 +6578,11 @@ Switches electronic signals</description>
 <part name="GND9" library="SparkFun" deviceset="GND" device=""/>
 <part name="X1" library="FaBo-Crystal" deviceset="CRYSTAL" device="-NX3225GD" value="8M"/>
 <part name="GND7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="C8" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
-<part name="C9" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
+<part name="C8" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="8.2pF"/>
+<part name="C9" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="8.2pF"/>
 <part name="X2" library="NDK - NX3215SA-32.768K-STD-MUA-8" deviceset="NX32" device="" value="32.768"/>
-<part name="C10" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
-<part name="C11" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
+<part name="C10" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="8.2pF"/>
+<part name="C11" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="8.2pF"/>
 <part name="U3" library="FT232RQ" deviceset="FT232RQ" device=""/>
 <part name="J1" library="DX07B024JJ1R1500" deviceset="DX07B024JJ1R1500" device=""/>
 <part name="+3V4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
@@ -6604,7 +6604,7 @@ Switches electronic signals</description>
 <part name="R5" library="SparkFun-Resistors" deviceset="1.5KOHM" device="-0603-1/10W-1%" value="470"/>
 <part name="+3V7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
 <part name="GND" library="testpad" library_urn="urn:adsk.eagle:library:385" deviceset="TP" device="B2,54" package3d_urn="urn:adsk.eagle:package:27948/1"/>
-<part name="C14" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="0.1uF"/>
+<part name="C14" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0603-25V-(+80/-20%)" value="2.2uF"/>
 <part name="D1" library="SFT722N-S" deviceset="SFT722N-S" device=""/>
 <part name="U2" library="Texas Instruments - TLC59731DR" deviceset="TEXAS_INSTRUMENTS_TLC59731DR" device="TEXAS_INSTRUMENTS_TLC59731DR_0_0"/>
 <part name="GND11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
@@ -6872,6 +6872,11 @@ Only populate one of these resistors</text>
 <junction x="-53.34" y="48.26"/>
 <pinref part="GND32" gate="1" pin="GND"/>
 <wire x1="-53.34" y1="48.26" x2="-53.34" y2="45.72" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="VSSA/VREF-"/>
+<wire x1="-38.1" y1="40.64" x2="-45.72" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="-45.72" y1="40.64" x2="-45.72" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="-45.72" y1="45.72" x2="-53.34" y2="45.72" width="0.1524" layer="91"/>
+<junction x="-53.34" y="45.72"/>
 </segment>
 </net>
 <net name="NRST" class="0">
@@ -7136,6 +7141,11 @@ Only populate one of these resistors</text>
 <wire x1="-53.34" y1="55.88" x2="-63.5" y2="55.88" width="0.1524" layer="91"/>
 <junction x="-53.34" y="55.88"/>
 <pinref part="C28" gate="G$1" pin="2"/>
+<pinref part="U$1" gate="G$1" pin="VDDA/VREF+"/>
+<wire x1="-38.1" y1="38.1" x2="-78.74" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="-78.74" y1="38.1" x2="-78.74" y2="55.88" width="0.1524" layer="91"/>
+<wire x1="-78.74" y1="55.88" x2="-63.5" y2="55.88" width="0.1524" layer="91"/>
+<junction x="-63.5" y="55.88"/>
 </segment>
 <segment>
 <label x="99.06" y="40.64" size="1.524" layer="95"/>
@@ -8098,6 +8108,11 @@ Only populate one of these resistors</text>
 <wire x1="15.24" y1="45.72" x2="15.24" y2="50.8" width="0.1524" layer="91"/>
 <label x="15.24" y="50.8" size="1.524" layer="95"/>
 </segment>
+<segment>
+<pinref part="J1" gate="G$1" pin="B_VBUS"/>
+<wire x1="60.96" y1="30.48" x2="66.04" y2="30.48" width="0.1524" layer="91"/>
+<label x="66.04" y="30.48" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="N$26" class="0">
 <segment>
@@ -8355,23 +8370,23 @@ Only populate one of these resistors</text>
 <attribute name="NAME" x="-73.66" y="73.66" size="1.778" layer="95"/>
 <attribute name="VALUE" x="-73.66" y="71.12" size="1.778" layer="96"/>
 </instance>
-<instance part="R10" gate="G$1" x="-83.82" y="55.88" smashed="yes" rot="R90">
-<attribute name="NAME" x="-85.344" y="55.88" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
-<attribute name="VALUE" x="-82.296" y="55.88" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
+<instance part="R10" gate="G$1" x="-83.82" y="66.04" smashed="yes" rot="R90">
+<attribute name="NAME" x="-85.344" y="66.04" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
+<attribute name="VALUE" x="-82.296" y="66.04" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
 </instance>
-<instance part="GND30" gate="1" x="-83.82" y="45.72" smashed="yes">
-<attribute name="VALUE" x="-86.36" y="43.18" size="1.778" layer="96"/>
+<instance part="GND30" gate="1" x="-83.82" y="58.42" smashed="yes">
+<attribute name="VALUE" x="-86.36" y="55.88" size="1.778" layer="96"/>
 </instance>
-<instance part="P+3" gate="1" x="-76.2" y="88.9" smashed="yes">
-<attribute name="VALUE" x="-78.74" y="83.82" size="1.778" layer="96" rot="R90"/>
+<instance part="P+3" gate="1" x="-63.5" y="55.88" smashed="yes">
+<attribute name="VALUE" x="-66.04" y="50.8" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="D3" gate="G$1" x="-93.98" y="81.28" smashed="yes">
-<attribute name="NAME" x="-91.44" y="81.7626" size="1.778" layer="95"/>
-<attribute name="VALUE" x="-91.44" y="78.9686" size="1.778" layer="96"/>
+<instance part="D3" gate="G$1" x="-81.28" y="48.26" smashed="yes">
+<attribute name="NAME" x="-78.74" y="48.7426" size="1.778" layer="95"/>
+<attribute name="VALUE" x="-78.74" y="45.9486" size="1.778" layer="96"/>
 </instance>
-<instance part="5V" gate="G$1" x="-83.82" y="88.9" smashed="yes">
-<attribute name="NAME" x="-85.09" y="90.17" size="1.778" layer="95"/>
-<attribute name="TP_SIGNAL_NAME" x="-82.55" y="87.63" size="1.778" layer="97"/>
+<instance part="5V" gate="G$1" x="-71.12" y="55.88" smashed="yes">
+<attribute name="NAME" x="-72.39" y="57.15" size="1.778" layer="95"/>
+<attribute name="TP_SIGNAL_NAME" x="-69.85" y="54.61" size="1.778" layer="97"/>
 </instance>
 <instance part="FRAME1" gate="G$1" x="-170.18" y="-58.42" smashed="yes">
 <attribute name="DRAWING_NAME" x="46.99" y="-43.18" size="2.54" layer="94"/>
@@ -8473,7 +8488,6 @@ Only populate one of these resistors</text>
 <segment>
 <pinref part="R10" gate="G$1" pin="1"/>
 <pinref part="GND30" gate="1" pin="GND"/>
-<wire x1="-83.82" y1="48.26" x2="-83.82" y2="50.8" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="U5" gate="G$1" pin="EPAD"/>
@@ -8555,17 +8569,14 @@ Only populate one of these resistors</text>
 </net>
 <net name="+5V" class="0">
 <segment>
-<pinref part="Q2" gate="G$1" pin="S"/>
-<wire x1="-76.2" y1="76.2" x2="-76.2" y2="81.28" width="0.1524" layer="91"/>
 <pinref part="P+3" gate="1" pin="+5V"/>
 <pinref part="D3" gate="G$1" pin="C"/>
-<wire x1="-76.2" y1="81.28" x2="-76.2" y2="86.36" width="0.1524" layer="91"/>
-<wire x1="-91.44" y1="81.28" x2="-83.82" y2="81.28" width="0.1524" layer="91"/>
-<junction x="-76.2" y="81.28"/>
+<wire x1="-63.5" y1="48.26" x2="-63.5" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="-78.74" y1="48.26" x2="-71.12" y2="48.26" width="0.1524" layer="91"/>
 <pinref part="5V" gate="G$1" pin="TP"/>
-<wire x1="-83.82" y1="81.28" x2="-76.2" y2="81.28" width="0.1524" layer="91"/>
-<wire x1="-83.82" y1="81.28" x2="-83.82" y2="86.36" width="0.1524" layer="91"/>
-<junction x="-83.82" y="81.28"/>
+<wire x1="-71.12" y1="48.26" x2="-63.5" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="-71.12" y1="48.26" x2="-71.12" y2="53.34" width="0.1524" layer="91"/>
+<junction x="-71.12" y="48.26"/>
 </segment>
 <segment>
 <pinref part="P+2" gate="1" pin="+5V"/>
@@ -8588,24 +8599,17 @@ Only populate one of these resistors</text>
 </net>
 <net name="USB_VCC" class="0">
 <segment>
-<pinref part="D3" gate="G$1" pin="A"/>
 <label x="-111.76" y="73.66" size="1.524" layer="95"/>
 <pinref part="Q2" gate="G$1" pin="G"/>
 <pinref part="R10" gate="G$1" pin="2"/>
-<wire x1="-83.82" y1="73.66" x2="-83.82" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="-83.82" y1="73.66" x2="-83.82" y2="71.12" width="0.1524" layer="91"/>
 <wire x1="-111.76" y1="73.66" x2="-96.52" y2="73.66" width="0.1524" layer="91"/>
 <junction x="-83.82" y="73.66"/>
+<pinref part="D3" gate="G$1" pin="A"/>
 <wire x1="-96.52" y1="73.66" x2="-83.82" y2="73.66" width="0.1524" layer="91"/>
-<wire x1="-96.52" y1="81.28" x2="-96.52" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="-83.82" y1="48.26" x2="-96.52" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="-96.52" y1="48.26" x2="-96.52" y2="73.66" width="0.1524" layer="91"/>
 <junction x="-96.52" y="73.66"/>
-</segment>
-</net>
-<net name="N$25" class="0">
-<segment>
-<pinref part="5V_BAT" gate="P" pin="P"/>
-<pinref part="Q2" gate="G$1" pin="D"/>
-<wire x1="-144.78" y1="63.5" x2="-76.2" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="-76.2" y1="63.5" x2="-76.2" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="+3V3" class="0">
@@ -8694,6 +8698,16 @@ Only populate one of these resistors</text>
 <pinref part="C23" gate="G$1" pin="1"/>
 <wire x1="-132.08" y1="-5.08" x2="-132.08" y2="-2.54" width="0.1524" layer="91"/>
 <wire x1="-132.08" y1="-2.54" x2="-127" y2="-2.54" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$34" class="0">
+<segment>
+<pinref part="5V_BAT" gate="P" pin="P"/>
+<wire x1="-144.78" y1="63.5" x2="-116.84" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="-116.84" y1="63.5" x2="-116.84" y2="83.82" width="0.1524" layer="91"/>
+<pinref part="Q2" gate="G$1" pin="S"/>
+<wire x1="-116.84" y1="83.82" x2="-76.2" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="-76.2" y1="83.82" x2="-76.2" y2="76.2" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

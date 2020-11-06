@@ -270,9 +270,11 @@ UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/DX07B024JJ1R1500.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/FT232RL.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/FT232RQ.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/FaBo-Crystal.lbr"
+UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/ICM-20948.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/MPU-9250.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/NDK - NX3215SA-32.768K-STD-MUA-8.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/NRF24l01+.lbr"
+UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/SI2302.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/falcon.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/SparkFun-Eagle-Libraries-master/SparkFun-Capacitors.lbr"
 UsedLibrary="/Users/adambujak/Documents/EAGLE/libraries/SparkFun-Eagle-Libraries-master/SparkFun-Resistors.lbr"
@@ -282,5 +284,5 @@ Type="Control Panel"
 Number=0
 
 [Desktop]
-Screen="4240 1440"
+Screen="1680 1050"
 Window="Win_1"
