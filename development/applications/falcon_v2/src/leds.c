@@ -20,7 +20,7 @@ void leds_task_setup(void)
 void leds_task(void *pvParameters)
 {
  while (1) {
-	  DEBUG_LOG("LED Task\r\n");
+	  DEBUG_LOG("LED Task1\r\n");
     bsp_leds_toggle();
     vTaskDelay(1500);
   }

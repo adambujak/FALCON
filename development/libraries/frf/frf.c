@@ -183,6 +183,9 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE4, 0);
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE5, 0);
 
+  uint8_t width = nRF24L01_get_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE1);
+  width++;
+
   nRF24L01_set_output_power(&instance->rfInstance, NRF24L01_0DBM);
 
   nRF24L01_set_datarate(&instance->rfInstance, NRF24L01_1MBPS);

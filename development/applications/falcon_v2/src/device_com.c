@@ -43,7 +43,7 @@ void device_com_task(void *pvParameters)
     //  vTaskDelay(50);
     //}
     frf_sendPacket(&radio, (uint8_t*)txData);
-    frf_finishSending(&radio);
+    //frf_finishSending(&radio);
     txData[5] = 48+((txData[5]+1)%10);
 
     frf_process(&radio);
