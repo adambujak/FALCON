@@ -174,12 +174,18 @@ $(BUILD_DIR):
 #######################################
 # clean up
 #######################################
+FLASH_SCRIPT = $(realpath $(DEV_ROOT))/scripts/falcon_flash.py
+TARGET_PATH  = $(realpath $(BUILD_DIR)/$(TARGET).bin)
+
 clean:
 	-rm -fR $(BUILD_DIR)
 
 flash:
 	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 	st-flash reset
+
+pyflash:
+	@python3 $(FLASH_SCRIPT) $(TARGET_PATH) 0x8000000 
 
 #######################################
 # dependencies
