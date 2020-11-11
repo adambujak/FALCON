@@ -1,5 +1,6 @@
 #include "bsp.h"
 #include "falcon_common.h"
+#include "stm32f4xx_it.h"
 
 #include "leds.h"
 #include "logger.h"
@@ -27,6 +28,7 @@ int main(void)
 
   RTOS_ERR_CHECK(taskStatus);
 
+  OSStarted();
   vTaskStartScheduler();
 
   /* Should never reach here */

@@ -1,4 +1,13 @@
 #include "stm32f4xx_it.h"
+#include "stm32f4xx_hal.h"
+#include "falcon_common.h"
+
+static int isOSStarted = 0;
+
+void OSStarted(void)
+{
+  isOSStarted = 1;
+}
 
 /**
   * @brief  This function handles NMI exception.
@@ -68,5 +77,13 @@ void UsageFault_Handler(void)
   */
 void DebugMon_Handler(void)
 {
+}
+
+void SysTick_Handler(void)
+{
+  HAL_IncTick();
+  if (isOSStarted) {
+	xPortSysTickHandler();
+  }
 }
 

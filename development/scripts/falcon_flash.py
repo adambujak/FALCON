@@ -19,8 +19,9 @@ def __main__():
 
     jlink = pylink.JLink()
 
-    jlink.open(jlinkSerialID)
-    jlink.connect('STM32F412ZG')
+    jlink.open()
+    jlink.connect('STM32F412RE')
+    print("Connected!")
 
     jlink.flash_file(path=binaryFile, addr=startAddress, on_progress=None, power_on=False)
     jlink.reset()
