@@ -1,5 +1,6 @@
 #include "bsp.h"
 
+#define max(a,b) (a)>(b)?a:b
 static int SystemClock_Config(void)
 {
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
@@ -53,10 +54,6 @@ void bsp_board_bringup(void)
   FLN_ERR_CHECK(SystemClock_Config());
 }
 
-int bsp_rf_spi_init(void)
-{
-  return FLN_OK;
-}
 
 int bsp_leds_init(void)
 {
@@ -133,7 +130,6 @@ int bsp_i2c_init(fln_i2c_handle_t *handle)
 
   FLN_SENSORS_I2C_SCL_GPIO_CLK_ENABLE();
   FLN_SENSORS_I2C_SDA_GPIO_CLK_ENABLE();
-
   FLN_SENSORS_I2C_CLK_ENABLE();
 
   FLN_SENSORS_I2C_FORCE_RESET();
@@ -198,7 +194,7 @@ int bsp_i2c_read(fln_i2c_handle_t *handle,
  ************************** Motors **************************
  ***********************************************************/
 
-TIM_HandleTypeDef motorTimerHandle;
+static TIM_HandleTypeDef motorTimerHandle;
 
 int bsp_motors_init(void)
 {
@@ -270,6 +266,121 @@ void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us)
   if (HAL_TIM_PWM_Start(&motorTimerHandle, channel) != HAL_OK) {
     error_handler();
   }
+}
+
+/* RF */
+static SPI_HandleTypeDef rfSpiHandle;
+
+int bsp_rf_spi_init(void)
+{
+  rfSpiHandle.Instance               = RF_SPI;
+  rfSpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  rfSpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
+  rfSpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
+  rfSpiHandle.Init.CLKPolarity       = SPI_POLARITY_LOW;
+  rfSpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
+  rfSpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
+  rfSpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
+  rfSpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
+  rfSpiHandle.Init.CRCPolynomial     = 7;
+  rfSpiHandle.Init.NSS               = SPI_NSS_SOFT;
+  rfSpiHandle.Init.Mode              = SPI_MODE_MASTER;
+
+  GPIO_InitTypeDef  GPIO_InitStruct;
+
+  if (rfSpiHandle.Instance == RF_SPI) {
+    RF_SPI_SCK_GPIO_CLK_ENABLE();
+    RF_SPI_MISO_GPIO_CLK_ENABLE();
+    RF_SPI_MOSI_GPIO_CLK_ENABLE();
+    RF_SPI_CLK_ENABLE();
+
+    if(HAL_SPI_Init(&rfSpiHandle) != HAL_OK)
+    {
+      /* Initialization Error */
+      return FLN_ERR;
+    }
+
+    GPIO_InitStruct.Pin       = RF_SPI_SCK_PIN;
+    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Alternate = RF_SPI_SCK_AF;
+    HAL_GPIO_Init(RF_SPI_SCK_GPIO_PORT, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = RF_SPI_MISO_PIN;
+    GPIO_InitStruct.Alternate = RF_SPI_MISO_AF;
+    HAL_GPIO_Init(RF_SPI_MISO_GPIO_PORT, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = RF_SPI_MOSI_PIN;
+    GPIO_InitStruct.Alternate = RF_SPI_MOSI_AF;
+    HAL_GPIO_Init(RF_SPI_MOSI_GPIO_PORT, &GPIO_InitStruct);
+  }
+  return FLN_OK;
+}
+
+void bsp_rf_spi_deinit(void)
+{
+  if(rfSpiHandle.Instance == RF_SPI) {
+    RF_SPI_FORCE_RESET();
+    RF_SPI_RELEASE_RESET();
+
+    HAL_GPIO_DeInit(RF_SPI_SCK_GPIO_PORT, RF_SPI_SCK_PIN);
+    HAL_GPIO_DeInit(RF_SPI_MISO_GPIO_PORT, RF_SPI_MISO_PIN);
+    HAL_GPIO_DeInit(RF_SPI_MOSI_GPIO_PORT, RF_SPI_MOSI_PIN);
+  }
+}
+
+int bsp_rf_transceive(uint8_t *txBuffer, uint16_t txSize, uint8_t *rxBuffer, uint16_t rxSize)
+{
+  if (txSize == 0 || txBuffer == NULL) {
+    hal_custom_receive(&rfSpiHandle, rxBuffer, rxSize, 5000);
+  }
+  else if (rxSize == 0 || rxBuffer == NULL) {
+    hal_custom_transmit(&rfSpiHandle, txBuffer, txSize, 5000);
+  }
+  else {
+	  HAL_SPI_TransmitReceive(&rfSpiHandle, txBuffer, rxBuffer, max(rxSize,txSize), 5000);
+  }
+  return FLN_OK;
+}
+
+int bsp_rf_gpio_init(void)
+{
+  GPIO_InitTypeDef  GPIO_InitStruct;
+
+  RF_GPIO_CLK_ENABLE();
+
+  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull  = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+
+  GPIO_InitStruct.Pin = RF_CE_PIN | RF_SPI_SS_PIN;
+  HAL_GPIO_Init(RF_CE_GPIO_PORT, &GPIO_InitStruct);
+
+  bsp_rf_cs_set(1);
+
+  return FLN_OK;
+}
+
+void bsp_rf_cs_set(uint8_t value)
+{
+  HAL_GPIO_WritePin(RF_SPI_SS_GPIO_PORT, RF_SPI_SS_PIN, value);
+}
+
+void bsp_rf_ce_set(uint8_t value)
+{
+  HAL_GPIO_WritePin(RF_CE_GPIO_PORT, RF_CE_PIN, value);
+}
+
+int bsp_rf_init(void)
+{
+  if (bsp_rf_spi_init() != FLN_OK) {
+    return FLN_ERR;
+  }
+  if (bsp_rf_gpio_init() != FLN_OK) {
+    return FLN_ERR;
+  }
+  return FLN_OK;
 }
 
 void error_handler(void)
