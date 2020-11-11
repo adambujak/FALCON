@@ -5,6 +5,7 @@ typedef struct {
   float gyro_data_SI[3];
   float accel_data_SI[3];
   float quat_data[4];
+  float alt_data_SI;
 } sensor_data_t;
 
 sensor_data_t sensor_data;

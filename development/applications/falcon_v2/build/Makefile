@@ -36,6 +36,7 @@ $(HAL_DIR)/Src/stm32f4xx_hal_tim.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_tim_ex.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_spi.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_uart.c \
+$(HAL_DIR)/Src/stm32f4xx_hal_i2c.c \
 $(FLN_BSP_DIR)/bsp.c \
 $(FREERTOS_ROOT)/tasks.c \
 $(FREERTOS_ROOT)/queue.c \
@@ -54,6 +55,7 @@ $(PROJ_DIR)/src/leds.c \
 $(PROJ_DIR)/src/device_com.c \
 $(PROJ_DIR)/src/motors.c \
 $(PROJ_DIR)/src/logger.c \
+$(PROJ_DIR)/src/sensors.c \
 $(DEV_ROOT)/libraries/fimu/fimu.c \
 $(DEV_ROOT)/drivers/ICM20948/common/inv_mems_drv_hook.c \
 $(DEV_ROOT)/drivers/ICM20948/dmp3a/dmp3Default_20648.c \

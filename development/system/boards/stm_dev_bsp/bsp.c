@@ -240,6 +240,37 @@ int bsp_i2c_read(fln_i2c_handle_t *handle,
   return FLN_OK;
 }
 
+static void (*imuISRCallback) (void);
+void bsp_IMU_int_init(void (*isrCallback) (void))
+{
+  GPIO_InitTypeDef  GPIO_InitStruct;
+
+//  IMU_IRQ_GPIO_CLK_ENABLE();
+
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull  = GPIO_NOPULL;
+  GPIO_InitStruct.Pin = IMU_IRQ_PIN;
+  HAL_GPIO_Init(IMU_IRQ_GPIO_PORT, &GPIO_InitStruct);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  imuISRCallback = isrCallback;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == IMU_IRQ_PIN)
+  {
+    imuISRCallback();
+  }
+}
+
+void EXTI15_10_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(IMU_IRQ_PIN);
+}
+
 /************************************************************
  ************************** Motors **************************
  ***********************************************************/

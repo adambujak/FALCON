@@ -175,6 +175,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/docs/architecture.drawio</locationURI>
 		</link>
 		<link>
+			<name>development/drivers/MPL3115A2</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>development/drivers/drivers_common.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/drivers/drivers_common.h</locationURI>
@@ -343,6 +348,16 @@
 			<name>development/applications/txRFTest/src</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>development/drivers/MPL3115A2/MPL3115A2.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/drivers/MPL3115A2/MPL3115A2.c</locationURI>
+		</link>
+		<link>
+			<name>development/drivers/MPL3115A2/MPL3115A2.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/drivers/MPL3115A2/MPL3115A2.h</locationURI>
 		</link>
 		<link>
 			<name>development/drivers/nRF24L01/nRF24L01.c</name>
@@ -515,6 +530,16 @@
 			<locationURI>PARENT-1-PROJECT_LOC/include/logger.h</locationURI>
 		</link>
 		<link>
+			<name>development/applications/falcon_v2/include/motors.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/include/motors.h</locationURI>
+		</link>
+		<link>
+			<name>development/applications/falcon_v2/include/sensors.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/include/sensors.h</locationURI>
+		</link>
+		<link>
 			<name>development/applications/falcon_v2/include/stm32f4xx_hal_conf.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/include/stm32f4xx_hal_conf.h</locationURI>
@@ -538,6 +563,16 @@
 			<name>development/applications/falcon_v2/src/main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/src/main.c</locationURI>
+		</link>
+		<link>
+			<name>development/applications/falcon_v2/src/motors.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/src/motors.c</locationURI>
+		</link>
+		<link>
+			<name>development/applications/falcon_v2/src/sensors.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/src/sensors.c</locationURI>
 		</link>
 		<link>
 			<name>development/applications/falcon_v2/src/stm32f4xx_it.c</name>

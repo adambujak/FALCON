@@ -107,6 +107,11 @@ int bsp_i2c_read(fln_i2c_handle_t *handle,
                  uint16_t length,
                  uint8_t *data);
 
+#define IMU_IRQ_GPIO_CLK_ENABLE()         __HAL_RCC_GPIOB_CLK_ENABLE()
+#define IMU_IRQ_PIN                       GPIO_PIN_10
+#define IMU_IRQ_GPIO_PORT                 GPIOB
+void bsp_IMU_int_init(void (*isrCallback) (void));
+
 /* MOTORS */
 #define FLN_MOTOR_TIMER                 TIM3
 #define FLN_MOTOR_TIMER_CLK_ENABLE()    __HAL_RCC_TIM3_CLK_ENABLE()
