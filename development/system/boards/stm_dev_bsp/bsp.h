@@ -111,4 +111,40 @@ int bsp_i2c_read(fln_i2c_handle_t *handle,
 int bsp_motors_init(void);
 void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us);
 
+/* RF */
+#define RF_SPI                           SPI2
+#define RF_SPI_CLK_ENABLE()              __HAL_RCC_SPI2_CLK_ENABLE()
+#define RF_SPI_SCK_GPIO_CLK_ENABLE()     __HAL_RCC_GPIOB_CLK_ENABLE()
+#define RF_SPI_MISO_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOB_CLK_ENABLE()
+#define RF_SPI_MOSI_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOB_CLK_ENABLE()
+#define RF_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE()
+
+#define RF_SPI_FORCE_RESET()             __HAL_RCC_SPI2_FORCE_RESET()
+#define RF_SPI_RELEASE_RESET()           __HAL_RCC_SPI2_RELEASE_RESET()
+
+#define RF_IRQ_PIN                       GPIO_PIN_10
+#define RF_IRQ_GPIO_PORT                 GPIOB
+#define RF_CE_PIN                        GPIO_PIN_11
+#define RF_CE_GPIO_PORT                  GPIOB
+#define RF_SPI_SS_PIN                    GPIO_PIN_12
+#define RF_SPI_SS_GPIO_PORT              GPIOB
+#define RF_SPI_SCK_PIN                   GPIO_PIN_13
+#define RF_SPI_SCK_GPIO_PORT             GPIOB
+#define RF_SPI_SCK_AF                    GPIO_AF5_SPI2
+#define RF_SPI_MISO_PIN                  GPIO_PIN_14
+#define RF_SPI_MISO_GPIO_PORT            GPIOB
+#define RF_SPI_MISO_AF                   GPIO_AF5_SPI2
+#define RF_SPI_MOSI_PIN                  GPIO_PIN_15
+#define RF_SPI_MOSI_GPIO_PORT            GPIOB
+#define RF_SPI_MOSI_AF                   GPIO_AF5_SPI2
+
+int bsp_rf_spi_init(void);
+void bsp_rf_spi_deinit(void);
+int bsp_rf_transceive(uint8_t *txBuffer, uint16_t txSize, uint8_t *rxBuffer, uint16_t rxSize);
+
+int bsp_rf_gpio_init(void);
+void bsp_rf_cs_set(uint8_t value);
+void bsp_rf_ce_set(uint8_t value);
+
+int bsp_rf_init(void);
 #endif  // FALCON_BSP_H

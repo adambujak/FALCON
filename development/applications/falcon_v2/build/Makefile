@@ -1,6 +1,5 @@
 TARGET = FALCON
 DEBUG = 1
-OPT =
 BUILD_DIR = _build
 BUILD_CONFIG ?= DEBUG
 
@@ -8,6 +7,7 @@ BUILD_CONFIG ?= DEBUG
 FALCON_ROOT = ../../../..
 DEV_ROOT = $(FALCON_ROOT)/development
 LIB_ROOT = $(DEV_ROOT)/libraries
+DRV_ROOT = $(DEV_ROOT)/drivers
 PROJ_DIR = ..
 FLN_BSP_DIR = $(DEV_ROOT)/system/boards/stm_dev_bsp
 SDK_ROOT = $(FALCON_ROOT)/dependencies/stm/STM32F4_Cube
@@ -28,6 +28,7 @@ $(HAL_DIR)/Src/stm32f4xx_hal_gpio.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_rcc.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_tim.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_tim_ex.c \
+$(HAL_DIR)/Src/stm32f4xx_hal_spi.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_uart.c \
 $(BSP_DIR)/stm32412g_discovery.c \
 $(FLN_BSP_DIR)/bsp.c \
@@ -39,10 +40,13 @@ $(FREERTOS_ROOT)/event_groups.c \
 $(FREERTOS_ROOT)/stream_buffer.c \
 $(FREERTOS_ROOT)/portable/MemMang/heap_4.c \
 $(FREERTOS_PORTABLE)/port.c \
+$(LIB_ROOT)/frf/frf.c \
+$(DRV_ROOT)/nRF24L01/nRF24L01.c \
 $(PROJ_DIR)/src/main.c \
 $(PROJ_DIR)/src/stm32f4xx_it.c \
 $(PROJ_DIR)/src/system_stm32f4xx.c \
 $(PROJ_DIR)/src/leds.c \
+$(PROJ_DIR)/src/device_com.c \
 $(PROJ_DIR)/src/motors.c \
 $(PROJ_DIR)/src/logger.c \
 
@@ -57,6 +61,9 @@ C_INCLUDES += \
 			-I$(HAL_DIR)/Inc \
 			-I$(BSP_DIR)/ \
 			-I$(FLN_BSP_DIR)/ \
+			-I$(LIB_ROOT)/frf/ \
+			-I$(DRV_ROOT) \
+			-I$(DRV_ROOT)/nRF24L01/ \
 			-I$(PROJ_DIR)/include \
 			-I$(CMSIS_DIR)/Device/ST/STM32F4xx/Include \
 			-I$(CMSIS_DIR)/Include \
@@ -74,8 +81,7 @@ C_DEFS =  \
 -DUSE_STM32412G_DISCOVERY \
 -D$(BUILD_CONFIG)
 
-
-
+OPT = -O0 -g3
 
 #######################################
 # binaries
