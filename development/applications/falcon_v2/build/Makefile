@@ -2,6 +2,8 @@ TARGET = FALCON
 DEBUG = 1
 BUILD_DIR = _build
 BUILD_CONFIG ?= DEBUG
+#BOARD_VERSION ?= DISCO
+BOARD_VERSION ?= V1
 
 
 FALCON_ROOT = ../../../..
@@ -21,7 +23,11 @@ CMSIS_DIR = $(SDK_ROOT)/Drivers/CMSIS
 # source
 ######################################
 # C sources
-C_SOURCES += \
+ifeq ($(BOARD_VERSION), DISCO)
+$C_SOURCES += (BSP_DIR)/stm32412g_discovery.c
+endif
+
+C_SOURCES = \
 $(HAL_DIR)/Src/stm32f4xx_hal.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_cortex.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_gpio.c \
@@ -30,7 +36,6 @@ $(HAL_DIR)/Src/stm32f4xx_hal_tim.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_tim_ex.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_spi.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_uart.c \
-$(BSP_DIR)/stm32412g_discovery.c \
 $(FLN_BSP_DIR)/bsp.c \
 $(FREERTOS_ROOT)/tasks.c \
 $(FREERTOS_ROOT)/queue.c \
@@ -50,16 +55,24 @@ $(PROJ_DIR)/src/device_com.c \
 $(PROJ_DIR)/src/motors.c \
 $(PROJ_DIR)/src/logger.c \
 
+
 # ASM sources
-ASM_SOURCES = startup_stm32f412zx.s
+ifeq ($(BOARD_VERSION), DISCO)
+STARTUP_FILE = startup_stm32f412zx.s
+else
+STARTUP_FILE = startup_stm32f412rx.s
+endif
+ASM_SOURCES += $(STARTUP_FILE) 
 
 # AS includes
 AS_INCLUDES =
 
+ifeq ($(BOARD_VERSION), DISCO)
+C_INCLUDES += -I$(BSP_DIR)/
+endif
 # C includes
 C_INCLUDES += \
 			-I$(HAL_DIR)/Inc \
-			-I$(BSP_DIR)/ \
 			-I$(FLN_BSP_DIR)/ \
 			-I$(LIB_ROOT)/frf/ \
 			-I$(DRV_ROOT) \
@@ -68,18 +81,26 @@ C_INCLUDES += \
 			-I$(CMSIS_DIR)/Device/ST/STM32F4xx/Include \
 			-I$(CMSIS_DIR)/Include \
  			-I$(FREERTOS_ROOT)/include \
- 			-I$(FREERTOS_PORTABLE)
+ 			-I$(FREERTOS_PORTABLE) \
+
 
 # macros for gcc
 # AS defines
 AS_DEFS =
 
+ifeq ($(BOARD_VERSION), DISCO)
+CHIPSET_DEF = STM32F412Zx
+C_DEFS += -DUSE_STM32412G_DISCOVERY
+C_DEFS += -DBOARD_VDISCO
+else
+CHIPSET_DEF = STM32F412Rx
+C_DEFS += -DBOARD_V1
+endif
 # C defines
-C_DEFS =  \
+C_DEFS +=  \
 -DUSE_HAL_DRIVER \
--DSTM32F412Zx \
--DUSE_STM32412G_DISCOVERY \
--D$(BUILD_CONFIG)
+-D$(CHIPSET_DEF) \
+-D$(BUILD_CONFIG) \
 
 OPT = -O0 -g3
 
@@ -143,6 +164,7 @@ LDSCRIPT = $(PROJ_DIR)/build/stm32_flash.ld
 LIBS = -lc -lm -lnosys
 LIBDIR =
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -u _printf_float -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin

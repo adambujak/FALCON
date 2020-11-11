@@ -9,18 +9,19 @@
 
 void leds_toggle(void)
 {
-  bsp_leds_toggle(FLN_LED_3);
+  bsp_leds_toggle();
 }
 
 void leds_task_setup(void)
 {
-  FLN_ERR_CHECK(bsp_leds_init(LED1_PIN | LED2_PIN | LED3_PIN));
+  FLN_ERR_CHECK(bsp_leds_init());
 }
 
 void leds_task(void *pvParameters)
 {
  while (1) {
-    bsp_leds_toggle(LED1_PIN | LED2_PIN);
-    vTaskDelay(500);
+	  DEBUG_LOG("LED Task\r\n");
+    bsp_leds_toggle();
+    vTaskDelay(1500);
   }
 }

@@ -50,5 +50,6 @@
   } while (0)
 
 void error_handler(void);
+extern void OSSysTick_Handler(void);
 
 #endif  // FALCON_COMMON_H
