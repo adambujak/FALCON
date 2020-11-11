@@ -54,7 +54,6 @@ void bsp_board_bringup(void)
   FLN_ERR_CHECK(SystemClock_Config());
 }
 
-
 int bsp_leds_init(void)
 {
   FLN_LED_CLK_ENABLE();
@@ -279,12 +278,7 @@ int bsp_rf_spi_init(void)
   rfSpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
   rfSpiHandle.Init.CLKPolarity       = SPI_POLARITY_LOW;
   rfSpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
-  rfSpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
-  rfSpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
-  rfSpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
-  rfSpiHandle.Init.CRCPolynomial     = 7;
-  rfSpiHandle.Init.NSS               = SPI_NSS_SOFT;
-  rfSpiHandle.Init.Mode              = SPI_MODE_MASTER;
+  rfSpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB; rfSpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE; rfSpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE; rfSpiHandle.Init.CRCPolynomial     = 7; rfSpiHandle.Init.NSS               = SPI_NSS_SOFT; rfSpiHandle.Init.Mode              = SPI_MODE_MASTER;
 
   GPIO_InitTypeDef  GPIO_InitStruct;
 
@@ -354,11 +348,24 @@ int bsp_rf_gpio_init(void)
   GPIO_InitStruct.Pull  = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 
-  GPIO_InitStruct.Pin = RF_CE_PIN | RF_SPI_SS_PIN;
+  GPIO_InitStruct.Pin = RF_CE_PIN;
   HAL_GPIO_Init(RF_CE_GPIO_PORT, &GPIO_InitStruct);
 
-  bsp_rf_cs_set(1);
+  GPIO_InitStruct.Pin = RF_SPI_SS_PIN;
+  HAL_GPIO_Init(RF_SPI_SS_GPIO_PORT, &GPIO_InitStruct);
 
+  bsp_rf_cs_set(1);
+  bsp_rf_ce_set(0);
+
+  RF_IRQ_GPIO_CLK_ENABLE();
+
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull  = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pin = RF_IRQ_PIN;
+  HAL_GPIO_Init(RF_IRQ_GPIO_PORT, &GPIO_InitStruct);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
   return FLN_OK;
 }
 
@@ -372,8 +379,10 @@ void bsp_rf_ce_set(uint8_t value)
   HAL_GPIO_WritePin(RF_CE_GPIO_PORT, RF_CE_PIN, value);
 }
 
-int bsp_rf_init(void)
+static void (*rfISRCallback) (void);
+int bsp_rf_init(void (*isrCallback) (void))
 {
+  rfISRCallback = isrCallback;
   if (bsp_rf_spi_init() != FLN_OK) {
     return FLN_ERR;
   }
@@ -381,6 +390,19 @@ int bsp_rf_init(void)
     return FLN_ERR;
   }
   return FLN_OK;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == RF_IRQ_PIN)
+  {
+    rfISRCallback();
+  }
+}
+
+void EXTI15_10_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(RF_IRQ_PIN);
 }
 
 void error_handler(void)
