@@ -19,7 +19,7 @@ def __main__():
 
     jlink = pylink.JLink()
 
-    jlink.open()
+    jlink.open(jlinkSerialID)
     jlink.connect('STM32F412RE')
     print("Connected!")
 
