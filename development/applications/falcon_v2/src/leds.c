@@ -1,6 +1,7 @@
 #include "leds.h"
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include "logger.h"
@@ -9,7 +10,6 @@
 
 void leds_toggle(void)
 {
-//  bsp_leds_toggle();
 }
 
 volatile uint8_t i = 32;
@@ -20,7 +20,6 @@ uint32_t ledValue = 0x3A0F0F00;
 
 static void callback(void)
 {
-
   bsp_leds_set(1);
   bsp_leds_set(0);
 
@@ -34,7 +33,12 @@ static void callback(void)
     return;
   }
   i--;
+}
 
+void led_set(uint8_t r, uint8_t g, uint8_t b)
+{
+  bsp_leds_timer_start();
+  ledValue = (0x3A << 24) | (r << 16) | (g << 8) | b;
 }
 
 void leds_task_setup(void)
@@ -42,15 +46,13 @@ void leds_task_setup(void)
   LED_LOW();
   for (int i = 0; i < 300; i++);
   FLN_ERR_CHECK(bsp_leds_init(callback));
-  bsp_leds_timer_start();
-
+  led_set(0x0,0x0f,0);
 }
 
 void leds_task(void *pvParameters)
 {
  while (1) {
 	  DEBUG_LOG("LED Task\r\n");
- //   bsp_leds_toggle();
     vTaskDelay(1500);
   }
 }
