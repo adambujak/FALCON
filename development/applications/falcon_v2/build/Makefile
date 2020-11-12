@@ -73,6 +73,8 @@ $(DEV_ROOT)/drivers/ICM20948/driver/inv_mems_slave_pressure.c \
 $(DEV_ROOT)/drivers/ICM20948/driver/inv_mems_transport.c \
 $(DEV_ROOT)/drivers/ICM20948/invn/common/ml_math_func.c \
 $(DEV_ROOT)/drivers/ICM20948/invn/common/mlmath.c \
+$(DEV_ROOT)/drivers/MPL3115A2/MPL3115A2.c \
+$(DEV_ROOT)/libraries/fbaro/fbaro.c \
 
 
 # ASM sources
@@ -108,7 +110,9 @@ C_INCLUDES += \
  			-I$(DEV_ROOT)/drivers/ICM20948/dmp3a \
  			-I$(DEV_ROOT)/drivers/ICM20948/dmp3 \
  			-I$(DEV_ROOT)/drivers/ICM20948/common \
- 			-I$(DEV_ROOT)/libraries/fimu
+ 			-I$(DEV_ROOT)/libraries/fimu \
+ 			-I$(DEV_ROOT)/drivers/MPL3115A2 \
+ 		    -I$(DEV_ROOT)/libraries/fbaro
 
 # macros for gcc
 # AS defines

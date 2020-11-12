@@ -195,6 +195,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>development/libraries/fbaro</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>development/libraries/fiom</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -378,6 +383,16 @@
 			<name>development/libraries/falcon_packet/falcon_packet.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/libraries/falcon_packet/falcon_packet.h</locationURI>
+		</link>
+		<link>
+			<name>development/libraries/fbaro/fbaro.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/libraries/fbaro/fbaro.c</locationURI>
+		</link>
+		<link>
+			<name>development/libraries/fbaro/fbaro.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/libraries/fbaro/fbaro.h</locationURI>
 		</link>
 		<link>
 			<name>development/libraries/fiom/fiom.c</name>
