@@ -114,7 +114,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   __HAL_TIM_CLEAR_IT(&ledTimerHandle, TIM_IT_UPDATE);
 }
 
-void TIM2_IRQHandler(void)
+void FLN_LED_TIMER_IRQ_Handler(void)
 {
   HAL_TIM_IRQHandler(&ledTimerHandle);
 }

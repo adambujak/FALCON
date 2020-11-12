@@ -87,13 +87,13 @@ void leds_task_setup(void)
 {
   LED_LOW();
   FLN_ERR_CHECK(bsp_leds_init(callback));
-  leds_set_color(0x00,0x0,0x10);
+  leds_set_color(0x15,0x0,0x10);
 }
 
 void leds_task(void *pvParameters)
 {
  while (1) {
-	  DEBUG_LOG("LED Task\r\n");
+    DEBUG_LOG("LED Task\r\n");
     leds_toggle();
     vTaskDelay(1500);
   }
