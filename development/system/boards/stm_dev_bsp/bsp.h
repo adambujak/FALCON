@@ -125,15 +125,16 @@ void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us);
 #define RF_SPI_SCK_GPIO_CLK_ENABLE()     __HAL_RCC_GPIOB_CLK_ENABLE()
 #define RF_SPI_MISO_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOB_CLK_ENABLE()
 #define RF_SPI_MOSI_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOB_CLK_ENABLE()
-#define RF_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE()
+#define RF_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE(); __HAL_RCC_GPIOC_CLK_ENABLE()
+#define RF_IRQ_GPIO_CLK_ENABLE()         __HAL_RCC_GPIOB_CLK_ENABLE()
 
 #define RF_SPI_FORCE_RESET()             __HAL_RCC_SPI2_FORCE_RESET()
 #define RF_SPI_RELEASE_RESET()           __HAL_RCC_SPI2_RELEASE_RESET()
 
 #define RF_IRQ_PIN                       GPIO_PIN_10
 #define RF_IRQ_GPIO_PORT                 GPIOB
-#define RF_CE_PIN                        GPIO_PIN_11
-#define RF_CE_GPIO_PORT                  GPIOB
+#define RF_CE_PIN                        GPIO_PIN_0
+#define RF_CE_GPIO_PORT                  GPIOC
 #define RF_SPI_SS_PIN                    GPIO_PIN_12
 #define RF_SPI_SS_GPIO_PORT              GPIOB
 #define RF_SPI_SCK_PIN                   GPIO_PIN_13
@@ -154,5 +155,5 @@ int bsp_rf_gpio_init(void);
 void bsp_rf_cs_set(uint8_t value);
 void bsp_rf_ce_set(uint8_t value);
 
-int bsp_rf_init(void);
+int bsp_rf_init(void (*isrCallback) (void));
 #endif  // FALCON_BSP_H
