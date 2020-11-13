@@ -160,12 +160,14 @@ float MPL3115A2_ReadBarometricPressure(void)
   }
   
   MPL3115A2_ReadByteArray(OUT_P_MSB,pbyte,3);
-    
-  //this function takes values from the read buffer and converts them to pressure units
+
   unsigned long m_altitude = pbyte[0];
   unsigned long c_altitude = pbyte[1];
-  float l_altitude = (float)(pbyte[2]>>4)/4; //dividing by 4, since two lowest bits are fractional value
-  return((float)(m_altitude<<10 | c_altitude<<2)+l_altitude); //shifting 2 to the left to make room for LSB
+  unsigned long l_altitude = pbyte[2];
+
+  uint32_t pressure = (m_altitude << 16)|(c_altitude << 8)| (l_altitude);
+
+  return (float)(pressure / 64.f);
 }
 
 float MPL3115A2_ReadPressure(unitsType units)
@@ -258,15 +260,17 @@ void MPL3115A2_SetTempOffset(char T_Offset)
 void MPL3115A2_OutputSampleRate(unsigned char sampleRate)
 {
   unsigned char ctrl_reg = MPL3115A2_ReadByte(CTRL_REG1); //Read current settings
-  ctrl_reg &= ~(1 << SBYB);                               
+  ctrl_reg &= ~(SBYB);
   MPL3115A2_WriteByte(CTRL_REG1, ctrl_reg);               //Put sensor in Standby mode
 
   if(sampleRate > 7) sampleRate = 7;                      //OS cannot be larger than 0b.0111
   sampleRate <<= 3;                                       //Align it for the CTRL_REG1 register
 
   ctrl_reg = MPL3115A2_ReadByte(CTRL_REG1);               //Read current settings
+  ctrl_reg &= ~(0x38);                                    //Clear current sample rate
   ctrl_reg |= sampleRate;                                 //Mask in new Output Sample bits
   MPL3115A2_WriteByte(CTRL_REG1, ctrl_reg);               //Update sample rate settings
+  MPL3115A2_ActiveMode();
 }
 
 void MPL3115A2_SetAcquisitionTimeStep(unsigned char ST_Value)
