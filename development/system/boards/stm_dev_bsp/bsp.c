@@ -1,5 +1,4 @@
 #include "bsp.h"
-
 #define max(a,b) (a)>(b)?a:b
 static int SystemClock_Config(void)
 {
@@ -54,27 +53,76 @@ void bsp_board_bringup(void)
   FLN_ERR_CHECK(SystemClock_Config());
 }
 
-int bsp_leds_init(void)
-{
-  FLN_LED_CLK_ENABLE();
+/************************************************************
+ *************************** LED ****************************
+ ***********************************************************/
+static TIM_HandleTypeDef ledTimerHandle;
+static void (*ledTimerCallback) (void);
 
+int bsp_leds_init(void (*callback) (void))
+{
+  ledTimerCallback = callback;
   GPIO_InitTypeDef GPIO_InitStruct;
-  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+
+  FLN_LED_CLK_ENABLE();
+  FLN_LED_TIMER_CLK_ENABLE();
+
+  HAL_GPIO_WritePin(FLN_LED_PORT, FLN_LED_PIN, GPIO_PIN_RESET);
 
   GPIO_InitStruct.Pin = FLN_LED_PIN;
-
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(FLN_LED_PORT, &GPIO_InitStruct);
+
+  HAL_NVIC_SetPriority(FLN_LED_TIMER_IRQ, 0, 0);
+  HAL_NVIC_EnableIRQ(FLN_LED_TIMER_IRQ);
+
+  ledTimerHandle.Instance = FLN_LED_TIMER;
+  ledTimerHandle.Init.Prescaler = (uint32_t)(SystemCoreClock / 1000000) - 1;
+  ledTimerHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
+  ledTimerHandle.Init.Period = 24;
+  ledTimerHandle.Init.ClockDivision = 0;
+
+  if (HAL_TIM_Base_Init(&ledTimerHandle) != HAL_OK) {
+    return FLN_ERR;
+  }
 
   return FLN_OK;
 }
 
-void bsp_leds_toggle()
+void bsp_leds_set(uint8_t val)
 {
-  HAL_GPIO_TogglePin(FLN_LED_PORT, FLN_LED_PIN);
+  HAL_GPIO_WritePin(FLN_LED_PORT, FLN_LED_PIN, val);
 }
 
+void bsp_leds_timer_start(void)
+{
+  if (HAL_TIM_Base_Start_IT(&ledTimerHandle) != HAL_OK) {
+    error_handler();
+  }
+}
+
+void bsp_leds_timer_stop(void)
+{
+  HAL_TIM_Base_Stop(&ledTimerHandle);
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  ledTimerCallback();
+  __HAL_TIM_CLEAR_IT(&ledTimerHandle, TIM_IT_UPDATE);
+}
+
+void FLN_LED_TIMER_IRQ_Handler(void)
+{
+  HAL_TIM_IRQHandler(&ledTimerHandle);
+}
+
+
+/************************************************************
+ *************************** UART ***************************
+ ***********************************************************/
 int bsp_uart_init(fln_uart_handle_t *handle)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -123,6 +171,9 @@ void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length)
   HAL_UART_Transmit(handle, data, length, 0xFFFF);
 }
 
+/************************************************************
+ *************************** I2C ****************************
+ ***********************************************************/
 int bsp_i2c_init(fln_i2c_handle_t *handle)
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
@@ -222,7 +273,6 @@ int bsp_motors_init(void)
   GPIO_InitStruct.Pin = FLN_MOTOR_GPIO_PIN_CHANNEL4;
   HAL_GPIO_Init(FLN_MOTOR_GPIO_PORT_CHANNEL4, &GPIO_InitStruct);
 
-
   uint32_t motorTimerPrescalerValue = (uint32_t)(SystemCoreClock / 1000000) - 1;
 
   motorTimerHandle.Instance = FLN_MOTOR_TIMER;
@@ -239,7 +289,6 @@ int bsp_motors_init(void)
   }
 	return FLN_OK;
 }
-
 
 void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us)
 {

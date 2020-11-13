@@ -35,8 +35,17 @@ int bsp_rf_spi_init(void);
 #define FLN_LED_PORT          GPIOA
 #endif
 
-int  bsp_leds_init(void);
-void bsp_leds_toggle(void);
+#define FLN_LED_AF                  GPIO_AF2_TIM2
+#define FLN_LED_TIMER               TIM2
+#define FLN_LED_TIMER_IRQ           TIM2_IRQn
+#define FLN_LED_TIMER_IRQ_Handler   TIM2_IRQHandler
+#define FLN_LED_TIMER_CLK_ENABLE()  __HAL_RCC_TIM2_CLK_ENABLE()
+
+int bsp_leds_init(void (*callback) (void));
+void bsp_leds_set(uint8_t val);
+void bsp_leds_timer_start(void);
+void bsp_leds_timer_stop(void);
+
 
 /* UART */
 typedef UART_HandleTypeDef fln_uart_handle_t;
