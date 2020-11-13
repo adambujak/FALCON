@@ -19,7 +19,6 @@ int fbaro_init(fbaro_config_t *config)
   }
 
   MPL3115A2_Initialize();     //Initialize the sensor
-  MPL3115A2_ActiveMode();     //Configure the sensor for active mode
 
   barometer.active = TRUE;
 
@@ -70,20 +69,26 @@ int fbaro_calibrate(void)
 
   DEBUG_LOG("Starting Altitude Cal\r\n");
 
-  MPL3115A2_OutputSampleRate(OS_1);
+  MPL3115A2_OutputSampleRate(SR3);
 
-  vTaskDelay(100);
+  vTaskDelay(50);
 
-  int samples = 500;
+  int samples = 25;
 
-  float test_data;
+  float test_data = 0;
 
   for(int i=0; i<samples; i++)
   {
     float temp = MPL3115A2_ReadAltitude();
     DEBUG_LOG("Reading %d: %7.5f\r\n",i,temp);
-    test_data += temp;
-    vTaskDelay(10);
+
+    if (temp != 0) {
+      test_data += temp;
+    }
+    else {
+      i--;
+    }
+    vTaskDelay(20);
   }
 
   barometer.start_alt = test_data/samples;
