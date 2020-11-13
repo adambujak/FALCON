@@ -8,14 +8,12 @@
 
 #include "frf.h"
 
+#include <string.h>
+
 #define FRF_DEFAULT_SIZE_PACKET 32
 #define FRF_NB_BITS_FOR_ERROR_RATE_CALC 100000
 #define FRF_NB_BYTES_FOR_ERROR_RATE_CALC 12500
-#define FRF_MAX_SIZE_PACKET 32
 #define FRF_ADDR_WIDTH NRF24L01_AW_5BYTES
-
-//ToDo: add state variable to determine whether or not to toggle ce
-
 
 #define FRF_ENABLE() (RFCKEN = 1);
 #define FRF_IRQ_ENABLE() (RF = 1);
@@ -24,29 +22,169 @@
 #define CE_LOW()  (instance->setCE(0))
 #define CE_HIGH() (instance->setCE(1))
 
-
-/***********************************************************
-************************ Public ****************************
-***********************************************************/
-
-/*********************** Inits ****************************/
-void frf_init(frf_t *instance, frf_config_t config)
+static int fifo_push(frf_fifo_t *fifo, frf_packet_t packet)
 {
-  instance->state = FRF_PWR_STATE_OFF;
-  instance->setCE = config.setCE;
+  if (fifo->byteCnt > FRF_FIFO_SIZE) {
+    return -1;
+  }
 
-  nRF24L01_initialize(&instance->rfInstance, config.blockingTransfer, config.spiCtx, config.setCS);
+  memcpy(fifo->packets[fifo->writeIndex], packet, FRF_PACKET_SIZE);
+  fifo->byteCnt++;
+  fifo->writeIndex = (fifo->writeIndex + 1) & (FRF_FIFO_SIZE - 1);
+  return 0;
 }
 
-void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t *rxAddr, uint8_t *txAddr)
+static int fifo_drop(frf_fifo_t *fifo)
 {
+  if (fifo->byteCnt == 0) {
+    return -1;
+  }
+
+  fifo->byteCnt--;
+  fifo->readIndex = (fifo->readIndex + 1) & (FRF_FIFO_SIZE - 1);
+  return 0;
+}
+
+static int fifo_peek(frf_fifo_t *fifo, frf_packet_t packet)
+{
+  if (fifo->byteCnt == 0) {
+    return -1;
+  }
+
+  memcpy(packet, fifo->packets[fifo->readIndex], FRF_PACKET_SIZE);
+  return 0;
+}
+
+static int fifo_pop(frf_fifo_t *fifo, frf_packet_t packet)
+{
+  if (fifo->byteCnt == 0) {
+    return -1;
+  }
+
+  memcpy(packet, fifo->packets[fifo->readIndex], FRF_PACKET_SIZE);
+  fifo->byteCnt--;
+  fifo->readIndex = (fifo->readIndex + 1) & (FRF_FIFO_SIZE - 1);
+  return 0;
+}
+
+static bool fifo_isEmpty(frf_fifo_t *fifo)
+{
+  if (fifo->byteCnt > 0) {
+    return false;
+  }
+  return true;
+}
+
+static void powerUpRx(frf_t *instance)
+{
+  if (instance->transferState == FRF_TRANSFER_STATE_RX) {
+    return;
+  }
+  CE_LOW();
+
+  instance->transferState = FRF_TRANSFER_STATE_RX;
+  instance->isSending = false;
+
+  nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+  nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PRX);
+  instance->delay(1);
+  nRF24L01_flush_rx(&instance->rfInstance);
+
+  CE_HIGH();
+}
+
+static void powerUpTx(frf_t *instance)
+{
+  if (instance->transferState == FRF_TRANSFER_STATE_TX) {
+    return;
+  }
+  CE_LOW();
+
+  instance->transferState = FRF_TRANSFER_STATE_TX;
+
+  nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+  nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PTX);
+  instance->delay(1);
+}
+
+static void readPacket(frf_t *instance)
+{
+  frf_packet_t packet;
+  nRF24L01_read_rx_payload(&instance->rfInstance, packet);
+  nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+  fifo_push(&instance->rxFifo, packet);
+}
+
+static void sendPayload(frf_t *instance)
+{
+  powerUpTx(instance);
+  frf_packet_t packet;
+  if (fifo_peek(&instance->txFifo, packet) == 0) {
+	  nRF24L01_flush_tx(&instance->rfInstance);
+    nRF24L01_write_tx_payload(&instance->rfInstance, packet, FRF_PACKET_SIZE);
+    instance->isSending = true;
+    CE_HIGH();
+  }
+}
+
+static void handleInterrupt(frf_t *instance)
+{
+  instance->interruptFired = false;
+  uint8_t irqFlags = nRF24L01_get_clear_irq_flags(&instance->rfInstance);
+
+  /* Max RT */
+  if (irqFlags & (1 << 4)) {
+    instance->isSending = false;
+    nRF24L01_flush_tx(&instance->rfInstance);
+    fifo_drop(&instance->txFifo);
+    nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+    powerUpRx(instance);
+  }
+
+  /* TX Event */
+  if (irqFlags & (1 << 5)) {
+    instance->isSending = false;
+    nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+    fifo_drop(&instance->txFifo);
+    powerUpRx(instance);
+  }
+
+  /* RX Event */
+  if (irqFlags & (1 << 6)) {
+    nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+    readPacket(instance);
+  }
+}
+
+/*********************** Public ***********************/
+
+void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx,
+              gpio_setter_t setCS, gpio_setter_t setCE, frf_delay_t delay)
+{
+  instance->setCE = setCE;
+  instance->delay = delay;
+  instance->interruptFired = false;
+
+  nRF24L01_initialize(&instance->rfInstance, transferFunc, spiCtx, setCS);
+}
+
+void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
+               uint8_t rxAddr[FRF_ADDR_WIDTH], uint8_t txAddr[FRF_ADDR_WIDTH])
+{
+  CE_LOW();
+  instance->delay(100);
+
   nRF24L01_set_rf_channel(&instance->rfInstance, channel);
+
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE0, 0);
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE1, payload_len);
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE2, 0);
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE3, 0);
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE4, 0);
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE5, 0);
+
+  uint8_t width = nRF24L01_get_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE1);
+  width++;
 
   nRF24L01_set_output_power(&instance->rfInstance, NRF24L01_0DBM);
 
@@ -64,263 +202,104 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t *r
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_PIPE0, txAddr);
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_TX, txAddr);
 
+  nRF24L01_set_irq_mode(&instance->rfInstance, 4, true);
+  nRF24L01_set_irq_mode(&instance->rfInstance, 5, true);
+  nRF24L01_set_irq_mode(&instance->rfInstance, 6, true);
+
+  instance->powerState = FRF_POWER_STATE_OFF;
+  instance->transferState = FRF_TRANSFER_STATE_NONE;
 
   frf_powerUp(instance);
 }
 
-/*********************** Setters *************************/
+void frf_isr(frf_t *instance)
+{
+  instance->interruptFired = true;
+}
+
+void frf_process(frf_t *instance)
+{
+  if (instance->interruptFired) {
+    handleInterrupt(instance);
+  }
+
+  if ((!instance->isSending) && (!fifo_isEmpty(&instance->txFifo))) {
+    sendPayload(instance);
+  }
+}
+
+int frf_getPacket(frf_t *instance, frf_packet_t packet)
+{
+  return fifo_pop(&instance->rxFifo, packet);
+}
+
+int frf_sendPacket(frf_t *instance, frf_packet_t packet)
+{
+  if (instance->powerState != FRF_POWER_STATE_ACTIVE) {
+    return -1;
+  }
+
+  int retval = fifo_push(&instance->txFifo, packet);
+  if (retval != 0) {
+    return retval;
+  }
+
+  if (!instance->isSending) {
+    sendPayload(instance);
+  }
+  return 0;
+}
+
+bool frf_isSending(frf_t *instance)
+{
+  /* If actively sending */
+  if (instance->isSending) {
+    return true;
+  }
+
+  /* If packets in tx queue */
+  if (!fifo_isEmpty(&instance->txFifo)) {
+    return true;
+  }
+
+  return false;
+}
+
+void frf_finishSending(frf_t *instance)
+{
+  while (frf_isSending(instance)) {
+    frf_process(instance);
+  }
+}
 
 void frf_powerUp(frf_t *instance)
 {
-  if (instance->state == FRF_PWR_STATE_OFF)
-  {
+  CE_LOW();
+
+  if (instance->powerState == FRF_POWER_STATE_OFF) {
     nRF24L01_set_power_mode(&instance->rfInstance, NRF24L01_PWR_UP);
-    //TODO: add delay
+    instance->delay(2);
   }
+
+  instance->transferState = FRF_TRANSFER_STATE_NONE;
+  instance->powerState = FRF_POWER_STATE_ACTIVE;
+  powerUpRx(instance);
 }
 
-void frf_powerUpRx(frf_t *instance)
-{
-  if (instance->state != FRF_PWR_STATE_RX)
-  {
-    /* Clear any values in rx fifo */
-    nRF24L01_flush_rx(&instance->rfInstance);
-
-    CE_LOW();
-
-    /* Power up chip if off */
-    frf_powerUp(instance);
-
-    /* Clear clear interrupt flags on chip */
-    nRF24L01_get_clear_irq_flags(&instance->rfInstance);
-
-    /* Put chip in rx mode */
-    nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PRX);
-
-    instance->state = FRF_PWR_STATE_RX;
-  }
-}
-
-void frf_powerUpTx(frf_t *instance)
-{
-  if (instance->state != FRF_PWR_STATE_TX)
-  {
-    CE_LOW();
-
-    /* Power up chip if off */
-    frf_powerUp(instance);
-
-    /* Clear clear interrupt flags on chip */
-    nRF24L01_get_clear_irq_flags(&instance->rfInstance);
-
-    /* Put chip in tx mode */
-    nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PTX);
-
-    instance->state = FRF_PWR_STATE_TX;
-  }
-}
-
-/* Power down chip */
-void frf_powerDown(frf_t *instance)
-{
-  if (instance->state != FRF_PWR_STATE_OFF)
-  {
-    nRF24L01_set_power_mode(&instance->rfInstance, NRF24L01_PWR_DOWN);
-    instance->state = FRF_PWR_STATE_OFF;
-    CE_LOW();
-  }
-}
-
-/* Put chip into standby */
 void frf_standby(frf_t *instance)
 {
-  instance->state = FRF_PWR_STATE_STANDBY;
-  CE_LOW();
-}
-
-/* Set the RX address */
-void frf_rx_address(frf_t *instance, uint8_t *addr)
-{
-  CE_LOW();
-  nRF24L01_set_address(&instance->rfInstance, NRF24L01_PIPE1, addr);
-  CE_HIGH();
-}
-
-/* Set the TX address */
-void frf_tx_address(frf_t *instance, uint8_t* addr)
-{
-  /* RX_ADDR_P0 must be set to the sending addr for auto ack to work. */
-  CE_LOW();
-  nRF24L01_set_address(&instance->rfInstance, NRF24L01_PIPE0, addr);
-  nRF24L01_set_address(&instance->rfInstance, NRF24L01_TX, addr);
-  CE_HIGH();
-}
-
-/* Clear all interrupts */
-void frf_clearInterrupts(frf_t *instance)
-{
-  CE_LOW();
-  nRF24L01_get_clear_irq_flags(&instance->rfInstance);
-  CE_HIGH();
-}
-
-/* Send data */
-void frf_send(frf_t *instance, uint8_t* data, uint8_t payload_len)
-{
-  /* Go to Standby-I first */
   CE_LOW();
 
-  if (instance->state != FRF_PWR_STATE_TX)
-  {
-    frf_powerUpTx(instance);
-  }
-
-  nRF24L01_flush_tx(&instance->rfInstance);
-
-  nRF24L01_write_tx_payload(&instance->rfInstance, data, payload_len);
-
-  /* Start the transmission */
-  CE_HIGH();
+  instance->powerState = FRF_POWER_STATE_STANDBY;
+  instance->transferState = FRF_TRANSFER_STATE_NONE;
 }
 
-/*********************** Getters *************************/
-
-/* Checks if data is available for reading */
-uint8_t frf_dataReady(frf_t *instance)
+void frf_powerDown(frf_t *instance)
 {
-  uint8_t status = nRF24L01_nop(&instance->rfInstance);
+  CE_LOW();
 
-  if ( status & (1 << NRF24L01_RX_DR) )
-  {
-      return 1;
-  }
+  instance->powerState = FRF_POWER_STATE_OFF;
+  instance->transferState = FRF_TRANSFER_STATE_NONE;
 
-  return !frf_rxFifoEmpty(instance);
-}
-
-/* Checks if receive FIFO is empty or not */
-uint8_t frf_rxFifoEmpty(frf_t *instance)
-{
-  return nRF24L01_rx_fifo_empty(&instance->rfInstance);
-}
-
-/* Returns the length of data waiting in the RX fifo */
-uint8_t frf_payloadLength(frf_t *instance)
-{
-  return nRF24L01_read_rx_payload_width(&instance->rfInstance);
-}
-
-/* Reads payload bytes into data array */
-void frf_getData(frf_t *instance, uint8_t* data)
-{
-  nRF24L01_read_rx_payload(&instance->rfInstance, data);
-  nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
-}
-
-/* Returns the number of retransmissions occured for the last message */
-uint8_t frf_retransmissionCount(frf_t *instance)
-{
-  return nRF24L01_get_transmit_attempts(&instance->rfInstance);
-}
-
-uint8_t frf_isSending(frf_t *instance)
-{
-  /* read the current status */
-  uint8_t status = nRF24L01_nop(&instance->rfInstance);
-
-  /* if sending successful (NRF24L01_TX_DS) or max retries exceded (NRF24L01_MAX_RT). */
-  if((status & ((1 << NRF24L01_TX_DS)  | (1 << NRF24L01_MAX_RT))))
-  {
-      return 0; /* false */
-  }
-
-  return 1; /* true */
-}
-
-uint8_t frf_lastMessageStatus(frf_t *instance)
-{
-  uint8_t status = nRF24L01_nop(&instance->rfInstance);
-
-  /* Transmission went OK */
-  if((status & ((1 << NRF24L01_TX_DS))))
-  {
-      return FRF_TRANSMISSON_OK;
-  }
-  /* Maximum retransmission count is reached */
-  /* Last message probably went missing ... */
-  else if((status & ((1 << NRF24L01_MAX_RT))))
-  {
-      return FRF_MESSAGE_LOST;
-  }
-  /* Probably still sending ... */
-  else
-  {
-      return 0xFF;
-  }
-}
-
-/*********************** Readers/Writers *********************/
-
-void frf_read(frf_t *instance, uint8_t *rxBuf)
-{
-  frf_powerUpRx(instance);
-
-  CE_HIGH();
-}
-
-
-uint8_t frf_blockingRead(frf_t *instance, uint8_t *rxBuf, uint16_t timeout)
-{
-  frf_powerUpRx(instance);
-
-  CE_HIGH();
-
-  uint32_t i = 0;
-  while (!frf_dataReady(instance))
-  {
-    i++;
-    if (i == timeout)
-    {
-      break;
-    }
-  }
-
-  uint8_t rxByteCnt = frf_payloadLength(instance);
-
-  frf_getData(instance, rxBuf);
-
-  frf_standby(instance);
-
-  return rxByteCnt;
-}
-
-void frf_write(frf_t *instance, uint8_t *txBuf, uint8_t payloadLen)
-{
-  frf_powerUpTx(instance);
-
-  frf_send(instance, txBuf, payloadLen);
-}
-
-
-uint8_t frf_blockingWrite(frf_t *instance, uint8_t *txBuf, uint8_t payloadLen, uint16_t timeout)
-{
-  frf_powerUpTx(instance);
-
-  frf_send(instance, txBuf, payloadLen);
-
-  /* Wait for transmission to end */
-  uint16_t i = 0;
-
-  while(frf_lastMessageStatus(instance) != FRF_TRANSMISSON_OK)
-  {
-    i++;
-    if (i == timeout )
-    {
-      break;
-    }
-  }
-
-  frf_standby(instance);
-
-  return frf_lastMessageStatus(instance);
+  nRF24L01_set_power_mode(&instance->rfInstance, NRF24L01_PWR_DOWN);
 }

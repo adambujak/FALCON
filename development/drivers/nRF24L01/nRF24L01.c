@@ -776,7 +776,7 @@ uint16_t nRF24L01_read_multibyte_reg(nRF24L01_t *instance, uint8_t reg, uint8_t 
       reg = nRF24L01_get_rx_data_source(instance);
       if (reg < 7U)
       {
-        length = nRF24L01_read_rx_payload_width(instance);
+        length = 32;
         command = NRF24L01_R_RX_PAYLOAD;
       }
       else
