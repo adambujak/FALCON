@@ -278,7 +278,12 @@ int bsp_rf_spi_init(void)
   rfSpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
   rfSpiHandle.Init.CLKPolarity       = SPI_POLARITY_LOW;
   rfSpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
-  rfSpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB; rfSpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE; rfSpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE; rfSpiHandle.Init.CRCPolynomial     = 7; rfSpiHandle.Init.NSS               = SPI_NSS_SOFT; rfSpiHandle.Init.Mode              = SPI_MODE_MASTER;
+  rfSpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
+  rfSpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
+  rfSpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
+  rfSpiHandle.Init.CRCPolynomial     = 7;
+  rfSpiHandle.Init.NSS               = SPI_NSS_SOFT;
+  rfSpiHandle.Init.Mode              = SPI_MODE_MASTER;
 
   GPIO_InitTypeDef  GPIO_InitStruct;
 
