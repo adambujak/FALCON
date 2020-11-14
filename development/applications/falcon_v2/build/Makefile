@@ -78,6 +78,7 @@ C_INCLUDES += \
 			-I$(DRV_ROOT) \
 			-I$(DRV_ROOT)/nRF24L01/ \
 			-I$(PROJ_DIR)/include \
+			-I$(PROJ_DIR)/../common/ \
 			-I$(CMSIS_DIR)/Device/ST/STM32F4xx/Include \
 			-I$(CMSIS_DIR)/Include \
  			-I$(FREERTOS_ROOT)/include \
@@ -98,6 +99,7 @@ C_DEFS += -DBOARD_V1
 endif
 # C defines
 C_DEFS +=  \
+-DHEDWIG \
 -DUSE_HAL_DRIVER \
 -D$(CHIPSET_DEF) \
 -D$(BUILD_CONFIG) \

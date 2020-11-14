@@ -10,6 +10,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "frf.h"
+#include "falcon_common.h"
 
 #define SPI_SCK_PIN 4
 #define SPI_MISO_PIN 30
@@ -134,7 +135,7 @@ int main(void)
 
     frf_packet_t packet;
     if (frf_getPacket(&radio, packet) == 0) {
-      NRF_LOG_INFO("ALBUS: %s\r\n", (char*)packet);
+      DEBUG_LOG("ALBUS: %s\r\n", (char*)packet);
     }
 
     frf_process(&radio);

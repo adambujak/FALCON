@@ -1,5 +1,5 @@
-#ifndef FALCON_COMMON_H
-#define FALCON_COMMON_H
+#ifndef HEDWIG_H
+#define HEDWIG_H
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -7,14 +7,9 @@
 #include "timers.h"
 #include "semphr.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "falcon_common.h"
 
 #include "logger.h"
-
-#define FLN_OK  0
-#define FLN_ERR -1
-
 #ifdef DEBUG
 #define DEBUG_LOG(fmt, ...)              \
   do {                                   \
@@ -24,14 +19,7 @@
   } while (0)
 #else
 #define DEBUG_LOG(...) do {} while (0)
-#endif
-
-#define ASSERT(val)         \
-  do {                      \
-    if(!(val)) {            \
-      error_handler();      \
-    }                       \
-  } while (0)
+#endif // DEBUG
 
 #define RTOS_ERR_CHECK(x)   \
   do {                      \
@@ -41,15 +29,6 @@
     }                       \
   } while (0)
 
-#define FLN_ERR_CHECK(x)    \
-  do {                      \
-    int retval = (x);       \
-    if (retval != FLN_OK) { \
-      error_handler();      \
-    }                       \
-  } while (0)
+void OSSysTick_Handler(void);
 
-void error_handler(void);
-extern void OSSysTick_Handler(void);
-
-#endif  // FALCON_COMMON_H
+#endif  // HEDWIG_H

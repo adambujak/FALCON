@@ -65,6 +65,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/modules/nrfx/mdk \
   $(SDK_ROOT)/components/libraries/scheduler \
   $(PROJ_DIR) \
+  $(PROJ_DIR)/../common \
   $(LIB_ROOT)/frf \
   $(DEV_ROOT)/drivers/nRF24L01 \
   $(DEV_ROOT)/drivers \
@@ -104,6 +105,8 @@ OPT = -O0 -g3
 
 # C flags common to all targets
 CFLAGS += $(OPT)
+CFLAGS += -DALBUS
+CFLAGS += -DDEBUG
 CFLAGS += -DAPP_TIMER_V2
 CFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
 CFLAGS += -DBOARD_PCA10040
