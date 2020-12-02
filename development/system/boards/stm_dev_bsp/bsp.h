@@ -142,7 +142,7 @@ void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us);
 
 #define RF_IRQ_PIN                       GPIO_PIN_10
 #define RF_IRQ_GPIO_PORT                 GPIOB
-#define RF_CE_PIN                        GPIO_PIN_0
+#define RF_CE_PIN                        GPIO_PIN_6
 #define RF_CE_GPIO_PORT                  GPIOC
 #define RF_SPI_SS_PIN                    GPIO_PIN_12
 #define RF_SPI_SS_GPIO_PORT              GPIOB
