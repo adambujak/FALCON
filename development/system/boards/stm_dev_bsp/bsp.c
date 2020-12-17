@@ -245,7 +245,7 @@ void bsp_IMU_int_init(void (*isrCallback) (void))
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
 
-//  IMU_IRQ_GPIO_CLK_ENABLE();
+  IMU_IRQ_GPIO_CLK_ENABLE();
 
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull  = GPIO_NOPULL;
@@ -258,15 +258,7 @@ void bsp_IMU_int_init(void (*isrCallback) (void))
   imuISRCallback = isrCallback;
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  if (GPIO_Pin == IMU_IRQ_PIN)
-  {
-    imuISRCallback();
-  }
-}
-
-void EXTI15_10_IRQHandler(void)
+void EXTI8_5_IRQHandler(void)
 {
   HAL_GPIO_EXTI_IRQHandler(IMU_IRQ_PIN);
 }
@@ -477,17 +469,21 @@ int bsp_rf_init(void (*isrCallback) (void))
   return FLN_OK;
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  if (GPIO_Pin == RF_IRQ_PIN)
-  {
-    rfISRCallback();
-  }
-}
-
 void EXTI15_10_IRQHandler(void)
 {
   HAL_GPIO_EXTI_IRQHandler(RF_IRQ_PIN);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == IMU_IRQ_PIN)
+  {
+    imuISRCallback();
+  }
+  else if (GPIO_Pin == RF_IRQ_PIN)
+  {
+    rfISRCallback();
+  }
 }
 
 void error_handler(void)

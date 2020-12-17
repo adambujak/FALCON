@@ -107,9 +107,9 @@ int bsp_i2c_read(fln_i2c_handle_t *handle,
                  uint16_t length,
                  uint8_t *data);
 
-#define IMU_IRQ_GPIO_CLK_ENABLE()         __HAL_RCC_GPIOB_CLK_ENABLE()
-#define IMU_IRQ_PIN                       GPIO_PIN_10
-#define IMU_IRQ_GPIO_PORT                 GPIOB
+#define IMU_IRQ_GPIO_CLK_ENABLE()         __HAL_RCC_GPIOA_CLK_ENABLE()
+#define IMU_IRQ_PIN                       GPIO_PIN_8
+#define IMU_IRQ_GPIO_PORT                 GPIOA
 void bsp_IMU_int_init(void (*isrCallback) (void));
 
 /* MOTORS */
@@ -147,7 +147,7 @@ void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us);
 
 #define RF_IRQ_PIN                       GPIO_PIN_10
 #define RF_IRQ_GPIO_PORT                 GPIOB
-#define RF_CE_PIN                        GPIO_PIN_0
+#define RF_CE_PIN                        GPIO_PIN_6
 #define RF_CE_GPIO_PORT                  GPIOC
 #define RF_SPI_SS_PIN                    GPIO_PIN_12
 #define RF_SPI_SS_GPIO_PORT              GPIOB

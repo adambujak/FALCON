@@ -3,6 +3,7 @@
 #include "falcon_common.h"
 #include "bsp.h"
 #include "logger.h"
+#include "leds.h"
 #include "fimu.h"
 #include "fbaro.h"
 
@@ -63,7 +64,7 @@ void sensors_task(void *pvParameters)
       {
         fbaro_get_altitude(&sensor_data.alt_data_SI);
         baro_delay_count = 0;
-        bsp_leds_toggle(FLN_LED_3);
+        leds_set_color(23,0,0);
       }
 //      DEBUG_LOG("Gyro Data\t %7.5f, %7.5f, %7.5f\r\n", sensor_data.gyro_data_SI[0], sensor_data.gyro_data_SI[1], sensor_data.gyro_data_SI[2]);
 //      DEBUG_LOG("Accel Data\t %7.5f, %7.5f, %7.5f\r\n", sensor_data.accel_data_SI[0], sensor_data.accel_data_SI[1], sensor_data.accel_data_SI[2]);
