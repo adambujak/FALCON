@@ -6,12 +6,13 @@
 #include "logger.h"
 #include "motors.h"
 #include "device_com.h"
+#include "sensors.h"
 
 #include <stdint.h>
 
 #define led_TASK_PRIORITY    (tskIDLE_PRIORITY + 2)
-#define logger_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 #define device_com_TASK_PRIORITY  (tskIDLE_PRIORITY + 3)
+#define sensors_TASK_PRIORITY (tskIDLE_PRIORITY + 3)
 
 int main(void)
 {
@@ -24,6 +25,7 @@ int main(void)
 
   leds_task_setup();
   device_com_setup();
+  sensors_task_setup();
 
   taskStatus = xTaskCreate(leds_task,
                            "led_task",
@@ -40,6 +42,15 @@ int main(void)
                         NULL,
                         device_com_TASK_PRIORITY,
                         NULL);
+
+  RTOS_ERR_CHECK(taskStatus);
+
+  taskStatus = xTaskCreate(sensors_task,
+                          "sensors_task",
+                          512,
+                          NULL,
+                          sensors_TASK_PRIORITY,
+                          NULL);
 
   RTOS_ERR_CHECK(taskStatus);
 
