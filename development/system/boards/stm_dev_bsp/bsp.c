@@ -148,9 +148,9 @@ int bsp_uart_init(fln_uart_handle_t *handle)
   handle->Instance = FLN_UART;
 
   handle->Init.BaudRate     = FLN_UART_BAUDRATE;
-  handle->Init.WordLength   = UART_WORDLENGTH_9B;
+  handle->Init.WordLength   = UART_WORDLENGTH_8B;
   handle->Init.StopBits     = UART_STOPBITS_1;
-  handle->Init.Parity       = UART_PARITY_ODD;
+  handle->Init.Parity       = UART_PARITY_NONE;
   handle->Init.HwFlowCtl    = UART_HWCONTROL_NONE;
   handle->Init.Mode         = UART_MODE_TX_RX;
   handle->Init.OverSampling = UART_OVERSAMPLING_16;
