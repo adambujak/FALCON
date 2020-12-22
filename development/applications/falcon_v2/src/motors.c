@@ -12,7 +12,7 @@ void motors_init(void)
   motors_set_motor_us(3, 0);
   motors_set_motor_us(4, 0);
 
-  HAL_Delay(6000);
+  HAL_Delay(1000);
 
   DEBUG_LOG("Motors Ready\r\n");
 }

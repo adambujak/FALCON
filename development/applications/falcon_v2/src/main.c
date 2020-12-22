@@ -12,7 +12,7 @@
 
 #define led_TASK_PRIORITY    (tskIDLE_PRIORITY + 2)
 #define device_com_TASK_PRIORITY  (tskIDLE_PRIORITY + 3)
-#define sensors_TASK_PRIORITY (tskIDLE_PRIORITY + 3)
+#define sensors_TASK_PRIORITY (tskIDLE_PRIORITY + 4)
 
 int main(void)
 {
