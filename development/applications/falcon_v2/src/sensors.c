@@ -66,9 +66,10 @@ void sensors_task(void *pvParameters)
         baro_delay_count = 0;
         leds_set_color(23,0,0);
       }
-//      DEBUG_LOG("Gyro Data\t %7.5f, %7.5f, %7.5f\r\n", sensor_data.gyro_data_SI[0], sensor_data.gyro_data_SI[1], sensor_data.gyro_data_SI[2]);
-//      DEBUG_LOG("Accel Data\t %7.5f, %7.5f, %7.5f\r\n", sensor_data.accel_data_SI[0], sensor_data.accel_data_SI[1], sensor_data.accel_data_SI[2]);
-//      DEBUG_LOG("%7.5f\t%7.5f\t%7.5f\t%7.5f\r\n", sensor_data.quat_data[0], sensor_data.quat_data[1], sensor_data.quat_data[2], sensor_data.quat_data[3]);
+      DEBUG_LOG("Gyro Data\t %7.5f, %7.5f, %7.5f\r\n", sensor_data.gyro_data_SI[0], sensor_data.gyro_data_SI[1], sensor_data.gyro_data_SI[2]);
+      DEBUG_LOG("Accel Data\t %7.5f, %7.5f, %7.5f\r\n", sensor_data.accel_data_SI[0], sensor_data.accel_data_SI[1], sensor_data.accel_data_SI[2]);
+      DEBUG_LOG("%7.5f\t%7.5f\t%7.5f\t%7.5f\r\n", sensor_data.quat_data[0], sensor_data.quat_data[1], sensor_data.quat_data[2], sensor_data.quat_data[3]);
+
       DEBUG_LOG("Alt Data\t %7.5f\r\n", sensor_data.alt_data_SI);
       baro_delay_count++;
     }
