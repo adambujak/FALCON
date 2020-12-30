@@ -252,13 +252,13 @@ void bsp_IMU_int_init(void (*isrCallback) (void))
   GPIO_InitStruct.Pin = IMU_IRQ_PIN;
   HAL_GPIO_Init(IMU_IRQ_GPIO_PORT, &GPIO_InitStruct);
 
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
   imuISRCallback = isrCallback;
 }
 
-void EXTI8_5_IRQHandler(void)
+void EXTI9_5_IRQHandler(void)
 {
   HAL_GPIO_EXTI_IRQHandler(IMU_IRQ_PIN);
 }
