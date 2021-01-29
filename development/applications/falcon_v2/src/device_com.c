@@ -1,11 +1,12 @@
 #include "device_com.h"
 
 #include "falcon_common.h"
+#include "radio_common.h"
 #include "frf.h"
 #include "bsp.h"
 
-static uint8_t rxAddr[5] = {0xD7,0xD7,0xD7,0xD7,0xD7};
-static uint8_t txAddr[5] = {0xE7,0xE7,0xE7,0xE7,0xE7};
+static uint8_t hedwig_address[RADIO_ADDRESS_LENGTH];
+static uint8_t albus_address[RADIO_ADDRESS_LENGTH];
 
 static frf_t radio;
 
@@ -24,13 +25,16 @@ void device_com_setup(void)
 {
   FLN_ERR_CHECK(bsp_rf_init(rfISR));
 
+  radio_get_hedwig_address(hedwig_address);
+  radio_get_albus_address(albus_address);
+
   frf_init(&radio, rf_spi_transfer, 0, bsp_rf_cs_set, bsp_rf_ce_set, vTaskDelay);
 }
 
 void device_com_task(void *pvParameters)
 {
   uint8_t payload_len = FRF_PACKET_SIZE;
-  frf_start(&radio, 2, payload_len, rxAddr, txAddr);
+  frf_start(&radio, 2, payload_len, hedwig_address, albus_address);
 
   char txData[FRF_PACKET_SIZE] = "heDwi1";
 
