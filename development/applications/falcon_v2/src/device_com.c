@@ -36,19 +36,20 @@ void device_com_task(void *pvParameters)
   uint8_t payload_len = FRF_PACKET_SIZE;
   frf_start(&radio, 2, payload_len, hedwig_address, albus_address);
 
-  char txData[FRF_PACKET_SIZE] = "heDwi1";
+  char tx_data[FRF_PACKET_SIZE] = "hedwig 1";
+
+  frf_sendPacket(&radio, (uint8_t*)tx_data);
+  frf_finishSending(&radio);
 
   while(1) {
-    //frf_packet_t packet;
-    //if (frf_getPacket(&radio, packet) == 0) {
-    //  DEBUG_LOG("HEDWIG: %s\r\n", (char*)packet);
-    //  bsp_leds_toggle(LED3_PIN);
+    frf_packet_t packet;
+    if (frf_getPacket(&radio, packet) == 0) {
+      DEBUG_LOG("ALBUS: %s\r\n", (char*)packet);
 
-    //  vTaskDelay(50);
-    //}
-    frf_sendPacket(&radio, (uint8_t*)txData);
-    //frf_finishSending(&radio);
-    txData[5] = 48+((txData[5]+1)%10);
+      tx_data[7] = 48+((tx_data[7]-47)%10);
+      frf_sendPacket(&radio, (uint8_t*)tx_data);
+      frf_finishSending(&radio);
+    }
 
     frf_process(&radio);
 

@@ -36,13 +36,19 @@ void device_com_task(void *pvParameters)
   uint8_t payload_len = FRF_PACKET_SIZE;
   frf_start(&radio, 2, payload_len, albus_address, hedwig_address);
 
+  char tx_data[FRF_PACKET_SIZE] = "albus 1";
+
   while(1) {
     frf_packet_t packet;
     if (frf_getPacket(&radio, packet) == 0) {
       DEBUG_LOG("HEDWIG: %s\r\n", (char*)packet);
       BSP_LED_Toggle(LED1);
 
-      vTaskDelay(50);
+      tx_data[6] = packet[7];
+      frf_sendPacket(&radio, (uint8_t*)tx_data);
+      frf_finishSending(&radio);
+      // TODO implement packet buffering in device_com for case when both radios want to transmit
+      // (obviously some sort of timeout will be needed for sending)
     }
     frf_process(&radio);
 
