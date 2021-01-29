@@ -11,6 +11,7 @@ DEV_ROOT = $(FALCON_ROOT)/development
 LIB_ROOT = $(DEV_ROOT)/libraries
 DRV_ROOT = $(DEV_ROOT)/drivers
 PROJ_DIR = ..
+COMMON_DIR = $(PROJ_DIR)/../common
 FLN_BSP_DIR = $(DEV_ROOT)/system/boards/stm_dev_bsp
 SDK_ROOT = $(FALCON_ROOT)/dependencies/stm/STM32F4_Cube
 FREERTOS_ROOT = $(FALCON_ROOT)/dependencies/freertos/FreeRTOSv10.4.1/FreeRTOS/Source
@@ -56,6 +57,7 @@ $(PROJ_DIR)/src/device_com.c \
 $(PROJ_DIR)/src/motors.c \
 $(PROJ_DIR)/src/logger.c \
 $(PROJ_DIR)/src/sensors.c \
+$(COMMON_DIR)/radio_common.c \
 $(DEV_ROOT)/libraries/fimu/fimu.c \
 $(DEV_ROOT)/drivers/ICM20948/common/inv_mems_drv_hook.c \
 $(DEV_ROOT)/drivers/ICM20948/dmp3a/dmp3Default_20648.c \
@@ -99,7 +101,7 @@ C_INCLUDES += \
 			-I$(DRV_ROOT) \
 			-I$(DRV_ROOT)/nRF24L01/ \
 			-I$(PROJ_DIR)/include \
-			-I$(PROJ_DIR)/../common/ \
+			-I$(COMMON_DIR) \
 			-I$(CMSIS_DIR)/Device/ST/STM32F4xx/Include \
 			-I$(CMSIS_DIR)/Include \
  			-I$(FREERTOS_ROOT)/include \
