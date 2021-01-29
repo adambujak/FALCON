@@ -24,10 +24,6 @@ CMSIS_DIR = $(SDK_ROOT)/Drivers/CMSIS
 # source
 ######################################
 # C sources
-ifeq ($(BOARD_VERSION), DISCO)
-$C_SOURCES += (BSP_DIR)/stm32412g_discovery.c
-endif
-
 C_SOURCES = \
 $(HAL_DIR)/Src/stm32f4xx_hal.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_cortex.c \
@@ -78,6 +74,9 @@ $(DEV_ROOT)/drivers/ICM20948/invn/common/mlmath.c \
 $(DEV_ROOT)/drivers/MPL3115A2/MPL3115A2.c \
 $(DEV_ROOT)/libraries/fbaro/fbaro.c \
 
+ifeq ($(BOARD_VERSION), DISCO)
+C_SOURCES += (BSP_DIR)/stm32412g_discovery.c
+endif
 
 # ASM sources
 ifeq ($(BOARD_VERSION), DISCO)
