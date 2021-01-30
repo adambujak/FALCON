@@ -17,12 +17,6 @@ void error_handler(void);
     }                       \
   } while (0)
 
-#ifdef ALBUS
-#include "albus.h"
-#endif // ALBUS
-
-#ifdef HEDWIG
-
 #define ASSERT(val)         \
   do {                      \
     if(!(val)) {            \
@@ -30,7 +24,11 @@ void error_handler(void);
     }                       \
   } while (0)
 
+#ifdef ALBUS
+#include "albus.h"
+#endif // ALBUS
 
+#ifdef HEDWIG
 #include "hedwig.h"
 #endif // HEDWIG
 

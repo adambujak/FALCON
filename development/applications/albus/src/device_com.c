@@ -16,14 +16,14 @@ static void rf_spi_transfer (void * context, uint8_t * tx_buf, uint16_t tx_len,
   bsp_rf_transceive(tx_buf, tx_len, rx_buf, rx_len);
 }
 
-static inline void rfISR(void)
+static inline void rf_isr(void)
 {
   frf_isr(&radio);
 }
 
 void device_com_setup(void)
 {
-  FLN_ERR_CHECK(bsp_rf_init(rfISR));
+  FLN_ERR_CHECK(bsp_rf_init(rf_isr));
 
   radio_get_hedwig_address(hedwig_address);
   radio_get_albus_address(albus_address);
@@ -34,26 +34,25 @@ void device_com_setup(void)
 void device_com_task(void *pvParameters)
 {
   uint8_t payload_len = FRF_PACKET_SIZE;
-  frf_start(&radio, 2, payload_len, hedwig_address, albus_address);
+  frf_start(&radio, 2, payload_len, albus_address, hedwig_address);
 
-  char tx_data[FRF_PACKET_SIZE] = "hedwig 1";
-
-  frf_sendPacket(&radio, (uint8_t*)tx_data);
-  frf_finishSending(&radio);
+  char tx_data[FRF_PACKET_SIZE] = "albus 1";
 
   while(1) {
     frf_packet_t packet;
     if (frf_getPacket(&radio, packet) == 0) {
-      DEBUG_LOG("ALBUS: %s\r\n", (char*)packet);
+      DEBUG_LOG("HEDWIG: %s\r\n", (char*)packet);
+      BSP_LED_Toggle(LED1);
 
-      tx_data[7] = 48+((tx_data[7]-47)%10);
+      tx_data[6] = packet[7];
       frf_sendPacket(&radio, (uint8_t*)tx_data);
       frf_finishSending(&radio);
+      // TODO implement packet buffering in device_com for case when both radios want to transmit
+      // (obviously some sort of timeout will be needed for sending)
     }
-
     frf_process(&radio);
 
-    vTaskDelay(500);
+    vTaskDelay(10);
   }
 }
 
