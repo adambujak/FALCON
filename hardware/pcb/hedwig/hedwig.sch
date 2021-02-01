@@ -8119,6 +8119,7 @@ Created by Upverter.com</description>
 <part name="GND41" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="GND42" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="L4" library="falcon" deviceset="REG_INDUCTOR" device="" value="3uH"/>
+<part name="GND43" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -9623,9 +9624,9 @@ Created by Upverter.com</description>
 <attribute name="NAME" x="78.74" y="-15.24" size="1.778" layer="95" font="vector" rot="R90"/>
 <attribute name="VALUE" x="83.82" y="-15.24" size="1.778" layer="96" font="vector" rot="R90" align="top-left"/>
 </instance>
-<instance part="R8" gate="R1" x="68.58" y="-27.94" smashed="yes" rot="R90">
-<attribute name="NAME" x="67.056" y="-27.94" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
-<attribute name="VALUE" x="70.104" y="-27.94" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
+<instance part="R8" gate="R1" x="81.28" y="-27.94" smashed="yes" rot="R90">
+<attribute name="NAME" x="79.756" y="-27.94" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
+<attribute name="VALUE" x="82.804" y="-27.94" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
 </instance>
 <instance part="R11" gate="R1" x="2.54" y="-33.02" smashed="yes" rot="R90">
 <attribute name="NAME" x="1.016" y="-33.02" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
@@ -9642,26 +9643,45 @@ Created by Upverter.com</description>
 <attribute name="NAME" x="30.48" y="-13.97" size="1.778" layer="95"/>
 <attribute name="VALUE" x="30.48" y="-40.64" size="1.778" layer="96"/>
 </instance>
+<instance part="GND43" gate="1" x="81.28" y="-38.1" smashed="yes">
+<attribute name="VALUE" x="78.74" y="-40.64" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
 <nets>
-<net name="N$21" class="0">
+<net name="USB_DP" class="0">
 <segment>
 <pinref part="U3" gate="G$1" pin="USBDP"/>
 <wire x1="-22.86" y1="27.94" x2="20.32" y2="27.94" width="0.1524" layer="91"/>
+<label x="20.32" y="27.94" size="1.778" layer="95"/>
+</segment>
+<segment>
 <pinref part="J2" gate="G$1" pin="DP1"/>
-<wire x1="25.4" y1="-25.4" x2="20.32" y2="-25.4" width="0.1524" layer="91"/>
-<wire x1="20.32" y1="-25.4" x2="20.32" y2="27.94" width="0.1524" layer="91"/>
+<label x="15.24" y="-25.4" size="1.778" layer="95"/>
+<wire x1="25.4" y1="-25.4" x2="15.24" y2="-25.4" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="J2" gate="G$1" pin="DP2"/>
+<wire x1="60.96" y1="-25.4" x2="63.5" y2="-25.4" width="0.1524" layer="91"/>
+<label x="63.5" y="-25.4" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="N$22" class="0">
+<net name="USB_DN" class="0">
 <segment>
 <pinref part="U3" gate="G$1" pin="USBDM"/>
-<wire x1="-22.86" y1="25.4" x2="17.78" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="25.4" x2="20.32" y2="25.4" width="0.1524" layer="91"/>
+<label x="20.32" y="25.4" size="1.778" layer="95"/>
+</segment>
+<segment>
 <pinref part="J2" gate="G$1" pin="DN1"/>
-<wire x1="25.4" y1="-27.94" x2="17.78" y2="-27.94" width="0.1524" layer="91"/>
-<wire x1="17.78" y1="-27.94" x2="17.78" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="-27.94" x2="15.24" y2="-27.94" width="0.1524" layer="91"/>
+<label x="15.24" y="-27.94" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="J2" gate="G$1" pin="DN2"/>
+<wire x1="60.96" y1="-27.94" x2="63.5" y2="-27.94" width="0.1524" layer="91"/>
+<label x="63.5" y="-27.94" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -9696,9 +9716,11 @@ Created by Upverter.com</description>
 <pinref part="J2" gate="G$1" pin="GND"/>
 <pinref part="GND20" gate="1" pin="GND"/>
 <wire x1="68.58" y1="-35.56" x2="60.96" y2="-35.56" width="0.1524" layer="91"/>
+</segment>
+<segment>
 <pinref part="R8" gate="R1" pin="1"/>
-<wire x1="68.58" y1="-33.02" x2="68.58" y2="-35.56" width="0.1524" layer="91" style="longdash"/>
-<junction x="68.58" y="-35.56"/>
+<pinref part="GND43" gate="1" pin="GND"/>
+<wire x1="81.28" y1="-35.56" x2="81.28" y2="-33.02" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$19" class="0">
@@ -9761,11 +9783,11 @@ Created by Upverter.com</description>
 <junction x="-22.86" y="40.64"/>
 </segment>
 </net>
-<net name="N$15" class="0">
+<net name="N$7" class="0">
 <segment>
 <pinref part="J2" gate="G$1" pin="CC2"/>
 <pinref part="R8" gate="R1" pin="2"/>
-<wire x1="60.96" y1="-22.86" x2="68.58" y2="-22.86" width="0.1524" layer="91" style="longdash"/>
+<wire x1="60.96" y1="-22.86" x2="81.28" y2="-22.86" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
