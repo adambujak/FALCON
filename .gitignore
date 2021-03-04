@@ -26,3 +26,5 @@ development/system/msp_sdk/docs
 **/Debug
 **/_build
 
+# Eclipse
+**/.cproject
