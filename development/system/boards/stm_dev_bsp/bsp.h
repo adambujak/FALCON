@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 #include "stm32f4xx_hal.h"
-#ifdef BOARD_VDISCO
+#ifdef BOARD_DISCO
 #include "stm32412g_discovery.h"
 #endif
 
@@ -23,7 +23,7 @@ void bsp_board_bringup(void);
 int bsp_rf_spi_init(void);
 
 /* LEDS */
-#ifdef BOARD_VDISCO
+#ifdef BOARD_DISCO
 #define FLN_LED_CLK_ENABLE()  LEDx_GPIO_CLK_ENABLE();
 #define FLN_LED_PIN           LED1_PIN
 #define FLN_LED_PORT          GPIOE
