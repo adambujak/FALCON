@@ -1,0 +1,56 @@
+static inline uint8_t encode_uint8(uint8_t *buffer, uint8_t *value)
+{
+  for (uint32_t i = 0; i < 1; i++) {
+    buffer[i] = ((*value) >> (i * 8)) & 0xFF;
+  }
+  return 1;
+}
+
+static inline uint8_t encode_int8(uint8_t *buffer, int8_t *value)
+{
+  for (uint32_t i = 0; i < 1; i++) {
+    buffer[i] = ((*value) >> (i * 8)) & 0xFF;
+  }
+  return 1;
+}
+
+static inline uint8_t encode_uint16(uint8_t *buffer, uint16_t *value)
+{
+  for (uint32_t i = 0; i < 2; i++) {
+    buffer[i] = ((*value) >> (i * 8)) & 0xFF;
+  }
+  return 2;
+}
+
+static inline uint8_t encode_int16(uint8_t *buffer, int16_t *value)
+{
+  for (uint32_t i = 0; i < 2; i++) {
+    buffer[i] = ((*value) >> (i * 8)) & 0xFF;
+  }
+  return 2;
+}
+
+static inline uint8_t encode_uint32(uint8_t *buffer, uint32_t *value)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    buffer[i] = ((*value) >> (i * 8)) & 0xFF;
+  }
+  return 4;
+}
+
+static inline uint8_t encode_int32(uint8_t *buffer, int32_t *value)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    buffer[i] = ((*value) >> (i * 8)) & 0xFF;
+  }
+  return 4;
+}
+
+static inline uint8_t encode_flo(uint8_t *buffer, float *value)
+{
+  uint32_t *tempValue = (uint32_t *) value;
+  for (uint32_t i = 0; i < 4; i++) {
+    buffer[i] = ((*tempValue) >> (i * 8)) & 0xFF;
+  }
+  return 4;
+}

@@ -1,0 +1,100 @@
+defines:
+  MAX_FRAME_SIZE: 96
+  MAX_PACKET_SIZE: 94
+  FRAME_DELIMITER1: 0x51
+  FRAME_DELIMITER2: 0x98
+  PACKET_DELIMITER1: 0xA7
+  PACKET_DELIMITER2: 0xB9
+  PACKET_HEADER_SIZE: 0x3
+  FRAME_HEADER_SIZE: 0x3
+  FRAME_FOOTER_SIZE: 0x2
+
+enums:
+  - name: flightControlMode
+    size: 1
+    values:
+    - {name: FLIGHT_CONTROL_MODE_STICK, value: 0x0}
+    - {name: FLIGHT_CONTROL_MODE_MOTION, value: 0x1}
+    - {name: FLIGHT_CONTROL_MODE_POSITION, value: 0x2}
+    - {name: FLIGHT_CONTROL_MODE_CNT, value: 0x3}
+
+types:
+  - { name: u8, size: 1, primitive: true }
+  - { name: i8, size: 1, primitive: true }
+  - { name: u16, size: 2, primitive: true }
+  - { name: i16, size: 2, primitive: true }
+  - { name: u32, size: 4, primitive: true }
+  - { name: i32, size: 4, primitive: true }
+  - { name: f32, size: 4, primitive: true }
+  - name: motorPWMControlData
+    fields:
+      - { name: motor1, type: u16}
+      - { name: motor2, type: u16}
+      - { name: motor3, type: u16}
+      - { name: motor4, type: u16}
+
+  - name: gpsCoordinateData
+    fields:
+      - { name: longitude, type: f32}
+      - { name: latitude, type: f32}
+
+  - name: statusData
+    fields:
+      - { name: gps, type: gpsCoordinateData}
+      - { name: motor, type: motorPWMControlData}
+      - { name: someEight, type: u8}
+      - { name: someIEight, type: i8}
+      - { name: someSixteen, type: i16}
+      - { name: someThirtyTwo, type: u32}
+      - { name: someIThirtyTwo, type: i32}
+
+  - name: orientationReference
+    fields:
+      - { name: yaw, type: f32}
+      - { name: pitch, type: f32}
+      - { name: roll, type: f32}
+      - { name: z, type: f32}
+
+  - name: positionReference
+    fields:
+      - { name: x, type: f32}
+      - { name: y, type: f32}
+      - { name: z, type: f32}
+      - { name: yaw, type: f32}
+
+packets:
+  - name: flightControlStick
+    command: true
+    query: false
+    response: false
+    fields:
+      - { name: orientationReferenceCmd, type: orientationReference}
+    
+  - name: flightControlPosition
+    command: true
+    query: false
+    response: false
+    fields:
+      - { name: positionReferenceCMD, type: positionReference}
+    
+  - name: motorSpeed
+    command: true
+    query: true
+    response: true
+    fields:
+      - { name: pwmData, type: motorPWMControlData}
+    
+  - name: setDestination
+    command: true
+    query: false
+    response: false
+    fields:
+      - {name: gpsData, type: gpsCoordinateData}
+
+  - name: status
+    command: false
+    query: false
+    response: true
+    fields:
+      - {name: gpsData, type: gpsCoordinateData}
+      - {name: status, type: statusData}
