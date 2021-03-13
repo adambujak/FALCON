@@ -22,6 +22,8 @@
 /* Must be power of 2 */
 #define FRF_FIFO_SIZE 32
 
+#define FRF_DEFAULT_TX_TIMER_PERIOD_MS 5
+
 typedef uint8_t frf_packet_t[FRF_PACKET_SIZE];
 typedef struct {
   uint32_t writeIndex;
@@ -36,6 +38,7 @@ typedef enum {
   FRF_EVENT_RX
 } frf_event_t;
 
+typedef void (*frf_cb_t) (frf_event_t arg);
 typedef void (*gpio_setter_t) (uint8_t val);
 typedef void (*frf_delay_t)   (uint32_t ms);
 typedef void (*spi_transfer_t) (void *context, uint8_t *tx_buf, uint16_t tx_len,
@@ -53,6 +56,15 @@ typedef enum {
 } frf_transfer_state_t;
 
 typedef struct {
+  spi_transfer_t transferFunc;
+  void          *spiCtx;
+  gpio_setter_t  setCS;
+  gpio_setter_t  setCE;
+  frf_delay_t    delay;
+  frf_cb_t       eventCallback;
+} frf_config_t;
+
+typedef struct {
   frf_power_state_t    powerState;
   frf_transfer_state_t transferState;
   gpio_setter_t        setCE;
@@ -60,12 +72,13 @@ typedef struct {
   nRF24L01_t           rfInstance;
   frf_fifo_t           rxFifo;
   frf_fifo_t           txFifo;
-  bool                 isSending;
-  bool                 interruptFired;
+  frf_cb_t             eventCallback;
+  volatile bool        isSending;
+  volatile bool        interruptFired;
+  volatile bool        txScheduled;
 } frf_t;
 
-void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx,
-              gpio_setter_t setCS, gpio_setter_t setCE, frf_delay_t delay);
+void frf_init(frf_t *instance, frf_config_t *config);
 
 void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
                uint8_t rxAddr[FRF_ADDR_WIDTH], uint8_t txAddr[FRF_ADDR_WIDTH]);
@@ -73,11 +86,14 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
 void frf_isr(frf_t *instance);
 void frf_process(frf_t *instance);
 
+void frf_tx(frf_t *instance);
 bool frf_isSending(frf_t *instance);
 
 int frf_getPacket(frf_t *instance, frf_packet_t packet);
-int frf_sendPacket(frf_t *instance, frf_packet_t packet);
+int frf_pushPacket(frf_t *instance, frf_packet_t packet);
 void frf_finishSending(frf_t *instance);
+
+void frf_sendPacket(frf_t *instance, frf_packet_t packet);
 
 void frf_powerUp(frf_t *instance);
 void frf_standby(frf_t *instance);
