@@ -9,7 +9,7 @@
  *
  * Model version                  : 1.113
  * Simulink Coder version         : 9.4 (R2020b) 29-Jul-2020
- * C/C++ source code generated on : Sat Mar 13 16:54:18 2021
+ * C/C++ source code generated on : Sun Mar 14 11:45:49 2021
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -38,7 +38,7 @@ static sensor_data_t rtU_Sensors;
 static states_estimate_t rtY_State_Estim;
 
 /* '<Root>/Throttle' */
-static uint16_T rtY_set_motor_output[4];
+static uint16_T rtY_Throttle[4];
 
 /*
  * Associating rt_OneStep with a real-time clock or interrupt service routine
@@ -70,7 +70,8 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Set model inputs here */
 
   /* Step the model */
-  flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim);
+  flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim,
+                        rtY_Throttle);
 
   /* Get model outputs here */
 
@@ -100,7 +101,8 @@ int_T main(int_T argc, const char *argv[])
   rtM->dwork = &rtDW;
 
   /* Initialize model */
-  flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim);
+  flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim,
+    rtY_Throttle);
 
   /* Attach rt_OneStep to a timer or interrupt service routine with
    * period 0.01 seconds (the model's base sample time) here.  The

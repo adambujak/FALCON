@@ -9,7 +9,7 @@
  *
  * Model version                  : 1.113
  * Simulink Coder version         : 9.4 (R2020b) 29-Jul-2020
- * C/C++ source code generated on : Sat Mar 13 16:54:18 2021
+ * C/C++ source code generated on : Sun Mar 14 11:45:49 2021
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -30,9 +30,6 @@
 #endif                                 /* flightController_COMMON_INCLUDES_ */
 
 /* Model Code Variants */
-
-/* Includes for objects with custom storage classes. */
-#include "motors.h"
 
 /* Macros for accessing real-time model data structure */
 
@@ -150,9 +147,11 @@ extern const ConstP rtConstP;
 
 /* Model entry point functions */
 extern void flightController_initialize(RT_MODEL *const rtM, FCS_command_t
-  *rtU_Commands, sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim);
+  *rtU_Commands, sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim,
+  uint16_T rtY_Throttle[4]);
 extern void flightController_step(RT_MODEL *const rtM, FCS_command_t
-  *rtU_Commands, sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim);
+  *rtU_Commands, sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim,
+  uint16_T rtY_Throttle[4]);
 
 /*-
  * These blocks were eliminated from the model due to optimizations:

@@ -41,6 +41,9 @@ static sensor_data_t rtU_Sensors;
 /* '<Root>/State_Estim' */
 static states_estimate_t rtY_State_Estim;
 
+/* '<Root>/Throttle' */
+static uint16_T rtY_Throttle[4];
+
 void rt_OneStep(RT_MODEL *const rtM);
 void rt_OneStep(RT_MODEL *const rtM)
 {
@@ -60,7 +63,7 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Set model inputs here */
 
   /* Step the model */
-  flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim);
+  flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
 
   /* Get model outputs here */
 
@@ -117,7 +120,7 @@ void sensors_task(void *pvParameters)
   rtMPtr->dwork = &rtDW;
 
   /* Initialize model */
-  flightController_initialize(rtMPtr, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim);
+  flightController_initialize(rtMPtr, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
 
   TimerHandle_t FC_timer = xTimerCreate("FC_timer", 10, pdTRUE, 0, FC_callback);
 
