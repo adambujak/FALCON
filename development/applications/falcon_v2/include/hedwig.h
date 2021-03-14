@@ -29,6 +29,8 @@
     }                       \
   } while (0)
 
-void OSSysTick_Handler(void);
+extern void hedwig_delay(uint32_t ms);
+extern void hedwig_sysTickHandler(void);
+void OSSysTickHandler(void);
 
 #endif  // HEDWIG_H

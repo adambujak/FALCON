@@ -84,7 +84,7 @@ header file. */
    standard names. */
 #define vPortSVCHandler    SVC_Handler
 #define xPortPendSVHandler PendSV_Handler
-#define xPortSysTickHandler OSSysTick_Handler
+#define xPortSysTickHandler OSSysTickHandler
 
 #endif /* FREERTOS_CONFIG_H */
 

@@ -14,6 +14,31 @@
 #define device_com_TASK_PRIORITY  (tskIDLE_PRIORITY + 3)
 #define sensors_TASK_PRIORITY (tskIDLE_PRIORITY + 4)
 
+static uint8_t startedOS= 0;
+
+static void startOS(void)
+{
+  startedOS = 1;
+  vTaskStartScheduler();
+}
+
+void hedwig_delay(uint32_t ms)
+{
+  if (startedOS) {
+    vTaskDelay(MS_TO_TICKS(ms));
+  }
+  else {
+    HAL_Delay(ms);
+  }
+}
+
+void hedwig_sysTickHandler(void)
+{
+  if (startedOS) {
+    OSSysTickHandler();
+  }
+}
+
 int main(void)
 {
   int32_t taskStatus;
@@ -21,7 +46,7 @@ int main(void)
   logger_init();
   motors_init();
 
-  DEBUG_LOG("Falcon V2 Started \r\n");
+  DEBUG_LOG("Hedwig Started \r\n");
 
   leds_task_setup();
   device_com_setup();
@@ -54,8 +79,7 @@ int main(void)
 
   RTOS_ERR_CHECK(taskStatus);
 
-  OSStarted();
-  vTaskStartScheduler();
+  startOS();
 
   /* Should never reach here */
   while (1);
