@@ -5,12 +5,27 @@
 #include "frf.h"
 #include "bsp.h"
 
-static uint8_t hedwig_address[RADIO_ADDRESS_LENGTH];
-static uint8_t albus_address[RADIO_ADDRESS_LENGTH];
+#include "falcon_packet.h"
+#include "fs_decoder.h"
+#include "fp_decode.h"
+
+#include <string.h>
+
+#define RTOS_TIMEOUT_TICKS 25
+
+static fs_decoder_t decoder;
+
+static uint8_t hedwigAddress[RADIO_ADDRESS_LENGTH];
+static uint8_t albusAddress[RADIO_ADDRESS_LENGTH];
+
+uint8_t packetCnt = 0;
+uint8_t frame_buffer[MAX_FRAME_SIZE];
 
 static frf_t radio;
+static volatile bool rfRxReady = false;
+static SemaphoreHandle_t frfMutex;
 
-static void rf_spi_transfer (void * context, uint8_t * tx_buf, uint16_t tx_len,
+static void rf_spi_transfer(void * context, uint8_t * tx_buf, uint16_t tx_len,
                              uint8_t * rx_buf, uint16_t rx_len)
 {
   bsp_rf_transceive(tx_buf, tx_len, rx_buf, rx_len);
@@ -21,39 +36,147 @@ static inline void rfISR(void)
   frf_isr(&radio);
 }
 
+static inline void lock_frf(void)
+{
+  xSemaphoreTake(frfMutex, RTOS_TIMEOUT_TICKS);
+}
+
+static inline void unlock_frf(void)
+{
+  xSemaphoreGive(frfMutex);
+}
+
+static inline void createFRFMutex(void)
+{
+  frfMutex = xSemaphoreCreateMutex();
+  if (frfMutex == NULL) {
+    error_handler();
+  }
+}
+
+static inline void handleRFRx(void)
+{
+  if (rfRxReady) {
+    frf_packet_t packet;
+    while (frf_getPacket(&radio, packet) == 0) {
+      /* Convert frf packet to byte array - in this case just cast */
+      uint8_t *buffer = (uint8_t *) packet;
+      memcpy(&frame_buffer[packetCnt*FRF_PACKET_SIZE], buffer, FRF_PACKET_SIZE);
+      packetCnt++;
+      //fp_decoder_decode(&decoder, buffer);
+    }
+    fs_decoder_decode(&decoder, frame_buffer, FRF_PACKET_SIZE*packetCnt);
+    packetCnt = 0;
+
+    rfRxReady = false;
+  }
+}
+
+static inline void rfProcess(void)
+{
+  lock_frf();
+  handleRFRx();
+  frf_process(&radio);
+  unlock_frf();
+}
+
+static void rf_event_callback(frf_event_t event)
+{
+  switch(event) {
+    case FRF_EVENT_TX_FAILED:
+      DEBUG_LOG("RF TX FAILED\r\n");
+      break;
+    case FRF_EVENT_TX_SUCCESS:
+      DEBUG_LOG("RF TX SUCCESS\r\n");
+      break;
+    case FRF_EVENT_RX:
+      rfRxReady = true;
+      DEBUG_LOG("RF RX Event\r\n");
+      break;
+  }
+}
+
+static void send_response_frame(void)
+{
+  //lock_frf();
+  //frf_pushPacket(&radio, (uint8_t*)data);
+  //unlock_frf();
+}
+
+static void rx_handler(uint8_t *data, fp_type_t packetType)
+{
+  switch (packetType) {
+    case FPT_FLIGHT_CONTROL_POSITION_COMMAND:
+    {
+      fpc_flight_control_position_t controlPosition = {};
+      fpc_flight_control_position_decode(data, &controlPosition);
+      DEBUG_LOG("CONTROL POSITION: %f, %f, %f, %f\r\n",
+                controlPosition.positionReferenceCMD.x,
+                controlPosition.positionReferenceCMD.y,
+                controlPosition.positionReferenceCMD.z,
+                controlPosition.positionReferenceCMD.yaw);
+    }
+    break;
+    case FPT_MOTOR_SPEED_COMMAND:
+    {
+      fpc_motor_speed_t motorSpeed = {};
+      fpc_motor_speed_decode(data, &motorSpeed);
+      DEBUG_LOG("MOTOR COMMAND: %d, %d, %d, %d\r\n",
+                motorSpeed.pwmData.motor1,
+                motorSpeed.pwmData.motor2,
+                motorSpeed.pwmData.motor3,
+                motorSpeed.pwmData.motor4);
+    }
+    break;
+    default:
+      break;
+  }
+}
+
+void decoder_callback(uint8_t *data, fp_type_t packetType)
+{
+  /* Once complete frame is decoded, send response frame with queued packets */
+  rx_handler(data, packetType);
+}
+
 void device_com_setup(void)
 {
   FLN_ERR_CHECK(bsp_rf_init(rfISR));
 
-  radio_get_hedwig_address(hedwig_address);
-  radio_get_albus_address(albus_address);
+  radio_get_hedwig_address(hedwigAddress);
+  radio_get_albus_address(albusAddress);
 
-  frf_init(&radio, rf_spi_transfer, 0, bsp_rf_cs_set, bsp_rf_ce_set, vTaskDelay);
+  memset(frame_buffer, 0, MAX_FRAME_SIZE);
+
+  /* RF Module Init */
+  frf_config_t config = {
+    .transferFunc = rf_spi_transfer,
+    .spiCtx = NULL,
+    .setCS = bsp_rf_cs_set,
+    .setCE = bsp_rf_ce_set,
+    .delay = hedwig_delay,
+    .eventCallback = rf_event_callback
+  };
+
+  frf_init(&radio, &config);
+  frf_start(&radio, 2, FRF_PACKET_SIZE, hedwigAddress, albusAddress);
+
+  /* Falcon Packet Decoder Init */
+  fs_decoder_config_t decoder_config = {
+    .callback = decoder_callback
+  };
+
+  fs_decoder_init(&decoder, &decoder_config);
+
+  createFRFMutex();
 }
 
 void device_com_task(void *pvParameters)
 {
-  uint8_t payload_len = FRF_PACKET_SIZE;
-  frf_start(&radio, 2, payload_len, hedwig_address, albus_address);
-
-  char tx_data[FRF_PACKET_SIZE] = "hedwig 1";
-
-  frf_sendPacket(&radio, (uint8_t*)tx_data);
-  frf_finishSending(&radio);
+  DEBUG_LOG("Device com task started\r\n");
 
   while(1) {
-    frf_packet_t packet;
-    if (frf_getPacket(&radio, packet) == 0) {
-      DEBUG_LOG("ALBUS: %s\r\n", (char*)packet);
-
-      tx_data[7] = 48+((tx_data[7]-47)%10);
-      frf_sendPacket(&radio, (uint8_t*)tx_data);
-      frf_finishSending(&radio);
-    }
-
-    frf_process(&radio);
-
-    vTaskDelay(500);
+    rfProcess();
+    hedwig_delay(1);
   }
 }
-
