@@ -56,6 +56,7 @@ $(PROJ_DIR)/src/device_com.c \
 $(PROJ_DIR)/src/motors.c \
 $(PROJ_DIR)/src/logger.c \
 $(PROJ_DIR)/src/sensors.c \
+$(PROJ_DIR)/src/flight_control.c \
 $(COMMON_DIR)/radio_common.c \
 $(DEV_ROOT)/libraries/fimu/fimu.c \
 $(DEV_ROOT)/drivers/ICM20948/common/inv_mems_drv_hook.c \

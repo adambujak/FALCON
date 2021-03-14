@@ -7,6 +7,7 @@
 #include "motors.h"
 #include "device_com.h"
 #include "sensors.h"
+#include "flight_control.h"
 
 #include <stdint.h>
 
@@ -14,6 +15,7 @@
 #define INCLUDE_MOTORS 0
 #define INCLUDE_SENSORS 1
 #define INCLUDE_DEVICE_COM 1
+#define INCLUDE_FLIGHT_CONTROL 1
 
 static uint8_t startedOS= 0;
 
@@ -62,6 +64,9 @@ int main(void)
   #if INCLUDE_DEVICE_COM
   device_com_setup();
   #endif
+  #if INCLUDE_FLIGHT_CONTROL
+  flight_control_setup();
+  #endif
 
   #if INCLUDE_LEDS
   taskStatus = xTaskCreate(leds_task,
@@ -86,14 +91,11 @@ int main(void)
   #endif
 
   #if INCLUDE_SENSORS
-  taskStatus = xTaskCreate(sensors_task,
-                          "sensors_task",
-                          512,
-                          NULL,
-                          sensors_TASK_PRIORITY,
-                          NULL);
+  sensors_task_start();
+  #endif
 
-  RTOS_ERR_CHECK(taskStatus);
+  #if INCLUDE_FLIGHT_CONTROL
+  flight_control_task_start();
   #endif
 
   startOS();
