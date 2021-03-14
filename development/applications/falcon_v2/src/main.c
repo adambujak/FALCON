@@ -10,9 +10,10 @@
 
 #include <stdint.h>
 
-#define led_TASK_PRIORITY    (tskIDLE_PRIORITY + 2)
-#define device_com_TASK_PRIORITY  (tskIDLE_PRIORITY + 3)
-#define sensors_TASK_PRIORITY (tskIDLE_PRIORITY + 4)
+#define INCLUDE_LEDS 0
+#define INCLUDE_MOTORS 0
+#define INCLUDE_SENSORS 0
+#define INCLUDE_DEVICE_COM 1
 
 static uint8_t startedOS= 0;
 
@@ -43,15 +44,26 @@ int main(void)
 {
   int32_t taskStatus;
   bsp_board_bringup();
+
   logger_init();
-  motors_init();
 
   DEBUG_LOG("Hedwig Started \r\n");
 
-  leds_task_setup();
-  device_com_setup();
-  sensors_task_setup();
+  #if INCLUDE_MOTORS
+  motors_init();
+  #endif
 
+  #if INCLUDE_LEDS
+  leds_task_setup();
+  #endif
+  #if INCLUDE_SENSORS
+  sensors_task_setup();
+  #endif
+  #if INCLUDE_DEVICE_COM
+  device_com_setup();
+  #endif
+
+  #if INCLUDE_LEDS
   taskStatus = xTaskCreate(leds_task,
                            "led_task",
                             2*configMINIMAL_STACK_SIZE,
@@ -60,7 +72,9 @@ int main(void)
                             NULL);
 
   RTOS_ERR_CHECK(taskStatus);
+  #endif
 
+  #if INCLUDE_DEVICE_COM
   taskStatus = xTaskCreate(device_com_task,
                         "device_com_task",
                         4*configMINIMAL_STACK_SIZE,
@@ -69,7 +83,9 @@ int main(void)
                         NULL);
 
   RTOS_ERR_CHECK(taskStatus);
+  #endif
 
+  #if INCLUDE_SENSORS
   taskStatus = xTaskCreate(sensors_task,
                           "sensors_task",
                           512,
@@ -78,6 +94,7 @@ int main(void)
                           NULL);
 
   RTOS_ERR_CHECK(taskStatus);
+  #endif
 
   startOS();
 

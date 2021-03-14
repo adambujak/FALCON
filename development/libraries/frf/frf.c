@@ -117,14 +117,28 @@ static void readPacket(frf_t *instance)
 
 static void sendPayload(frf_t *instance)
 {
-  powerUpTx(instance);
   frf_packet_t packet;
   if (fifo_peek(&instance->txFifo, packet) == 0) {
-	  nRF24L01_flush_tx(&instance->rfInstance);
+    powerUpTx(instance);
+    nRF24L01_flush_tx(&instance->rfInstance);
     nRF24L01_write_tx_payload(&instance->rfInstance, packet, FRF_PACKET_SIZE);
     instance->isSending = true;
     CE_HIGH();
   }
+}
+
+static bool isTxReady(frf_t *instance)
+{
+  if (!instance->txScheduled) {
+    return false;
+  }
+  if (instance->isSending) {
+    return false;
+  }
+  if (fifo_isEmpty(&instance->txFifo)) {
+    return false;
+  }
+  return true;
 }
 
 static void handleInterrupt(frf_t *instance)
@@ -136,9 +150,9 @@ static void handleInterrupt(frf_t *instance)
   if (irqFlags & (1 << 4)) {
     instance->isSending = false;
     nRF24L01_flush_tx(&instance->rfInstance);
-    fifo_drop(&instance->txFifo);
     nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
     powerUpRx(instance);
+    instance->eventCallback(FRF_EVENT_TX_FAILED);
   }
 
   /* TX Event */
@@ -147,25 +161,30 @@ static void handleInterrupt(frf_t *instance)
     nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
     fifo_drop(&instance->txFifo);
     powerUpRx(instance);
+    instance->eventCallback(FRF_EVENT_TX_SUCCESS);
   }
 
   /* RX Event */
   if (irqFlags & (1 << 6)) {
     nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
+    // TODO add read until receive error code
+    // nRF24L01_get_rx_fifo_status
     readPacket(instance);
+    instance->eventCallback(FRF_EVENT_RX);
   }
 }
 
 /*********************** Public ***********************/
 
-void frf_init(frf_t *instance, spi_transfer_t transferFunc, void *spiCtx,
-              gpio_setter_t setCS, gpio_setter_t setCE, frf_delay_t delay)
+void frf_init(frf_t *instance, frf_config_t *config)
 {
-  instance->setCE = setCE;
-  instance->delay = delay;
+  instance->setCE = config->setCE;
+  instance->delay = config->delay;
+  instance->eventCallback = config->eventCallback;
   instance->interruptFired = false;
+  instance->txScheduled = true;
 
-  nRF24L01_initialize(&instance->rfInstance, transferFunc, spiCtx, setCS);
+  nRF24L01_initialize(&instance->rfInstance, config->transferFunc, config->spiCtx, config->setCS);
 }
 
 void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
@@ -182,9 +201,6 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE3, 0);
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE4, 0);
   nRF24L01_set_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE5, 0);
-
-  uint8_t width = nRF24L01_get_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE1);
-  width++;
 
   nRF24L01_set_output_power(&instance->rfInstance, NRF24L01_0DBM);
 
@@ -206,6 +222,9 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_irq_mode(&instance->rfInstance, 5, true);
   nRF24L01_set_irq_mode(&instance->rfInstance, 6, true);
 
+  nRF24L01_flush_tx(&instance->rfInstance);
+
+
   instance->powerState = FRF_POWER_STATE_OFF;
   instance->transferState = FRF_TRANSFER_STATE_NONE;
 
@@ -223,9 +242,15 @@ void frf_process(frf_t *instance)
     handleInterrupt(instance);
   }
 
-  if ((!instance->isSending) && (!fifo_isEmpty(&instance->txFifo))) {
+  if (isTxReady(instance)) {
     sendPayload(instance);
+    instance->txScheduled = false;
   }
+}
+
+void frf_tx(frf_t *instance)
+{
+  instance->txScheduled = true;
 }
 
 int frf_getPacket(frf_t *instance, frf_packet_t packet)
@@ -233,21 +258,21 @@ int frf_getPacket(frf_t *instance, frf_packet_t packet)
   return fifo_pop(&instance->rxFifo, packet);
 }
 
-int frf_sendPacket(frf_t *instance, frf_packet_t packet)
+int frf_pushPacket(frf_t *instance, frf_packet_t packet)
 {
   if (instance->powerState != FRF_POWER_STATE_ACTIVE) {
     return -1;
   }
 
-  int retval = fifo_push(&instance->txFifo, packet);
-  if (retval != 0) {
-    return retval;
-  }
+  return fifo_push(&instance->txFifo, packet);
+}
 
-  if (!instance->isSending) {
-    sendPayload(instance);
-  }
-  return 0;
+void frf_sendPacket(frf_t *instance, frf_packet_t packet)
+{
+  powerUpTx(instance);
+  nRF24L01_write_tx_payload(&instance->rfInstance, packet, FRF_PACKET_SIZE);
+  instance->isSending = true;
+  CE_HIGH();
 }
 
 bool frf_isSending(frf_t *instance)
@@ -269,6 +294,7 @@ void frf_finishSending(frf_t *instance)
 {
   while (frf_isSending(instance)) {
     frf_process(instance);
+    instance->delay(1);
   }
 }
 
