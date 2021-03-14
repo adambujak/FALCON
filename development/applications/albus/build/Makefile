@@ -58,6 +58,7 @@ $(FALCON_PACKET_ROOT)/fp_decode.c \
 $(FALCON_PACKET_ROOT)/ff_encoder.c \
 $(FALCON_PACKET_ROOT)/fs_decoder.c \
 $(LIBCRC_ROOT)/src/crc16.c \
+$(GRINBUF_ROOT)/grinbuf.c \
 
 ifeq ($(BOARD_VERSION), DISCO)
 C_SOURCES += $(BSP_DIR)/stm32412g_discovery.c
@@ -85,6 +86,7 @@ C_INCLUDES += \
 			-I$(DRV_ROOT) \
 			-I$(FALCON_PACKET_ROOT) \
 			-I$(LIBCRC_ROOT)/include \
+			-I$(GRINBUF_ROOT) \
 			-I$(DRV_ROOT)/nRF24L01/ \
 			-I$(PROJ_DIR)/include \
             -I$(COMMON_DIR) \
