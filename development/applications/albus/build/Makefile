@@ -18,6 +18,9 @@ FREERTOS_PORTABLE = $(FREERTOS_ROOT)/portable/GCC/ARM_CM4F
 HAL_DIR = $(SDK_ROOT)/Drivers/STM32F4xx_HAL_Driver
 BSP_DIR = $(SDK_ROOT)/Drivers/BSP/STM32412G-Discovery
 CMSIS_DIR = $(SDK_ROOT)/Drivers/CMSIS
+FALCON_PACKET_ROOT = $(LIB_ROOT)/falcon_packet
+LIBCRC_ROOT = $(LIB_ROOT)/libcrc
+GRINBUF_ROOT = $(LIB_ROOT)/grinbuf
 
 ######################################
 # source
@@ -49,6 +52,12 @@ $(PROJ_DIR)/src/system_stm32f4xx.c \
 $(PROJ_DIR)/src/device_com.c \
 $(PROJ_DIR)/src/logger.c \
 $(COMMON_DIR)/radio_common.c \
+$(FALCON_PACKET_ROOT)/falcon_packet.c \
+$(FALCON_PACKET_ROOT)/fp_encode.c \
+$(FALCON_PACKET_ROOT)/fp_decode.c \
+$(FALCON_PACKET_ROOT)/ff_encoder.c \
+$(FALCON_PACKET_ROOT)/fs_decoder.c \
+$(LIBCRC_ROOT)/src/crc16.c \
 
 ifeq ($(BOARD_VERSION), DISCO)
 C_SOURCES += $(BSP_DIR)/stm32412g_discovery.c
@@ -74,6 +83,8 @@ C_INCLUDES += \
 			-I$(FLN_BSP_DIR)/ \
 			-I$(LIB_ROOT)/frf/ \
 			-I$(DRV_ROOT) \
+			-I$(FALCON_PACKET_ROOT) \
+			-I$(LIBCRC_ROOT)/include \
 			-I$(DRV_ROOT)/nRF24L01/ \
 			-I$(PROJ_DIR)/include \
             -I$(COMMON_DIR) \
