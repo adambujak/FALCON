@@ -16,22 +16,20 @@
 
 /* Enums */
 typedef enum {
-  FPT_FLIGHT_CONTROL_STICK_COMMAND = 0,
-  FPT_FLIGHT_CONTROL_POSITION_COMMAND = 1,
-  FPT_MOTOR_SPEED_COMMAND = 2,
-  FPT_MOTOR_SPEED_QUERY = 3,
-  FPT_MOTOR_SPEED_RESPONSE = 4,
-  FPT_SET_DESTINATION_COMMAND = 5,
-  FPT_STATUS_RESPONSE = 6,
-  FPT_CNT = 7
+  FPT_MODE_COMMAND = 0,
+  FPT_MODE_QUERY = 1,
+  FPT_MODE_RESPONSE = 2,
+  FPT_FLIGHT_CONTROL_COMMAND = 3,
+  FPT_STATUS_RESPONSE = 4,
+  FPT_CNT = 5
 } fp_type_t;
 
 typedef enum {
-  FE_FLIGHT_CONTROL_MODE_STICK = 0,
-  FE_FLIGHT_CONTROL_MODE_MOTION = 1,
-  FE_FLIGHT_CONTROL_MODE_POSITION = 2,
-  FE_FLIGHT_CONTROL_MODE_CNT = 3
-} fe_flight_control_mode_t;
+  FE_FALCON_MODE_IDLE = 0,
+  FE_FALCON_MODE_CALIBRATING = 1,
+  FE_FALCON_MODE_FCS_READY = 2,
+  FE_FLIGHT_MODE_FLY = 3
+} fe_falcon_mode_t;
 
 /* Types */
 typedef struct {
@@ -42,61 +40,51 @@ typedef struct {
 } ft_motor_pwm_control_data_t;
 
 typedef struct {
-  float longitude;
-  float latitude;
-} ft_gps_coordinate_data_t;
+  float x;
+  float y;
+  float z;
+  float dx;
+  float dy;
+  float dz;
+  float yaw;
+  float pitch;
+  float roll;
+  float p;
+  float q;
+  float r;
+} ft_fcs_state_estimate_t;
 
 typedef struct {
-  ft_gps_coordinate_data_t gps;
+  fe_falcon_mode_t mode;
   ft_motor_pwm_control_data_t motor;
-  uint8_t someEight;
-  int8_t someIEight;
-  int16_t someSixteen;
-  uint32_t someThirtyTwo;
-  int32_t someIThirtyTwo;
+  ft_fcs_state_estimate_t states;
 } ft_status_data_t;
 
 typedef struct {
   float yaw;
   float pitch;
   float roll;
-  float z;
-} ft_orientation_reference_t;
-
-typedef struct {
-  float x;
-  float y;
-  float z;
-  float yaw;
-} ft_position_reference_t;
+  float alt;
+} ft_fcs_control_input_t;
 
 /* Packets */
 typedef struct {
-  ft_orientation_reference_t orientationReferenceCmd;
-} fpc_flight_control_stick_t;
+  fe_falcon_mode_t mode;
+} fpc_mode_t;
 
 typedef struct {
-  ft_position_reference_t positionReferenceCMD;
-} fpc_flight_control_position_t;
+  fe_falcon_mode_t mode;
+} fpq_mode_t;
 
 typedef struct {
-  ft_motor_pwm_control_data_t pwmData;
-} fpc_motor_speed_t;
+  fe_falcon_mode_t mode;
+} fpr_mode_t;
 
 typedef struct {
-  ft_motor_pwm_control_data_t pwmData;
-} fpq_motor_speed_t;
+  ft_fcs_control_input_t fcsControlCmd;
+} fpc_flight_control_t;
 
 typedef struct {
-  ft_motor_pwm_control_data_t pwmData;
-} fpr_motor_speed_t;
-
-typedef struct {
-  ft_gps_coordinate_data_t gpsData;
-} fpc_set_destination_t;
-
-typedef struct {
-  ft_gps_coordinate_data_t gpsData;
   ft_status_data_t status;
 } fpr_status_t;
 
