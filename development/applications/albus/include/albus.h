@@ -29,6 +29,8 @@
     }                       \
   } while (0)
 
-void OSSysTick_Handler(void);
+extern void albus_delay(uint32_t ms);
+extern void albus_sysTickHandler(void);
+extern void OSSysTickHandler(void);
 
 #endif  // ALBUS_H

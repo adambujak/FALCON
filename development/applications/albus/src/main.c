@@ -1,5 +1,5 @@
 #include "bsp.h"
-#include "albus.h"
+#include "falcon_common.h"
 #include "stm32f4xx_it.h"
 
 #include "logger.h"
@@ -9,6 +9,31 @@
 
 #define logger_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 #define device_com_TASK_PRIORITY  (tskIDLE_PRIORITY + 2)
+
+static uint8_t startedOS= 0;
+
+static void startOS(void)
+{
+  startedOS = 1;
+  vTaskStartScheduler();
+}
+
+void albus_delay(uint32_t ms)
+{
+  if (startedOS) {
+    vTaskDelay(MS_TO_TICKS(ms));
+  }
+  else {
+    HAL_Delay(ms);
+  }
+}
+
+void albus_sysTickHandler(void)
+{
+  if (startedOS) {
+    OSSysTickHandler();
+  }
+}
 
 int main(void)
 {
@@ -34,6 +59,7 @@ int main(void)
   OSStarted();
   vTaskStartScheduler();
 
+  startOS();
   /* Should never reach here */
   while (1);
 }

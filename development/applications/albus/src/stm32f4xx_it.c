@@ -82,8 +82,6 @@ void DebugMon_Handler(void)
 void SysTick_Handler(void)
 {
   HAL_IncTick();
-  if (isOSStarted) {
-	xPortSysTickHandler();
-  }
+  albus_sysTickHandler();
 }
 
