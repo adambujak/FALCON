@@ -2,8 +2,8 @@ TARGET = FALCON
 DEBUG = 1
 BUILD_DIR = _build
 BUILD_CONFIG ?= DEBUG
-#BOARD_VERSION ?= DISCO
-BOARD_VERSION ?= V1
+BOARD_VERSION ?= DISCO
+#BOARD_VERSION ?= V1
 
 
 FALCON_ROOT = ../../../..
@@ -76,6 +76,8 @@ $(DEV_ROOT)/drivers/ICM20948/invn/common/ml_math_func.c \
 $(DEV_ROOT)/drivers/ICM20948/invn/common/mlmath.c \
 $(DEV_ROOT)/drivers/MPL3115A2/MPL3115A2.c \
 $(DEV_ROOT)/libraries/fbaro/fbaro.c \
+$(DEV_ROOT)/libraries/flight_control/flightController.c \
+$(DEV_ROOT)/libraries/flight_control/flightController_data.c \
 $(FALCON_PACKET_ROOT)/falcon_packet.c \
 $(FALCON_PACKET_ROOT)/fs_decoder.c \
 $(FALCON_PACKET_ROOT)/ff_encoder.c \
@@ -86,7 +88,7 @@ $(GRINBUF_ROOT)/grinbuf.c \
 $(LIBCRC_ROOT)/src/crc16.c \
 
 ifeq ($(BOARD_VERSION), DISCO)
-C_SOURCES += (BSP_DIR)/stm32412g_discovery.c
+C_SOURCES += $(BSP_DIR)/stm32412g_discovery.c
 endif
 
 # ASM sources
@@ -127,7 +129,8 @@ C_INCLUDES += \
  			-I$(DEV_ROOT)/drivers/ICM20948/common \
  			-I$(DEV_ROOT)/libraries/fimu \
  			-I$(DEV_ROOT)/drivers/MPL3115A2 \
- 		    -I$(DEV_ROOT)/libraries/fbaro
+ 		    -I$(DEV_ROOT)/libraries/fbaro \
+ 		    -I$(DEV_ROOT)/libraries/flight_control
 
 # macros for gcc
 # AS defines
@@ -136,7 +139,7 @@ AS_DEFS =
 ifeq ($(BOARD_VERSION), DISCO)
 CHIPSET_DEF = STM32F412Zx
 C_DEFS += -DUSE_STM32412G_DISCOVERY
-C_DEFS += -DBOARD_VDISCO
+C_DEFS += -DBOARD_DISCO
 else
 CHIPSET_DEF = STM32F412Rx
 C_DEFS += -DBOARD_V1
@@ -150,8 +153,6 @@ C_DEFS +=  \
 -DMEMS_20648 \
 -DMEMS_SECONDARY_DEVICE \
 -DMEMS_AUGMENTED_SENSORS \
--D$(BUILD_CONFIG)
-
 
 OPT = -O0 -g3
 

@@ -3,10 +3,10 @@
 
 #include "falcon_common.h"
 
-#define MOTOR1 1
-#define MOTOR2 2
-#define MOTOR3 3
-#define MOTOR4 4
+#define MOTOR_1 0
+#define MOTOR_2 1
+#define MOTOR_3 2
+#define MOTOR_4 3
 
 void motors_init(void);
 void motors_set_motor_us(uint8_t motor, uint16_t speed);

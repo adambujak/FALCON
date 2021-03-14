@@ -7,10 +7,10 @@ void motors_init(void)
 
   DEBUG_LOG("Motors Init\r\n");
 
-  motors_set_motor_us(1, 0);
-  motors_set_motor_us(2, 0);
-  motors_set_motor_us(3, 0);
-  motors_set_motor_us(4, 0);
+  motors_set_motor_us(MOTOR_1, 0);
+  motors_set_motor_us(MOTOR_2, 0);
+  motors_set_motor_us(MOTOR_3, 0);
+  motors_set_motor_us(MOTOR_4, 0);
 
   HAL_Delay(1000);
 

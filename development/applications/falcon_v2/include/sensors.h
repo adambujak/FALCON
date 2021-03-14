@@ -1,14 +1,8 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-typedef struct {
-  float gyro_data_SI[3];
-  float accel_data_SI[3];
-  float quat_data[4];
-  float alt_data_SI;
-} sensor_data_t;
-
-sensor_data_t sensor_data;
+#include "flightController.h"          /* Model's header file */
+#include "rtwtypes.h"
 
 void sensors_task_setup(void);
 void sensors_task(void *pvParameters);

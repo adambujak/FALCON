@@ -328,7 +328,7 @@ void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us)
   };
 
   pwmConfig.Pulse = us;
-  uint32_t channel = motorChannels[motor-1];
+  uint32_t channel = motorChannels[motor];
 
   if (HAL_TIM_PWM_ConfigChannel(&motorTimerHandle, &pwmConfig, channel) != HAL_OK) {
     error_handler();

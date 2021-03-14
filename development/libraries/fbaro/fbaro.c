@@ -20,6 +20,8 @@ int fbaro_init(fbaro_config_t *config)
 
   MPL3115A2_Initialize();     //Initialize the sensor
 
+  MPL3115A2_ActiveMode();     //Configure the sensor for active mode
+
   barometer.active = TRUE;
 
   MPL3115A2_AltimeterMode();

@@ -28,6 +28,10 @@ int fimu_start(fimu_config_t config);
 
 void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *rv_float);
 
-int fimu_calibrate(void);
+int fimu_calibrate_DMP(void);
+
+int fimu_calibrate_offset(void);
+
+void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias);
 
 #endif // FIMU_H
