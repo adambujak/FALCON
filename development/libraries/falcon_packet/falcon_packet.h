@@ -25,10 +25,10 @@ typedef enum {
 } fp_type_t;
 
 typedef enum {
-  FE_FALCON_MODE_IDLE = 0,
-  FE_FALCON_MODE_CALIBRATING = 1,
-  FE_FALCON_MODE_FCS_READY = 2,
-  FE_FLIGHT_MODE_FLY = 3
+  FE_FLIGHT_MODE_IDLE = 1,
+  FE_FLIGHT_MODE_CALIBRATING = 2,
+  FE_FLIGHT_MODE_FCS_READY = 3,
+  FE_FLIGHT_MODE_FLY = 4
 } fe_falcon_mode_t;
 
 /* Types */

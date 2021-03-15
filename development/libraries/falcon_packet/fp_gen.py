@@ -20,6 +20,132 @@ def convert_camel_case_to_lower_underscore(camelStr):
         output += s.lower() + "_"
     return output[0:-1]
 
+python_struct_pack_str_dict = {
+"uint8_t": "<B",
+"int8_t": "<b",
+"uint16_t": "<H",
+"int16_t": "<h",
+"uint32_t": "<L",
+"int32_t": "<l",
+"float": "<f",
+"uint64_t": "<Q"
+}
+
+class EnumField:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+class EnumClass:
+    def __init__(self, fields):
+        self.fields = fields
+
+enumDict = {}
+definesDict = {}
+
+def python_get_packet_size_lookup():
+    output = "packet_size_lookup_dict = {\n"
+
+    for key in packetsDict:
+        packet = packetsDict[key]
+        output += "    fp_type_t.{}: {},\n".format(packetTypesDict[packet.name]["typeName"], packet.size)
+
+    output = output[0:-1]
+    output += "\n};"
+    return output
+
+def python_get_packet_size_str():
+    output = ""
+    output += python_get_packet_size_lookup()
+    output += "\n"
+    output += "\n"
+
+    output += "def get_packet_size(packetType):"
+    output += "\n   return packet_size_lookup_dict[packetType]"
+    output += "\n"
+    output += "\n"
+
+    return output
+
+def python_defines_str():
+    output = ""
+    for define in definesDict:
+        output += "{} = {}\n".format(define, definesDict[define])
+    output += "\n"
+    return output
+
+
+def python_encode_header_str():
+    output = ""
+    output += "def encode_header(dest, packetType, offset):"
+    output += "\n    struct.pack_into('<B', dest, offset, PACKET_DELIMITER1)"
+    output += "\n    struct.pack_into('<B', dest, offset + 1, PACKET_DELIMITER2)"
+    output += "\n    struct.pack_into('<B', dest, offset + 2, packetType)\n\n"
+    return output
+
+def python_encode_field_str(field, offset):
+    output = ""
+    if (field.varType.isPrimitive):
+        output += "struct.pack_into('{}', dest, offset + {}, self.{})".format(python_struct_pack_str_dict[field.varType.nameStr], offset, field.name)
+    else:
+        output += "self.{}.encode(dest, offset + {})".format(field.name, offset)
+    return output
+
+def python_class_str(className, fields, isPacket=False):
+    output = ""
+    output += "class {}:".format(className)
+    output += "\n    def __init__(self, encoded=None, offset=0, **kwargs):"
+    output += "\n        if encoded:"
+    output += "\n            self.decode(encoded, offset)"
+    output += "\n        else:"
+    for field in fields:
+        output += "\n            self.{} = kwargs.get(\"{}\", 0)".format(field.name, field.name)
+    output += "\n\n    def encode(self, dest, offset=0):"
+    offset = 0
+
+    if (isPacket):
+        output += "\n        encode_header(dest, fp_type_t.{}, 0)".format(packetTypesDict[className]["typeName"])
+        offset = PACKET_HEADER_SIZE
+
+    for field in fields:
+        output += "\n        {}".format(python_encode_field_str(field, offset))
+        offset += field.varType.size
+    output += "\n"
+    output += "\n"
+    return output
+
+def python_enum_str(className):
+    output = ""
+    output += "class {}(IntEnum):".format(className)
+    enumClass = enumDict[className]
+    fields = enumClass.fields
+    for field in fields:
+        output += "\n    {} = {}".format(field.name, field.value)
+    output += "\n"
+    output += "\n"
+    return output
+
+def build_python_packet_type_enum():
+    count = 0
+    fields = []
+    for key in packetsDict:
+        packet = packetsDict[key]
+        packetTypeName = convert_camel_case_to_caps_underscore(key)
+        packetTypeEnumName = "FPT_{}".format(packetTypeName)
+        fields += [EnumField(packetTypeEnumName, count)]
+        count += 1
+
+    fields += [EnumField("FPT_CNT", count)]
+
+    output = ""
+    output += "class fp_type_t(IntEnum):"
+    for field in fields:
+        output += "\n    {} = {}".format(field.name, field.value)
+    output += "\n"
+    output += "\n"
+    return output
+
+
 class Field:
     def __init__(self, varType, name):
         self.varType = varType
@@ -39,6 +165,12 @@ class VarType:
             output += "\n  {} {};".format(field.varType.nameStr, field.name)
         output += "\n} " + "{};".format(self.nameStr)
         return output
+
+    def build_python_struct_str(self):
+        if self.isEnum:
+            python_enum_str(self.nameStr)
+        else:
+            return python_class_str(self.nameStr, self.fields)
 
     def __str__(self):
         output = "VarType:"
@@ -63,6 +195,9 @@ class Packet:
             output += "\n  {} {};".format(field.varType.nameStr, field.name)
         output += "\n} " + "{};".format(self.name)
         return output
+
+    def build_python_struct_str(self):
+        return python_class_str(self.name, self.fields, True)
 
     def __str__(self):
         output = "Packet:"
@@ -120,14 +255,20 @@ def build_enums(enums):
         values = []
         size = e["size"]
 
+        enumFields = []
         for value in e["values"]:
             output += "\n  FE_{} = {},".format(value["name"], value["value"])
+            enumFields += [EnumField("FE_{}".format(value["name"]), value["value"])]
 
         # remove last comma in emum
         output = output[0:-1]
+        newEnum = EnumClass(enumFields)
+
 
         newTypeName = "fe_{}_t".format(convert_camel_case_to_lower_underscore(e["name"]))
         newType = VarType(newTypeName, size, False, True)
+
+        enumDict[newTypeName] = newEnum
 
         output += "\n} " + "{};\n\n".format(newTypeName);
 
@@ -202,6 +343,7 @@ def build_packet_type_enum():
 def build_defines(defines):
     output = ""
     for d in defines:
+        definesDict[d] = defines[d];
         output += "#define {} {}\n".format(d, defines[d])
     output += "\n"
     return output
@@ -506,6 +648,34 @@ def write_encode_source_file():
         outputFile.write(get_encode_functions())
         outputFile.write(get_generic_encode_function())
 
+def write_python_file():
+    output = ""
+    output += "import struct"
+    output += "\nfrom enum import IntEnum\n\n"
+
+    output += python_defines_str()
+    output += build_python_packet_type_enum()
+    output += python_get_packet_size_str()
+    output += python_encode_header_str()
+
+
+    for key in typesDict:
+        varType = typesDict[key]
+        if varType.isPrimitive is False:
+                if varType.isEnum:
+                    output += python_enum_str(varType.nameStr)
+                else:
+                    output += varType.build_python_struct_str()
+                    output += "\n"
+
+    for key in packetsDict:
+        packet = packetsDict[key]
+        output += packet.build_python_struct_str()
+        output += "\n"
+
+    with open("falcon_packet.py", "w") as outputFile:
+        outputFile.write(output)
+
 with open("fp.yaml", 'r') as stream:
     try:
         yaml_file = yaml.safe_load(stream)
@@ -515,6 +685,7 @@ with open("fp.yaml", 'r') as stream:
         write_encode_source_file()
         write_decode_header_file()
         write_decode_source_file()
+        write_python_file()
 
     except yaml.YAMLError as exc:
         print(exc)
