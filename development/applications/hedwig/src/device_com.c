@@ -135,6 +135,16 @@ void decoder_callback(uint8_t *data, fp_type_t packetType)
   rx_handler(data, packetType);
 }
 
+static void device_com_task(void *pvParameters)
+{
+  DEBUG_LOG("Device com task started\r\n");
+
+  while(1) {
+    rfProcess();
+    hedwig_delay(1);
+  }
+}
+
 void device_com_setup(void)
 {
   FLN_ERR_CHECK(bsp_rf_init(rfISR));
@@ -167,12 +177,14 @@ void device_com_setup(void)
   createFRFMutex();
 }
 
-void device_com_task(void *pvParameters)
+void device_com_start(void)
 {
-  DEBUG_LOG("Device com task started\r\n");
+  BaseType_t taskStatus = xTaskCreate(device_com_task,
+                          "device_com_task",
+                          4*configMINIMAL_STACK_SIZE,
+                          NULL,
+                          device_com_TASK_PRIORITY,
+                          NULL);
 
-  while(1) {
-    rfProcess();
-    hedwig_delay(1);
-  }
+  RTOS_ERR_CHECK(taskStatus);
 }

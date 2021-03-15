@@ -6,6 +6,6 @@
 void leds_toggle(void);
 void leds_set_color(uint8_t r, uint8_t g, uint8_t b);
 void leds_task_setup(void);
-void leds_task(void *pvParameters);
+void leds_task_start(void);
 
 #endif  // LEDS_H

@@ -83,13 +83,6 @@ void leds_toggle(void)
   }
 }
 
-void leds_task_setup(void)
-{
-  LED_LOW();
-  FLN_ERR_CHECK(bsp_leds_init(callback));
-  leds_set_color(0x15,0x0,0x10);
-}
-
 void leds_task(void *pvParameters)
 {
  while (1) {
@@ -98,4 +91,24 @@ void leds_task(void *pvParameters)
     vTaskDelay(1500);
   }
 }
+
+void leds_task_setup(void)
+{
+  LED_LOW();
+  FLN_ERR_CHECK(bsp_leds_init(callback));
+  leds_set_color(0x15,0x0,0x10);
+}
+
+void leds_task_start(void)
+{
+  BaseType_t taskStatus = xTaskCreate(leds_task,
+                           "led_task",
+                           2*configMINIMAL_STACK_SIZE,
+                           NULL,
+                           led_TASK_PRIORITY,
+                           NULL);
+
+  RTOS_ERR_CHECK(taskStatus);
+}
+
 

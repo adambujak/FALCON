@@ -54,7 +54,6 @@ int main(void)
   #if INCLUDE_MOTORS
   motors_init();
   #endif
-
   #if INCLUDE_LEDS
   leds_task_setup();
   #endif
@@ -69,31 +68,14 @@ int main(void)
   #endif
 
   #if INCLUDE_LEDS
-  taskStatus = xTaskCreate(leds_task,
-                           "led_task",
-                            2*configMINIMAL_STACK_SIZE,
-                            NULL,
-                            led_TASK_PRIORITY,
-                            NULL);
-
-  RTOS_ERR_CHECK(taskStatus);
+  leds_task_tart();
   #endif
-
   #if INCLUDE_DEVICE_COM
-  taskStatus = xTaskCreate(device_com_task,
-                        "device_com_task",
-                        4*configMINIMAL_STACK_SIZE,
-                        NULL,
-                        device_com_TASK_PRIORITY,
-                        NULL);
-
-  RTOS_ERR_CHECK(taskStatus);
+  device_com_start();
   #endif
-
   #if INCLUDE_SENSORS
   sensors_task_start();
   #endif
-
   #if INCLUDE_FLIGHT_CONTROL
   flight_control_task_start();
   #endif

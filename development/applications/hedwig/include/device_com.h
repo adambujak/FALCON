@@ -3,7 +3,7 @@
 
 #include "falcon_common.h"
 
-void device_com_task(void *pvParameters);
-void device_com_setup (void);
+void device_com_setup(void);
+void device_com_start(void);
 
 #endif // DEVICE_COM_H
