@@ -105,7 +105,7 @@ void rt_OneStep(RT_MODEL *const rtM)
       unlock_command_data();
     }
     else {
-      DEBUG_LOG("commandDataMutex take failed\r\n");
+      LOG_DEBUG("commandDataMutex take failed\r\n");
       error_handler();
     }
     unlock_sensor_data();
@@ -133,11 +133,15 @@ void rt_OneStep(RT_MODEL *const rtM)
 
 static void flight_control_callback(TimerHandle_t xTimer)
 {
-  rt_OneStep(rtM);
+  LOG_DEBUG("flight_control_callback CALLED\r\n");
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-  LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
-            rtY_State_Estim.z, rtY_State_Estim.dz, rtY_State_Estim.yaw, rtY_State_Estim.pitch, rtY_State_Estim.roll,
-            rtY_State_Estim.p, rtY_State_Estim.q, rtY_State_Estim.r);
+  xTaskNotifyFromISR(flight_control_task_handle,
+                     0,
+                     eSetBits,
+                     &xHigherPriorityTaskWoken);
+
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 void flight_control_set_sensor_data(float *gyro_data, float *accel_data, float *quat_data, float alt_data)
@@ -164,7 +168,7 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input)
     unlock_command_data();
   }
   else {
-    DEBUG_LOG("commandDataMutex take failed\r\n");
+    LOG_DEBUG("commandDataMutex take failed\r\n");
   }
 }
 
@@ -212,10 +216,35 @@ static void flight_control_task(void *pvParameters)
 
   flight_control_start();
 
+  BaseType_t flightTimerNotification;
+
   while(1)
   {
-    // getShitFromSensorsANDCom();
-    vTaskDelay(2);
+
+    /* Wait to be notified of an interrupt. */
+    flightTimerNotification = xTaskNotifyWait(pdFALSE,
+                                         0xFFFFFFFF,
+                                         NULL,
+                                         MS_TO_TICKS(12));
+
+    if (flightTimerNotification == pdPASS) {
+
+      rt_OneStep(rtM);
+
+      LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
+          rtY_State_Estim.z,
+          rtY_State_Estim.dz,
+          rtY_State_Estim.yaw,
+          rtY_State_Estim.pitch,
+          rtY_State_Estim.roll,
+          rtY_State_Estim.p,
+          rtY_State_Estim.q,
+          rtY_State_Estim.r);
+    }
+    else {
+      LOG_DEBUG("timer notif not received\r\n");
+      error_handler();
+    }
   }
 }
 
