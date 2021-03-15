@@ -2,6 +2,7 @@
 
 #include "falcon_common.h"
 #include "motors.h"
+#include "falcon_packet.h"
 
 #include "flightController.h"
 #include "rtwtypes.h"
@@ -25,12 +26,13 @@ static states_estimate_t rtY_State_Estim;
 /* '<Root>/Throttle' */
 static uint16_T rtY_Throttle[4];
 
-TimerHandle_t flight_control_timer;
-BaseType_t FC_timerStatus;
+static TimerHandle_t flight_control_timer;
+static BaseType_t FC_timerStatus;
 
 static TaskHandle_t flight_control_task_handle = NULL;
 
 static SemaphoreHandle_t sensorDataMutex;
+static SemaphoreHandle_t commandDataMutex;
 
 static inline BaseType_t lock_sensor_data(void)
 {
@@ -42,10 +44,28 @@ static inline void unlock_sensor_data(void)
   xSemaphoreGive(sensorDataMutex);
 }
 
+static inline BaseType_t lock_command_data(void)
+{
+  return xSemaphoreTake(commandDataMutex, RTOS_TIMEOUT_TICKS);
+}
+
+static inline void unlock_command_data(void)
+{
+  xSemaphoreGive(commandDataMutex);
+}
+
 static inline void createSensorDataMutex(void)
 {
   sensorDataMutex = xSemaphoreCreateMutex();
   if (sensorDataMutex == NULL) {
+    error_handler();
+  }
+}
+
+static inline void createCommandDataMutex(void)
+{
+  commandDataMutex = xSemaphoreCreateMutex();
+  if (commandDataMutex == NULL) {
     error_handler();
   }
 }
@@ -79,9 +99,15 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Set model inputs here */
 
   /* Step the model */
-  if (lock_sensor_data() == pdTRUE) {
-    LOG_DEBUG("flight controller step\r\n");
-    flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+  if (lock_sensor_data() == pdTRUE ) {
+    if (lock_command_data() == pdTRUE) {
+      flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+      unlock_command_data();
+    }
+    else {
+      DEBUG_LOG("commandDataMutex take failed\r\n");
+      error_handler();
+    }
     unlock_sensor_data();
   }
   else {
@@ -114,6 +140,20 @@ static void flight_control_callback(TimerHandle_t xTimer)
             rtY_State_Estim.p, rtY_State_Estim.q, rtY_State_Estim.r);
 }
 
+static void flight_control_task(void *pvParameters)
+{
+
+  vTaskDelay(10000);
+
+  flight_control_start();
+
+  while(1)
+  {
+    // getShitFromSensorsANDCom();
+    vTaskDelay(2);
+  }
+}
+
 void flight_control_set_sensor_data(float *gyro_data, float *accel_data, float *quat_data, float alt_data)
 {
   if (lock_sensor_data() == pdTRUE) {
@@ -128,17 +168,24 @@ void flight_control_set_sensor_data(float *gyro_data, float *accel_data, float *
   }
 }
 
-void flight_control_setup(void)
+void flight_control_set_command_data(fpc_flight_control_t *control_input)
 {
-  /* Pack model data into RTM */
-  rtM->dwork = &rtDW;
+  if(lock_command_data() == pdTRUE) {
+    rtU_Commands.control_input.yaw_cmd = control_input->fcsControlCmd.yaw;
+    rtU_Commands.control_input.pitch_cmd = control_input->fcsControlCmd.pitch;
+    rtU_Commands.control_input.roll_cmd = control_input->fcsControlCmd.roll;
+    rtU_Commands.control_input.alt_cmd = control_input->fcsControlCmd.alt;
+    unlock_command_data();
+  }
+  else {
+    DEBUG_LOG("commandDataMutex take failed\r\n");
+  }
+}
 
-  /* Initialize model */
-  flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
-
-  flight_control_timer = xTimerCreate("flight_control_timer", FC_PERIOD_MS, pdTRUE, 0, flight_control_callback);
-
-  createSensorDataMutex();
+void flight_control_start(void)
+{
+  FC_timerStatus = xTimerStart( flight_control_timer, 0 );
+  RTOS_ERR_CHECK(FC_timerStatus);
 }
 
 // int flight_control_stop(void)
@@ -153,12 +200,6 @@ void flight_control_setup(void)
 //     return 1;
 //   }
 // }
-
-void flight_control_start(void)
-{
-  FC_timerStatus = xTimerStart(flight_control_timer, 0);
-  RTOS_ERR_CHECK(FC_timerStatus);
-}
 
 // int flight_control_reset(void)
 // {
@@ -178,16 +219,18 @@ void flight_control_start(void)
 //   }
 // }
 
-static void flight_control_task(void *pvParameters)
+void flight_control_setup(void)
 {
-  vTaskDelay(20000);
+  /* Pack model data into RTM */
+  rtM->dwork = &rtDW;
 
-  flight_control_start();
+  /* Initialize model */
+  flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
 
-  while (1) {
-    // getShitFromSensorsANDCom();
-    vTaskDelay(2);
-  }
+  flight_control_timer = xTimerCreate("flight_control_timer", FC_PERIOD_MS, pdTRUE, 0, flight_control_callback);
+
+  createSensorDataMutex();
+  createCommandDataMutex();
 }
 
 void flight_control_task_start(void)
