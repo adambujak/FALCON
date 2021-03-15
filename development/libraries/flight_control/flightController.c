@@ -9,7 +9,7 @@
  *
  * Model version                  : 1.113
  * Simulink Coder version         : 9.4 (R2020b) 29-Jul-2020
- * C/C++ source code generated on : Sat Mar 13 16:54:18 2021
+ * C/C++ source code generated on : Sun Mar 14 11:45:49 2021
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -20,7 +20,6 @@
  */
 
 #include "flightController.h"
-#include "motors.h"
 
 const states_estimate_t flightController_rtZstates_estimate_t = {
   0.0F,                                /* x */
@@ -53,7 +52,8 @@ const sensor_data_t flightController_rtZsensor_data = { { 0.0F, 0.0F, 0.0F },/* 
 
 /* Model step function */
 void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
-  sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim)
+  sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim, uint16_T
+  rtY_Throttle[4])
 {
   DW *rtDW = rtM->dwork;
   real_T rtb_VectorConcatenate_b[9];
@@ -802,17 +802,17 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(0, 1000U);
+    rtY_Throttle[0] = 1000U;
   } else if (rtb_fcn3 < 100.0) {
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(0, 100U);
+    rtY_Throttle[0] = 100U;
   } else {
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(0, (uint16_T)rtb_fcn3);
+    rtY_Throttle[0] = (uint16_T)rtb_fcn3;
   }
 
   /* Sum: '<S5>/MotorFL' incorporates:
@@ -826,17 +826,17 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(1, 1000U);
+    rtY_Throttle[1] = 1000U;
   } else if (rtb_fcn3 < 100.0) {
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(1, 100U);
+    rtY_Throttle[1] = 100U;
   } else {
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(1, (uint16_T)rtb_fcn3);
+    rtY_Throttle[1] = (uint16_T)rtb_fcn3;
   }
 
   /* Sum: '<S5>/MotorBR' */
@@ -847,17 +847,17 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(2, 1000U);
+    rtY_Throttle[2] = 1000U;
   } else if (rtb_fcn3 < 100.0) {
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(2, 100U);
+    rtY_Throttle[2] = 100U;
   } else {
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(2, (uint16_T)rtb_fcn3);
+    rtY_Throttle[2] = (uint16_T)rtb_fcn3;
   }
 
   /* Sum: '<S5>/MotorBL' */
@@ -868,17 +868,17 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(3, 1000U);
+    rtY_Throttle[3] = 1000U;
   } else if (rtb_fcn3 < 100.0) {
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(3, 100U);
+    rtY_Throttle[3] = 100U;
   } else {
     /* Outport: '<Root>/Throttle' incorporates:
      *  DataTypeConversion: '<S5>/Data Type Conversion'
      */
-    motors_set_motor_us(3, (uint16_T)rtb_fcn3);
+    rtY_Throttle[3] = (uint16_T)rtb_fcn3;
   }
 
   /* End of Outputs for SubSystem: '<S1>/MotorMixing' */
@@ -909,7 +909,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
 
 /* Model initialize function */
 void flightController_initialize(RT_MODEL *const rtM, FCS_command_t
-  *rtU_Commands, sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim)
+  *rtU_Commands, sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim,
+  uint16_T rtY_Throttle[4])
 {
   DW *rtDW = rtM->dwork;
 
@@ -925,6 +926,8 @@ void flightController_initialize(RT_MODEL *const rtM, FCS_command_t
 
   /* external outputs */
   (*rtY_State_Estim) = flightController_rtZstates_estimate_t;
+  (void) memset(&rtY_Throttle[0], 0,
+                4U*sizeof(uint16_T));
 
   {
     int32_T i;

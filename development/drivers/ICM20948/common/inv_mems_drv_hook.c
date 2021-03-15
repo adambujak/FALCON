@@ -39,14 +39,15 @@ int inv_serial_interface_read_hook(uint16_t reg, uint32_t length, uint8_t *data)
 **/
 void inv_sleep(unsigned long mSecs)
 {
-    TickType_t xDelay;
-
-    unsigned long TICK_PERIOD_MS = 1000L / configTICK_RATE_HZ;
-    /* take the ceiling */
-    xDelay = (mSecs + TICK_PERIOD_MS - 1) / TICK_PERIOD_MS;
-
-    /* must add one tick to ensure a full duration of xDelay ticks */
-    vTaskDelay(xDelay + 1);
+//    TickType_t xDelay;
+//
+//    unsigned long TICK_PERIOD_MS = 1000L / configTICK_RATE_HZ;
+//    /* take the ceiling */
+//    xDelay = (mSecs + TICK_PERIOD_MS - 1) / TICK_PERIOD_MS;
+//
+//    /* must add one tick to ensure a full duration of xDelay ticks */
+//    vTaskDelay(xDelay + 1);
+	hedwig_delay(mSecs);
 }
 
 void inv_sleep_100us(unsigned long nHowMany100MicroSecondsToSleep)

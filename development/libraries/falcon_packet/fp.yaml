@@ -10,13 +10,13 @@ defines:
   FRAME_FOOTER_SIZE: 0x2
 
 enums:
-  - name: flightControlMode
+  - name: falconMode
     size: 1
     values:
-    - {name: FLIGHT_CONTROL_MODE_STICK, value: 0x0}
-    - {name: FLIGHT_CONTROL_MODE_MOTION, value: 0x1}
-    - {name: FLIGHT_CONTROL_MODE_POSITION, value: 0x2}
-    - {name: FLIGHT_CONTROL_MODE_CNT, value: 0x3}
+    - {name: FLIGHT_MODE_IDLE, value: 0x1}
+    - {name: FLIGHT_MODE_CALIBRATING, value: 0x2}
+    - {name: FLIGHT_MODE_FCS_READY, value: 0x3}
+    - {name: FLIGHT_MODE_FLY, value: 0x4}
 
 types:
   - { name: u8, size: 1, primitive: true }
@@ -33,68 +33,52 @@ types:
       - { name: motor3, type: u16}
       - { name: motor4, type: u16}
 
-  - name: gpsCoordinateData
-    fields:
-      - { name: longitude, type: f32}
-      - { name: latitude, type: f32}
-
-  - name: statusData
-    fields:
-      - { name: gps, type: gpsCoordinateData}
-      - { name: motor, type: motorPWMControlData}
-      - { name: someEight, type: u8}
-      - { name: someIEight, type: i8}
-      - { name: someSixteen, type: i16}
-      - { name: someThirtyTwo, type: u32}
-      - { name: someIThirtyTwo, type: i32}
-
-  - name: orientationReference
-    fields:
-      - { name: yaw, type: f32}
-      - { name: pitch, type: f32}
-      - { name: roll, type: f32}
-      - { name: z, type: f32}
-
-  - name: positionReference
+  - name: fcsStateEstimate
     fields:
       - { name: x, type: f32}
       - { name: y, type: f32}
       - { name: z, type: f32}
+      - { name: dx, type: f32}
+      - { name: dy, type: f32}
+      - { name: dz, type: f32}
       - { name: yaw, type: f32}
+      - { name: pitch, type: f32}
+      - { name: roll, type: f32}
+      - { name: p, type: f32}
+      - { name: q, type: f32}
+      - { name: r, type: f32}
+
+  - name: statusData
+    fields:
+      - { name: mode, type: falconMode}
+      - { name: motor, type: motorPWMControlData}
+      - { name: states, type: fcsStateEstimate}
+
+  - name: fcsControlInput
+    fields:
+      - { name: yaw, type: f32}
+      - { name: pitch, type: f32}
+      - { name: roll, type: f32}
+      - { name: alt, type: f32}
 
 packets:
-  - name: flightControlStick
-    command: true
-    query: false
-    response: false
-    fields:
-      - { name: orientationReferenceCmd, type: orientationReference}
-    
-  - name: flightControlPosition
-    command: true
-    query: false
-    response: false
-    fields:
-      - { name: positionReferenceCMD, type: positionReference}
-    
-  - name: motorSpeed
+  - name: mode
     command: true
     query: true
     response: true
     fields:
-      - { name: pwmData, type: motorPWMControlData}
-    
-  - name: setDestination
+      - { name: mode, type: falconMode}
+
+  - name: flightControl
     command: true
     query: false
     response: false
     fields:
-      - {name: gpsData, type: gpsCoordinateData}
+      - { name: fcsControlCmd, type: fcsControlInput}
 
   - name: status
     command: false
     query: false
     response: true
     fields:
-      - {name: gpsData, type: gpsCoordinateData}
       - {name: status, type: statusData}

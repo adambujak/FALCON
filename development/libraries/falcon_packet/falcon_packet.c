@@ -2,13 +2,11 @@
 #include "falcon_packet.h"
 
 static uint8_t packet_size_lookup_table[FPT_CNT] = {
-  [FPT_FLIGHT_CONTROL_STICK_COMMAND] = 16,
-  [FPT_FLIGHT_CONTROL_POSITION_COMMAND] = 16,
-  [FPT_MOTOR_SPEED_COMMAND] = 8,
-  [FPT_MOTOR_SPEED_QUERY] = 8,
-  [FPT_MOTOR_SPEED_RESPONSE] = 8,
-  [FPT_SET_DESTINATION_COMMAND] = 8,
-  [FPT_STATUS_RESPONSE] = 36,
+  [FPT_MODE_COMMAND] = 1,
+  [FPT_MODE_QUERY] = 1,
+  [FPT_MODE_RESPONSE] = 1,
+  [FPT_FLIGHT_CONTROL_COMMAND] = 16,
+  [FPT_STATUS_RESPONSE] = 57,
 };
 
 fp_type_t fp_get_packet_type(uint8_t packetID)

@@ -106,26 +106,22 @@ static void send_response_frame(void)
 static void rx_handler(uint8_t *data, fp_type_t packetType)
 {
   switch (packetType) {
-    case FPT_FLIGHT_CONTROL_POSITION_COMMAND:
+    case FPT_FLIGHT_CONTROL_COMMAND:
     {
-      fpc_flight_control_position_t controlPosition = {};
-      fpc_flight_control_position_decode(data, &controlPosition);
-      DEBUG_LOG("CONTROL POSITION: %f, %f, %f, %f\r\n",
-                controlPosition.positionReferenceCMD.x,
-                controlPosition.positionReferenceCMD.y,
-                controlPosition.positionReferenceCMD.z,
-                controlPosition.positionReferenceCMD.yaw);
+      fpc_flight_control_t controlInput = {};
+      fpc_flight_control_decode(data, &controlInput);
+      DEBUG_LOG("CONTROL INPUT: %f, %f, %f, %f\r\n",
+                controlInput.fcsControlCmd.yaw,
+                controlInput.fcsControlCmd.pitch,
+                controlInput.fcsControlCmd.roll,
+                controlInput.fcsControlCmd.alt);
     }
     break;
-    case FPT_MOTOR_SPEED_COMMAND:
+    case FPT_MODE_COMMAND:
     {
-      fpc_motor_speed_t motorSpeed = {};
-      fpc_motor_speed_decode(data, &motorSpeed);
-      DEBUG_LOG("MOTOR COMMAND: %d, %d, %d, %d\r\n",
-                motorSpeed.pwmData.motor1,
-                motorSpeed.pwmData.motor2,
-                motorSpeed.pwmData.motor3,
-                motorSpeed.pwmData.motor4);
+      fpc_mode_t mode = {};
+      fpc_mode_decode(data, &mode);
+      DEBUG_LOG("MODE COMMAND: %d\r\n", mode.mode);
     }
     break;
     default:
