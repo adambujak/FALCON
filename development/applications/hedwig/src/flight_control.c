@@ -7,7 +7,7 @@
 #include "flightController.h"
 #include "rtwtypes.h"
 
-#define FC_PERIOD_MS       MS_TO_TICKS(10)
+#define FC_PERIOD_TICKS    MS_TO_TICKS(10)
 #define RTOS_TIMEOUT_TICKS MS_TO_TICKS(5)
 
 static RT_MODEL rtM_;
@@ -140,20 +140,6 @@ static void flight_control_callback(TimerHandle_t xTimer)
             rtY_State_Estim.p, rtY_State_Estim.q, rtY_State_Estim.r);
 }
 
-static void flight_control_task(void *pvParameters)
-{
-
-  vTaskDelay(10000);
-
-  flight_control_start();
-
-  while(1)
-  {
-    // getShitFromSensorsANDCom();
-    vTaskDelay(2);
-  }
-}
-
 void flight_control_set_sensor_data(float *gyro_data, float *accel_data, float *quat_data, float alt_data)
 {
   if (lock_sensor_data() == pdTRUE) {
@@ -219,6 +205,20 @@ void flight_control_start(void)
 //   }
 // }
 
+static void flight_control_task(void *pvParameters)
+{
+
+  vTaskDelay(10000);
+
+  flight_control_start();
+
+  while(1)
+  {
+    // getShitFromSensorsANDCom();
+    vTaskDelay(2);
+  }
+}
+
 void flight_control_setup(void)
 {
   /* Pack model data into RTM */
@@ -227,7 +227,7 @@ void flight_control_setup(void)
   /* Initialize model */
   flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
 
-  flight_control_timer = xTimerCreate("flight_control_timer", FC_PERIOD_MS, pdTRUE, 0, flight_control_callback);
+  flight_control_timer = xTimerCreate("flight_control_timer", FC_PERIOD_TICKS, pdTRUE, 0, flight_control_callback);
 
   createSensorDataMutex();
   createCommandDataMutex();
