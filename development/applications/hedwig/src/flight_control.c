@@ -133,7 +133,6 @@ void rt_OneStep(RT_MODEL *const rtM)
 
 static void flight_control_callback(TimerHandle_t xTimer)
 {
-  LOG_DEBUG("flight_control_callback CALLED\r\n");
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
   xTaskNotifyFromISR(flight_control_task_handle,
@@ -225,7 +224,7 @@ static void flight_control_task(void *pvParameters)
     flightTimerNotification = xTaskNotifyWait(pdFALSE,
                                          0xFFFFFFFF,
                                          NULL,
-                                         MS_TO_TICKS(12));
+                                         MS_TO_TICKS(10));
 
     if (flightTimerNotification == pdPASS) {
 
