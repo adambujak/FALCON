@@ -130,9 +130,12 @@ class fpc_mode_t:
         else:
             self.mode = kwargs.get("mode", 0)
 
-    def encode(self, dest, offset=0):
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_MODE_COMMAND) + 3)
+
         encode_header(dest, fp_type_t.FPT_MODE_COMMAND, 0)
         self.mode.encode(dest, offset + 3)
+        return dest
 
 
 class fpq_mode_t:
@@ -142,9 +145,12 @@ class fpq_mode_t:
         else:
             self.mode = kwargs.get("mode", 0)
 
-    def encode(self, dest, offset=0):
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_MODE_QUERY) + 3)
+
         encode_header(dest, fp_type_t.FPT_MODE_QUERY, 0)
         self.mode.encode(dest, offset + 3)
+        return dest
 
 
 class fpr_mode_t:
@@ -154,9 +160,12 @@ class fpr_mode_t:
         else:
             self.mode = kwargs.get("mode", 0)
 
-    def encode(self, dest, offset=0):
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_MODE_RESPONSE) + 3)
+
         encode_header(dest, fp_type_t.FPT_MODE_RESPONSE, 0)
         self.mode.encode(dest, offset + 3)
+        return dest
 
 
 class fpc_flight_control_t:
@@ -166,9 +175,12 @@ class fpc_flight_control_t:
         else:
             self.fcsControlCmd = kwargs.get("fcsControlCmd", 0)
 
-    def encode(self, dest, offset=0):
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_FLIGHT_CONTROL_COMMAND) + 3)
+
         encode_header(dest, fp_type_t.FPT_FLIGHT_CONTROL_COMMAND, 0)
         self.fcsControlCmd.encode(dest, offset + 3)
+        return dest
 
 
 class fpr_status_t:
@@ -178,8 +190,11 @@ class fpr_status_t:
         else:
             self.status = kwargs.get("status", 0)
 
-    def encode(self, dest, offset=0):
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_STATUS_RESPONSE) + 3)
+
         encode_header(dest, fp_type_t.FPT_STATUS_RESPONSE, 0)
         self.status.encode(dest, offset + 3)
+        return dest
 
 
