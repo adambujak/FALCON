@@ -33,6 +33,8 @@ static TaskHandle_t flight_control_task_handle = NULL;
 
 static SemaphoreHandle_t sensorDataMutex;
 static SemaphoreHandle_t commandDataMutex;
+static SemaphoreHandle_t outputDataMutex;
+
 
 static inline BaseType_t lock_sensor_data(void)
 {
@@ -54,6 +56,17 @@ static inline void unlock_command_data(void)
   xSemaphoreGive(commandDataMutex);
 }
 
+static inline BaseType_t lock_output_data(void)
+{
+  return xSemaphoreTake(outputDataMutex, RTOS_TIMEOUT_TICKS);
+}
+
+static inline void unlock_output_data(void)
+{
+  xSemaphoreGive(outputDataMutex);
+}
+
+
 static inline void createSensorDataMutex(void)
 {
   sensorDataMutex = xSemaphoreCreateMutex();
@@ -66,6 +79,14 @@ static inline void createCommandDataMutex(void)
 {
   commandDataMutex = xSemaphoreCreateMutex();
   if (commandDataMutex == NULL) {
+    error_handler();
+  }
+}
+
+static inline void createOutputDataMutex(void)
+{
+  outputDataMutex = xSemaphoreCreateMutex();
+  if (outputDataMutex == NULL) {
     error_handler();
   }
 }
@@ -101,7 +122,14 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Step the model */
   if (lock_sensor_data() == pdTRUE ) {
     if (lock_command_data() == pdTRUE) {
-      flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+      if (lock_output_data() == pdTRUE) {
+        flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+        unlock_output_data();
+      }
+      else {
+        DEBUG_LOG("outputDataMutex take failed\r\n");
+        error_handler();
+      }
       unlock_command_data();
     }
     else {
@@ -168,6 +196,30 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input)
   }
   else {
     LOG_DEBUG("commandDataMutex take failed\r\n");
+  }
+}
+
+void flight_control_get_outputs(fpr_status_t *status_response)
+{
+  if(lock_output_data() == pdTRUE) {
+    //status_response->status.mode = SomeMode;
+    status_response->status.mode
+    status_response->status.motor.motor1 = rtY_Throttle[0];
+    status_response->status.motor.motor1 = rtY_Throttle[1];
+    status_response->status.motor.motor1 = rtY_Throttle[2];
+    status_response->status.motor.motor1 = rtY_Throttle[3];
+    status_response->status.states.z = rtY_State_Estim.z;
+    status_response->status.states.dz = rtY_State_Estim.dz;
+    status_response->status.states.yaw = rtY_State_Estim.yaw;
+    status_response->status.states.pitch = rtY_State_Estim.pitch;
+    status_response->status.states.roll = rtY_State_Estim.roll;
+    status_response->status.states.p = rtY_State_Estim.p;
+    status_response->status.states.q = rtY_State_Estim.q;
+    status_response->status.states.r = rtY_State_Estim.r;
+    unlock_output_data();
+  }
+  else {
+    DEBUG_LOG("commandDataMutex take failed\r\n");
   }
 }
 
@@ -259,6 +311,7 @@ void flight_control_setup(void)
 
   createSensorDataMutex();
   createCommandDataMutex();
+  createOutputDataMutex();
 }
 
 void flight_control_task_start(void)
