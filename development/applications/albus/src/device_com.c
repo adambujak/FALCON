@@ -44,7 +44,8 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
   {
     fpc_flight_control_t control = {{0}};
     fpc_flight_control_decode(data, &control);
-    printf("MOTOR COMMAND: %f, %f, %f, %f\r\n",
+    DEBUG_LOG("received motor cmd\r\n");
+    DEBUG_LOG("MOTOR COMMAND: %f, %f, %f, %f\r\n",
            control.fcsControlCmd.yaw,
            control.fcsControlCmd.pitch,
            control.fcsControlCmd.roll,
@@ -111,7 +112,7 @@ static void uartProcess(void)
 {
 	switch(uartState) {
 	  case UART_STATE_IDLE:
-		bsp_uart_read(uartBuffer, 1, uart_rx_callback);
+		bsp_uart_read(uartBuffer, MAX_FRAME_SIZE, uart_rx_callback);
 		uartState = UART_STATE_READING;
 		break;
 	  case UART_STATE_READING:

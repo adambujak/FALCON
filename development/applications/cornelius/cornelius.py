@@ -18,11 +18,7 @@ class Albus(SerialDevice):
 
     def write_packet(self, packet):
         frame = self.encoder.pack_packets_into_frame([packet])
-        print(frame)
-        encoded = packet.encode()
-        print(encoded)
-        self.write_bytes(encoded)
-        print("done")
+        self.write_bytes(frame)
 
     def send_control(self, yaw, pitch, roll, alt):
         kwargs = {
