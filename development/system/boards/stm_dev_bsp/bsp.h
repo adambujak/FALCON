@@ -65,11 +65,16 @@ typedef UART_HandleTypeDef fln_uart_handle_t;
 #define FLN_UART_RX_GPIO_PORT            GPIOA
 #define FLN_UART_RX_AF                   GPIO_AF7_USART2
 
+#define FLN_UART_IRQn                    USART2_IRQn
+#define FLN_UART_IRQHandler              USART2_IRQHandler
+
 #define FLN_UART_BAUDRATE                115200
 
-int  bsp_uart_init(fln_uart_handle_t *handle);
-void bsp_uart_put_char(fln_uart_handle_t *handle, uint8_t *ch);
-void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length);
+int bsp_uart_init(void);
+int bsp_uart_put_char(uint8_t *ch);
+int bsp_uart_write(uint8_t *data, uint32_t length);
+int bsp_uart_read(uint8_t *dest, uint32_t length, void (*callback) (void));
+
 
 /*I2C*/
 typedef I2C_HandleTypeDef fln_i2c_handle_t;

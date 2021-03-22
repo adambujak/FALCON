@@ -9,13 +9,13 @@
 
 #include "falcon_common.h"
 
-#include "logger.h"
+#include "uart.h"
 #ifdef DEBUG
 #define DEBUG_LOG(fmt, ...)              \
   do {                                   \
     char str[128];                       \
     sprintf(str, (fmt), ## __VA_ARGS__); \
-    logger_write(str);                   \
+    uart_log(str);                       \
   } while (0)
 #else
 #define DEBUG_LOG(...) do {} while (0)

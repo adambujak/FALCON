@@ -29,6 +29,7 @@ GRINBUF_ROOT = $(LIB_ROOT)/grinbuf
 C_SOURCES = \
 $(HAL_DIR)/Src/stm32f4xx_hal.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_cortex.c \
+$(HAL_DIR)/Src/stm32f4xx_hal_dma.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_gpio.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_rcc.c \
 $(HAL_DIR)/Src/stm32f4xx_hal_tim.c \
@@ -50,11 +51,12 @@ $(PROJ_DIR)/src/main.c \
 $(PROJ_DIR)/src/stm32f4xx_it.c \
 $(PROJ_DIR)/src/system_stm32f4xx.c \
 $(PROJ_DIR)/src/device_com.c \
-$(PROJ_DIR)/src/logger.c \
+$(PROJ_DIR)/src/uart.c \
 $(COMMON_DIR)/radio_common.c \
 $(FALCON_PACKET_ROOT)/falcon_packet.c \
 $(FALCON_PACKET_ROOT)/fp_encode.c \
 $(FALCON_PACKET_ROOT)/fp_decode.c \
+$(FALCON_PACKET_ROOT)/fp_decoder.c \
 $(FALCON_PACKET_ROOT)/ff_encoder.c \
 $(FALCON_PACKET_ROOT)/fs_decoder.c \
 $(LIBCRC_ROOT)/src/crc16.c \
@@ -70,7 +72,7 @@ STARTUP_FILE = startup_stm32f412zx.s
 else
 STARTUP_FILE = startup_stm32f412rx.s
 endif
-ASM_SOURCES += $(STARTUP_FILE) 
+ASM_SOURCES += $(STARTUP_FILE)
 
 # AS includes
 AS_INCLUDES =
@@ -194,14 +196,17 @@ OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
-	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+	@echo compiling $<
+	@$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
-	$(AS) -c $(CFLAGS) $< -o $@
+	@echo assembling $<
+	@$(AS) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
-	$(SZ) $@
+	@echo linking $<
+	@$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	@$(SZ) $@
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(HEX) $< $@
@@ -211,6 +216,7 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 
 $(BUILD_DIR):
 	mkdir $@
+
 
 #######################################
 # clean up
@@ -226,7 +232,7 @@ flash:
 	st-flash reset
 
 pyflash:
-	@python3 $(FLASH_SCRIPT) $(TARGET_PATH) 0x8000000 
+	@python3 $(FLASH_SCRIPT) $(TARGET_PATH) 0x8000000
 
 #######################################
 # dependencies

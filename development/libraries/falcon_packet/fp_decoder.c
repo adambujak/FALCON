@@ -13,11 +13,11 @@ void fp_decoder_decode(uint8_t *buffer, uint32_t length, fp_decoder_cb_t callbac
   uint8_t index = 0;
 
   while(true) {
-    
+
     if (index >= length) {
       return;
     }
-    
+
     switch (state) {
 
       case FP_DECODER_STATE_PACKET_PARSE_HEADER: {
@@ -39,6 +39,11 @@ void fp_decoder_decode(uint8_t *buffer, uint32_t length, fp_decoder_cb_t callbac
         state = FP_DECODER_STATE_PACKET_PARSE_HEADER;
       }
       break;
+
+      case FP_DECODER_STATE_CNT: {
+        /* Something has gone wrong */
+        return;
+      }
     }
   }
 }

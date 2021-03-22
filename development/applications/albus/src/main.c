@@ -2,7 +2,7 @@
 #include "falcon_common.h"
 #include "stm32f4xx_it.h"
 
-#include "logger.h"
+#include "uart.h"
 #include "device_com.h"
 #include "falcon_packet.h"
 #include "ff_encoder.h"
@@ -38,52 +38,11 @@ void albus_sysTickHandler(void)
   }
 }
 
-void sendDataTask(void *arg)
-{
-  uint8_t frame_buffer[MAX_FRAME_SIZE] = {0};
-  ff_encoder_t encoder;
-  ff_encoder_init(&encoder);
-  ff_encoder_set_buffer(&encoder, frame_buffer);
-
-  fpc_motor_speed_t motorSpeedCmd = {
-    .pwmData = {
-      0,
-      250,
-      500,
-      750
-    }
-  };
-
-  fpc_flight_control_position_t positionReferenceCmd = {
-    .positionReferenceCMD = {
-      1.2,
-      2.4,
-      3.6,
-      4.8
-    }
-  };
-
-  if (ff_encoder_append_packet(&encoder, &motorSpeedCmd, FPT_MOTOR_SPEED_COMMAND) == FLN_ERR) {
-    error_handler();
-  }
-
-  if (ff_encoder_append_packet(&encoder, &positionReferenceCmd, FPT_FLIGHT_CONTROL_POSITION_COMMAND) == FLN_ERR) {
-    error_handler();
-  }
-
-  ff_encoder_append_footer(&encoder);
-
-  while(1) {
-    device_com_send_frame(frame_buffer);
-    vTaskDelay(3000);
-  }
-}
-
 int main(void)
 {
   int32_t taskStatus;
   bsp_board_bringup();
-  logger_init();
+  uart_init();
 
   DEBUG_LOG("Albus Started\r\n");
 
@@ -96,15 +55,6 @@ int main(void)
                         4*configMINIMAL_STACK_SIZE,
                         NULL,
                         device_com_TASK_PRIORITY,
-                        NULL);
-
-  RTOS_ERR_CHECK(taskStatus);
-
-  taskStatus = xTaskCreate(sendDataTask,
-                        "senddatt",
-                        4*configMINIMAL_STACK_SIZE,
-                        NULL,
-                        device_com_TASK_PRIORITY+3,
                         NULL);
 
   RTOS_ERR_CHECK(taskStatus);

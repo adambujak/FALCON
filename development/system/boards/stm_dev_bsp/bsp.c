@@ -123,7 +123,11 @@ void FLN_LED_TIMER_IRQ_Handler(void)
 /************************************************************
  *************************** UART ***************************
  ***********************************************************/
-int bsp_uart_init(fln_uart_handle_t *handle)
+static fln_uart_handle_t usbUartHandle;
+
+static void (*usbRxUartCallback) (void) = NULL;
+
+int bsp_uart_init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
 
@@ -145,30 +149,63 @@ int bsp_uart_init(fln_uart_handle_t *handle)
 
   HAL_GPIO_Init(FLN_UART_RX_GPIO_PORT, &GPIO_InitStruct);
 
-  handle->Instance = FLN_UART;
+  usbUartHandle.Instance = FLN_UART;
 
-  handle->Init.BaudRate     = FLN_UART_BAUDRATE;
-  handle->Init.WordLength   = UART_WORDLENGTH_8B;
-  handle->Init.StopBits     = UART_STOPBITS_1;
-  handle->Init.Parity       = UART_PARITY_NONE;
-  handle->Init.HwFlowCtl    = UART_HWCONTROL_NONE;
-  handle->Init.Mode         = UART_MODE_TX_RX;
-  handle->Init.OverSampling = UART_OVERSAMPLING_16;
+  usbUartHandle.Init.BaudRate     = FLN_UART_BAUDRATE;
+  usbUartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
+  usbUartHandle.Init.StopBits     = UART_STOPBITS_1;
+  usbUartHandle.Init.Parity       = UART_PARITY_NONE;
+  usbUartHandle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
+  usbUartHandle.Init.Mode         = UART_MODE_TX_RX;
+  usbUartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
 
-  if (HAL_UART_Init(handle) != HAL_OK) {
+  HAL_NVIC_SetPriority(FLN_UART_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(FLN_UART_IRQn);
+
+  if (HAL_UART_Init(&usbUartHandle) != HAL_OK) {
     return FLN_ERR;
   }
   return FLN_OK;
 }
 
-void bsp_uart_put_char(fln_uart_handle_t *handle, uint8_t *ch)
+int bsp_uart_put_char(uint8_t *ch)
 {
-  HAL_UART_Transmit(handle, ch, 1, 0xFFFF);
+  if (HAL_UART_Transmit(&usbUartHandle, ch, 1, 0xFFFF) != HAL_OK) {
+    return FLN_ERR;
+  }
+  return FLN_OK;
 }
 
-void bsp_uart_write(fln_uart_handle_t *handle, uint8_t *data, uint16_t length)
+int bsp_uart_write(uint8_t *data, uint32_t length)
 {
-  HAL_UART_Transmit(handle, data, length, 0xFFFF);
+  if (HAL_UART_Transmit(&usbUartHandle, data, length, 0xFFFF) != HAL_OK) {
+    return FLN_ERR;
+  }
+  return FLN_OK;
+}
+
+int bsp_uart_read(uint8_t *dest, uint32_t length, void (*callback) (void))
+{
+  if (HAL_UART_Receive_IT(&usbUartHandle, (uint8_t *)dest, length) != HAL_OK) {
+    return FLN_ERR;
+  }
+  usbRxUartCallback = callback;
+  return FLN_OK;
+}
+
+void HAL_UART_RxCpltCallback(fln_uart_handle_t *handle)
+{
+  if (handle == &usbUartHandle) {
+    if (usbRxUartCallback != NULL) {
+      usbRxUartCallback();
+      usbRxUartCallback = NULL;
+    }
+  }
+}
+
+void FLN_UART_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&usbUartHandle);
 }
 
 /************************************************************
