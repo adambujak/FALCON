@@ -106,13 +106,14 @@ static inline void unlock_uart(void)
 static void uart_rx_callback(void)
 {
     uartState = UART_STATE_READY;
+    DEBUG_LOG("data\r\n");
 }
 
 static void uartProcess(void)
 {
 	switch(uartState) {
 	  case UART_STATE_IDLE:
-		bsp_uart_read(uartBuffer, MAX_FRAME_SIZE, uart_rx_callback);
+		bsp_uart_read(uartBuffer, 2, uart_rx_callback);
 		uartState = UART_STATE_READING;
 		break;
 	  case UART_STATE_READING:
