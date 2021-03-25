@@ -1,42 +1,27 @@
 import curses
 import time
 from threading import Thread, Lock
-from math import *
-from mokuskaui import *
+import serial
 
-class SerialMonitorWindow(ScrollWindow):
-    def input_handler(self, key):
-        if key == ord('r'):
-            self.scroll_reset()
+serialInstance = serial.Serial('/dev/tty.usbmodem14303', 115200, timeout=0.5)
+serialInstance.flush()
+serialInstance.reset_input_buffer()
+serialInstance.reset_output_buffer()
 
-        if key == ord('k'):
-            self.scroll_up()
+print(bytes(2))
+serialInstance.write(bytes(2))
+readval = serialInstance.read(1)
+print(readval)
 
-        if key == ord('j'):
-            self.scroll_down()
+serialInstance.write(bytes(2))
+serialInstance.write(bytes(2))
+print(readval)
 
-        if key == ord('g'):
-            self.scroll_home()
+serialInstance.write(bytes(2))
+readval = serialInstance.read(1)
+readval = serialInstance.read(1)
+print(readval)
 
-class DeviceManagerUI(MokuskaUI):
-    def input_handler(self, key):
-        pass
+serialInstance.close()
 
-    def start(self):
-        serialMonitorWidth = int(self.width * 0.5)
-        self.screen.addstr(1, self.width - serialMonitorWidth//2 - 9, "Serial Monitor")
-        self.serialMonitorWindow = SerialMonitorWindow((self.width - serialMonitorWidth), 2, serialMonitorWidth-1, self.height-3)
-        self.add_element(self.serialMonitorWindow)
-
-    def serial_monitor_append(self, string):
-        self.serialMonitorWindow.write_string(string)
-
-
-ui = DeviceManagerUI()
-
-count = 0
-while(True):
-    ui.serial_monitor_append("hello{}".format(count))
-    count += 1
-    time.sleep(.1)
 
