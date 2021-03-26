@@ -1,4 +1,4 @@
-#include "albus.h"
+#include "falcon_common.h"
 #include "uart.h"
 #include "logger.h"
 
@@ -111,17 +111,18 @@ int main(void)
                         tskIDLE_PRIORITY + 1,
                         NULL);
 
+  ASSERT(taskStatus == pdTRUE);
+
   vTaskStartScheduler();
   /* Should never reach here */
   while (1);
 }
 
-void Error_Handler(void)
+void error_handler(void)
 {
-
+  LOG_ERROR("Error Handler\r\n");
+  while (1) {
+    LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_14);
+    for (uint32_t i = 0; i < 1000000; i++);
+  }
 }
-#ifdef  USE_FULL_ASSERT
-void assert_failed(uint8_t *file, uint32_t line)
-{
-}
-#endif

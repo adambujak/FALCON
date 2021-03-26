@@ -1,6 +1,6 @@
 #include "uart.h"
 
-#include "albus.h"
+#include "falcon_common.h"
 #include "board.h"
 #include "grinbuf.h"
 
@@ -16,8 +16,8 @@ typedef struct {
   uint32_t size;
 } fifo_t;
 
-uint8_t rx_buffer[UART_RX_BUFFER_SIZE];
-uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
+static uint8_t rx_buffer[UART_RX_BUFFER_SIZE];
+static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
 
 static fifo_t rx_fifo;
 static fifo_t tx_fifo;
