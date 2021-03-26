@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
+
 typedef struct {
   uint8_t *buffer;
   uint32_t write_index;
@@ -26,7 +28,7 @@ static bool writing = false;
 
 static void fifo_init(fifo_t *fifo, uint8_t *buffer, uint32_t size)
 {
-  // TODO: assert size is 2^x
+  ASSERT(IS_POWER_OF_TWO(size));
   fifo->buffer = buffer;
   fifo->size = size;
   fifo->write_index = 0;
