@@ -1,42 +1,31 @@
 TARGET = ALBUS
-DEBUG = 1
-BUILD_DIR = _build
 BUILD_CONFIG ?= DEBUG
 BOARD_VERSION ?= DISCO
 
-
+# Build path
+BUILD_DIR = _build
 FALCON_ROOT = ../../../..
 DEV_ROOT = $(FALCON_ROOT)/development
 LIB_ROOT = $(DEV_ROOT)/libraries
 DRV_ROOT = $(DEV_ROOT)/drivers
-PROJ_DIR = ..
-COMMON_DIR = $(PROJ_DIR)/../common
-FLN_BSP_DIR = $(DEV_ROOT)/system/boards/stm_dev_bsp
+PROJ_ROOT = ..
+COMMON_ROOT = $(PROJ_ROOT)/../common
 SDK_ROOT = $(FALCON_ROOT)/dependencies/stm/STM32F4_Cube
 FREERTOS_ROOT = $(FALCON_ROOT)/dependencies/freertos/FreeRTOSv10.4.1/FreeRTOS/Source
 FREERTOS_PORTABLE = $(FREERTOS_ROOT)/portable/GCC/ARM_CM4F
-HAL_DIR = $(SDK_ROOT)/Drivers/STM32F4xx_HAL_Driver
-BSP_DIR = $(SDK_ROOT)/Drivers/BSP/STM32412G-Discovery
-CMSIS_DIR = $(SDK_ROOT)/Drivers/CMSIS
+HAL_ROOT = $(SDK_ROOT)/Drivers/STM32F4xx_HAL_Driver
+CMSIS_ROOT = $(SDK_ROOT)/Drivers/CMSIS
 FALCON_PACKET_ROOT = $(LIB_ROOT)/falcon_packet
 LIBCRC_ROOT = $(LIB_ROOT)/libcrc
 GRINBUF_ROOT = $(LIB_ROOT)/grinbuf
 
-######################################
-# source
-######################################
 # C sources
-C_SOURCES = \
-$(HAL_DIR)/Src/stm32f4xx_hal.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_cortex.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_dma.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_gpio.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_rcc.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_tim.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_tim_ex.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_spi.c \
-$(HAL_DIR)/Src/stm32f4xx_hal_uart.c \
-$(FLN_BSP_DIR)/bsp.c \
+C_SOURCES =  \
+$(PROJ_ROOT)/src/main.c \
+$(PROJ_ROOT)/src/uart.c \
+$(PROJ_ROOT)/src/logger.c \
+$(PROJ_ROOT)/src/stm32f4xx_it.c \
+$(PROJ_ROOT)/src/system_stm32f4xx.c \
 $(FREERTOS_ROOT)/tasks.c \
 $(FREERTOS_ROOT)/queue.c \
 $(FREERTOS_ROOT)/list.c \
@@ -45,86 +34,43 @@ $(FREERTOS_ROOT)/event_groups.c \
 $(FREERTOS_ROOT)/stream_buffer.c \
 $(FREERTOS_ROOT)/portable/MemMang/heap_4.c \
 $(FREERTOS_PORTABLE)/port.c \
-$(LIB_ROOT)/frf/frf.c \
-$(DRV_ROOT)/nRF24L01/nRF24L01.c \
-$(PROJ_DIR)/src/main.c \
-$(PROJ_DIR)/src/stm32f4xx_it.c \
-$(PROJ_DIR)/src/system_stm32f4xx.c \
-$(PROJ_DIR)/src/device_com.c \
-$(PROJ_DIR)/src/uart.c \
-$(COMMON_DIR)/radio_common.c \
-$(FALCON_PACKET_ROOT)/falcon_packet.c \
-$(FALCON_PACKET_ROOT)/fp_encode.c \
-$(FALCON_PACKET_ROOT)/fp_decode.c \
-$(FALCON_PACKET_ROOT)/fp_decoder.c \
-$(FALCON_PACKET_ROOT)/ff_encoder.c \
-$(FALCON_PACKET_ROOT)/fs_decoder.c \
-$(LIBCRC_ROOT)/src/crc16.c \
-$(GRINBUF_ROOT)/grinbuf.c \
+$(HAL_ROOT)/Src/stm32f4xx_ll_gpio.c \
+$(HAL_ROOT)/Src/stm32f4xx_ll_usart.c \
+$(HAL_ROOT)/Src/stm32f4xx_ll_dma.c \
+$(HAL_ROOT)/Src/stm32f4xx_ll_rcc.c \
+$(HAL_ROOT)/Src/stm32f4xx_ll_utils.c \
+$(HAL_ROOT)/Src/stm32f4xx_ll_exti.c \
 
-ifeq ($(BOARD_VERSION), DISCO)
-C_SOURCES += $(BSP_DIR)/stm32412g_discovery.c
-endif
-
-# ASM sources
-ifeq ($(BOARD_VERSION), DISCO)
-STARTUP_FILE = startup_stm32f412zx.s
-else
-STARTUP_FILE = startup_stm32f412rx.s
-endif
-ASM_SOURCES += $(STARTUP_FILE)
-
-# AS includes
-AS_INCLUDES =
-
-ifeq ($(BOARD_VERSION), DISCO)
-C_INCLUDES += -I$(BSP_DIR)/
-endif
 # C includes
 C_INCLUDES += \
-			-I$(HAL_DIR)/Inc \
-			-I$(FLN_BSP_DIR)/ \
+			-I$(HAL_ROOT)/Inc \
 			-I$(LIB_ROOT)/frf/ \
 			-I$(DRV_ROOT) \
 			-I$(FALCON_PACKET_ROOT) \
 			-I$(LIBCRC_ROOT)/include \
 			-I$(GRINBUF_ROOT) \
 			-I$(DRV_ROOT)/nRF24L01/ \
-			-I$(PROJ_DIR)/include \
-            -I$(COMMON_DIR) \
-			-I$(CMSIS_DIR)/Device/ST/STM32F4xx/Include \
-			-I$(CMSIS_DIR)/Include \
- 			-I$(FREERTOS_ROOT)/include \
- 			-I$(FREERTOS_PORTABLE) \
+			-I$(PROJ_ROOT)/include \
+			-I$(COMMON_ROOT) \
+			-I$(CMSIS_ROOT)/Device/ST/STM32F4xx/Include \
+			-I$(CMSIS_ROOT)/Include \
+			-I$(FREERTOS_ROOT)/include \
+			-I$(FREERTOS_PORTABLE) \
 
-
-# macros for gcc
-# AS defines
-AS_DEFS =
 
 ifeq ($(BOARD_VERSION), DISCO)
-CHIPSET_DEF = STM32F412Zx
-C_DEFS += -DUSE_STM32412G_DISCOVERY
-C_DEFS += -DBOARD_DISCO
+STARTUP_FILE = startup_stm32f412zx.s
 else
-CHIPSET_DEF = STM32F412Rx
-C_DEFS += -DBOARD_V1
+STARTUP_FILE = startup_stm32f412rx.s
 endif
-# C defines
-C_DEFS +=  \
--DALBUS \
--DUSE_HAL_DRIVER \
--D$(CHIPSET_DEF) \
--D$(BUILD_CONFIG) \
+# ASM sources
+ASM_SOURCES += $(STARTUP_FILE)
 
-OPT = -O0 -g3
+# AS includes
+AS_INCLUDES =
 
-#######################################
-# binaries
-#######################################
+
 PREFIX = arm-none-eabi-
-# The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
-# either it can be added to the PATH environment variable.
 ifdef GCC_PATH
 CC = $(GCC_PATH)/$(PREFIX)gcc
 AS = $(GCC_PATH)/$(PREFIX)gcc -x assembler-with-cpp
@@ -139,9 +85,6 @@ endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 
-#######################################
-# CFLAGS
-#######################################
 # cpu
 CPU = -mcpu=cortex-m4
 
@@ -153,6 +96,39 @@ FLOAT-ABI = -mfloat-abi=hard
 
 # mcu
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
+
+# macros for gcc
+# AS defines
+AS_DEFS =
+
+ifeq ($(BOARD_VERSION), DISCO)
+CHIPSET_DEF = STM32F412Zx
+C_DEFS += -DUSE_STM32412G_DISCOVERY
+C_DEFS += -DBOARD_DISCO
+else
+CHIPSET_DEF = STM32F412Rx
+C_DEFS += -DBOARD_V1
+endif
+
+# C defines
+C_DEFS +=  \
+-DALBUS \
+-DUSE_FULL_LL_DRIVER \
+-D$(CHIPSET_DEF) \
+-D$(BUILD_CONFIG) \
+-DHSE_VALUE=8000000 \
+-DHSE_STARTUP_TIMEOUT=100 \
+-DLSE_STARTUP_TIMEOUT=5000 \
+-DLSE_VALUE=32768 \
+-DEXTERNAL_CLOCK_VALUE=12288000 \
+-DHSI_VALUE=16000000 \
+-DLSI_VALUE=32000 \
+-DVDD_VALUE=3300 \
+-DPREFETCH_ENABLE=1 \
+-DINSTRUCTION_CACHE_ENABLE=1 \
+-DDATA_CACHE_ENABLE=1
+
+OPT = -O0 -g3
 
 
 # compile gcc flags
@@ -173,7 +149,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = $(PROJ_DIR)/build/stm32_flash.ld
+LDSCRIPT = $(PROJ_ROOT)/build/stm32_flash.ld
 
 # libraries
 LIBS = -lc -lm -lnosys
@@ -217,26 +193,12 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir $@
 
-
-#######################################
-# clean up
-#######################################
-FLASH_SCRIPT = $(realpath $(DEV_ROOT))/scripts/falcon_flash.py
-TARGET_PATH  = $(realpath $(BUILD_DIR)/$(TARGET).bin)
-
 clean:
 	-rm -fR $(BUILD_DIR)
 
-flash:
-	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+flash: all
+	# retry st-flash on failure
+	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000 || st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 	st-flash reset
 
-pyflash:
-	@python3 $(FLASH_SCRIPT) $(TARGET_PATH) 0x8000000
-
-#######################################
-# dependencies
-#######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
-
-# *** EOF ***BUILDDIR = _build

@@ -1,10 +1,13 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef UART_H
+#define UART_H
 
 #include <stdint.h>
 
-void uart_init(void);
-void uart_log(char *string);
-int  uart_process(void);
+#define UART_TX_BUFFER_SIZE  512
+#define UART_RX_BUFFER_SIZE  512
 
-#endif  // LOGGER_H
+void uart_init(void);
+void uart_write(uint8_t *data, uint32_t length);
+
+
+#endif  // UART_H
