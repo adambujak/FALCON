@@ -8,7 +8,13 @@ void logger_write(char *string);
 #define LOG_LEVEL_WARN  3
 #define LOG_LEVEL_ERROR 4
 
+#ifndef LOG_LEVEL
 #define LOG_LEVEL LOG_LEVEL_DEBUG
+#endif // LOG_LEVEL
+
+#ifndef LOG_MODE_BLOCKING
+#define LOG_MODE_BLOCKING 1
+#endif // LOG_MODE_BLOCKING
 
 #define LOGX(fmt, ...)                   \
   do {                                   \

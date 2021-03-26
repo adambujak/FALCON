@@ -4,17 +4,8 @@
 
 #include "board.h"
 
-#ifndef NVIC_PRIORITYGROUP_0
-#define NVIC_PRIORITYGROUP_0         ((uint32_t)0x00000007) /*!< 0 bit  for pre-emption priority,
-                                                                 4 bits for subpriority */
-#define NVIC_PRIORITYGROUP_1         ((uint32_t)0x00000006) /*!< 1 bit  for pre-emption priority,
-                                                                 3 bits for subpriority */
-#define NVIC_PRIORITYGROUP_2         ((uint32_t)0x00000005) /*!< 2 bits for pre-emption priority,
-                                                                 2 bits for subpriority */
-#define NVIC_PRIORITYGROUP_3         ((uint32_t)0x00000004) /*!< 3 bits for pre-emption priority,
-                                                                 1 bit  for subpriority */
-#define NVIC_PRIORITYGROUP_4         ((uint32_t)0x00000003) /*!< 4 bits for pre-emption priority,
-                                                                 0 bit  for subpriority */
+#ifndef NVIC_PRIORITYGROUP_4
+#define NVIC_PRIORITYGROUP_4  ((uint32_t)0x00000003)
 #endif
 
 void sysclk_init(void)
@@ -75,6 +66,19 @@ static void gpio_init(void)
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
+static void board_bringup(void)
+{
+  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+
+  NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+
+  sysclk_init();
+
+  gpio_init();
+  uart_init();
+}
+
 static void main_task(void *pvParameters)
 {
   uint32_t last_tick = xTaskGetTickCount();
@@ -92,15 +96,7 @@ static void main_task(void *pvParameters)
 
 int main(void)
 {
-  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
-  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
-
-  NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
-
-  sysclk_init();
-
-  gpio_init();
-  uart_init();
+  board_bringup();
 
   int32_t taskStatus;
 

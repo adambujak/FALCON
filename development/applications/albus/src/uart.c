@@ -105,6 +105,11 @@ static void tx(void)
   }
 }
 
+bool uart_is_writing(void)
+{
+  return writing;
+}
+
 void uart_write(uint8_t *data, uint32_t length)
 {
   DISABLE_IRQ();

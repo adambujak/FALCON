@@ -12,4 +12,8 @@ void logger_write(char *string)
   }
 
   uart_write((uint8_t *)string, (uint32_t)length);
+
+#if LOG_MODE_BLOCKING
+  while(uart_is_writing());
+#endif // LOG_MODE_BLOCKING
 }
