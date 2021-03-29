@@ -51,6 +51,7 @@ $(PROJ_ROOT)/src/uart.c \
 $(PROJ_ROOT)/src/gpio.c \
 $(PROJ_ROOT)/src/logger.c \
 $(PROJ_ROOT)/src/spi.c \
+$(PROJ_ROOT)/src/system_time.c \
 $(PROJ_ROOT)/src/device_com.c \
 $(PROJ_ROOT)/src/radio.c \
 $(PROJ_ROOT)/src/stm32f4xx_it.c \

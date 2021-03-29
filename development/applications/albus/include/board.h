@@ -22,6 +22,7 @@
 #include "stm32f4xx_ll_tim.h"
 #include "stm32f4xx_ll_gpio.h"
 
+#define SYSCLK_FREQ            96000000
 
 /* UART */
 #define UART                   USART2
@@ -65,5 +66,7 @@
 
 #define RF_SPI_GPIO_CLK_EN()       LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2); \
                                    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+
+#define SYSTEM_TIME_TIMER          TIM2
 
 #endif  // BOARD_H

@@ -4,6 +4,7 @@
 #include "spi.h"
 #include "logger.h"
 #include "device_com.h"
+#include "system_time.h"
 
 #include "board.h"
 #include "stm32f4xx_ll_gpio.h"
@@ -13,15 +14,9 @@
 #define NVIC_PRIORITYGROUP_4  ((uint32_t)0x00000003)
 #endif
 
-static inline uint32_t timer_diff(uint32_t time1, uint32_t time2) {
-  if (time2 < time1) {
-    return (0xFFFFFFFF - time1) + time2;
-  }
-  return time2 - time1;
-}
 void delay_us(uint32_t us) {
-  uint32_t start_time = TIM2->CNT;
-  while(timer_diff(start_time, TIM2->CNT) < us);
+  uint32_t start_time = system_time_get();
+  while(system_time_cmp_us(start_time, system_time_get()) < us);
 }
 
 void sysclk_init(void)
@@ -57,8 +52,8 @@ void sysclk_init(void)
   {
 
   }
-  LL_Init1msTick(96000000);
-  LL_SetSystemCoreClock(96000000);
+  LL_Init1msTick(SYSCLK_FREQ);
+  LL_SetSystemCoreClock(SYSCLK_FREQ);
   LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);
 }
 
@@ -89,23 +84,6 @@ static void test_pin_init(void)
   LL_GPIO_Init(GPIOB, &gpio_config);
 }
 
-static void delay_timer_init(void)
-{
-  LL_TIM_InitTypeDef TIM_InitStruct = {0};
-
-  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
-
-  TIM_InitStruct.Prescaler = 95;
-  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 4294967295;
-  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-  LL_TIM_Init(TIM2, &TIM_InitStruct);
-  LL_TIM_EnableARRPreload(TIM2);
-  LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
-  LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
-  LL_TIM_DisableMasterSlaveMode(TIM2);
-  LL_TIM_EnableCounter(TIM2);
-}
 
 static void board_bringup(void)
 {
@@ -126,7 +104,6 @@ int main(void)
   board_bringup();
   led_pin_init();
   test_pin_init();
-  delay_timer_init();
 
   // device_com_setup();
   // device_com_start();
