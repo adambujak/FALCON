@@ -40,7 +40,7 @@ typedef enum {
 
 typedef void (*frf_cb_t) (frf_event_t arg);
 typedef void (*gpio_setter_t) (uint8_t val);
-typedef void (*frf_delay_t)   (uint32_t ms);
+typedef void (*frf_delay_t) (uint32_t ms);
 typedef void (*spi_transfer_t) (void *context, uint8_t *tx_buf, uint16_t tx_len,
                                 uint8_t *rx_buf, uint16_t rx_len);
 typedef enum {
@@ -60,7 +60,7 @@ typedef struct {
   void          *spiCtx;
   gpio_setter_t  setCS;
   gpio_setter_t  setCE;
-  frf_delay_t    delay;
+  frf_delay_t    delay_us;
   frf_cb_t       eventCallback;
 } frf_config_t;
 
@@ -68,7 +68,7 @@ typedef struct {
   frf_power_state_t    powerState;
   frf_transfer_state_t transferState;
   gpio_setter_t        setCE;
-  frf_delay_t          delay;
+  frf_delay_t          delay_us;
   nRF24L01_t           rfInstance;
   frf_fifo_t           rxFifo;
   frf_fifo_t           txFifo;

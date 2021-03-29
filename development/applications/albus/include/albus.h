@@ -10,7 +10,6 @@
 #include "logger.h"
 
 #include <stdint.h>
-#include <stdio.h>
 
 #define DISABLE_IRQ()        \
   uint32_t prim;             \
@@ -21,5 +20,11 @@
   if (!prim) {               \
     __enable_irq();          \
   }                          \
+
+#define SYSCLK_FRQ 96000000
+
+#define US_TO_SYSTICK(us) (SYSCLK_FRQ / 1000000) * (us)
+
+void delay_us(uint32_t us);
 
 #endif  // ALBUS_H

@@ -1,12 +1,28 @@
 #include "falcon_common.h"
 #include "uart.h"
+#include "gpio.h"
+#include "spi.h"
 #include "logger.h"
+#include "device_com.h"
 
 #include "board.h"
+#include "stm32f4xx_ll_gpio.h"
+#include "stm32f4xx_ll_tim.h"
 
 #ifndef NVIC_PRIORITYGROUP_4
 #define NVIC_PRIORITYGROUP_4  ((uint32_t)0x00000003)
 #endif
+
+static inline uint32_t timer_diff(uint32_t time1, uint32_t time2) {
+  if (time2 < time1) {
+    return (0xFFFFFFFF - time1) + time2;
+  }
+  return time2 - time1;
+}
+void delay_us(uint32_t us) {
+  uint32_t start_time = TIM2->CNT;
+  while(timer_diff(start_time, TIM2->CNT) < us);
+}
 
 void sysclk_init(void)
 {
@@ -46,24 +62,49 @@ void sysclk_init(void)
   LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);
 }
 
-static void gpio_init(void)
+static void led_pin_init(void)
 {
-  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
+  LL_GPIO_InitTypeDef gpio_config = {0};
 
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOH);
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOD);
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+  LL_GPIO_ResetOutputPin(GPIOE, LL_GPIO_PIN_0);
+  gpio_config.Pin = LL_GPIO_PIN_0;
+  gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
+  gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+  gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  gpio_config.Pull = LL_GPIO_PULL_UP;
+  LL_GPIO_Init(GPIOE, &gpio_config);
+}
 
-  LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_14);
+static void test_pin_init(void)
+{
+  LL_GPIO_InitTypeDef gpio_config = {0};
 
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_14;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_1);
+  gpio_config.Pin = LL_GPIO_PIN_1;
+  gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
+  gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+  gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  gpio_config.Pull = LL_GPIO_PULL_UP;
+  LL_GPIO_Init(GPIOB, &gpio_config);
+}
+
+static void delay_timer_init(void)
+{
+  LL_TIM_InitTypeDef TIM_InitStruct = {0};
+
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+
+  TIM_InitStruct.Prescaler = 95;
+  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+  TIM_InitStruct.Autoreload = 4294967295;
+  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+  LL_TIM_Init(TIM2, &TIM_InitStruct);
+  LL_TIM_EnableARRPreload(TIM2);
+  LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
+  LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
+  LL_TIM_DisableMasterSlaveMode(TIM2);
+  LL_TIM_EnableCounter(TIM2);
 }
 
 static void board_bringup(void)
@@ -76,49 +117,36 @@ static void board_bringup(void)
   sysclk_init();
 
   gpio_init();
+  spi_init();
   uart_init();
-}
-
-static void main_task(void *pvParameters)
-{
-  uint32_t last_tick = xTaskGetTickCount();
-  uint32_t now = xTaskGetTickCount();
-
-  while (1) {
-    now = xTaskGetTickCount();
-    if ((now - last_tick) > 2000) {
-      LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_14);
-      last_tick = now;
-      LOG_DEBUG("hello\r\n");
-    }
-  }
 }
 
 int main(void)
 {
   board_bringup();
+  led_pin_init();
+  test_pin_init();
+  delay_timer_init();
 
-  int32_t taskStatus;
+  // device_com_setup();
+  // device_com_start();
 
-  taskStatus = xTaskCreate(main_task,
-                        "main_task",
-                        configMINIMAL_STACK_SIZE,
-                        NULL,
-                        tskIDLE_PRIORITY + 1,
-                        NULL);
+  // vTaskStartScheduler();
 
-  ASSERT(taskStatus == pdTRUE);
-
-  vTaskStartScheduler();
+  LL_GPIO_SetOutputPin(GPIOE, LL_GPIO_PIN_0);
   /* Should never reach here */
-  while (1);
+  while (1)  {
+    // LL_GPIO_TogglePin(GPIOE, LL_GPIO_PIN_0);
+    LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_1);
+    delay_us(5);
+  }
 }
 
 void error_handler(void)
 {
   LOG_ERROR("Error Handler\r\n");
   while (1) {
-    LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_14);
+    // ToDo: Blink LED
     for (uint32_t i = 0; i < 1000000; i++);
   }
 }

@@ -19,13 +19,12 @@ FALCON_PACKET_ROOT = $(LIB_ROOT)/falcon_packet
 LIBCRC_ROOT = $(LIB_ROOT)/libcrc
 GRINBUF_ROOT = $(LIB_ROOT)/grinbuf
 
-# C sources
-C_SOURCES =  \
-$(PROJ_ROOT)/src/main.c \
-$(PROJ_ROOT)/src/uart.c \
-$(PROJ_ROOT)/src/logger.c \
-$(PROJ_ROOT)/src/stm32f4xx_it.c \
-$(PROJ_ROOT)/src/system_stm32f4xx.c \
+RADIO_SOURCES = \
+$(LIB_ROOT)/frf/frf.c \
+$(DRV_ROOT)/nRF24L01/nRF24L01.c \
+$(COMMON_ROOT)/radio_common.c \
+
+FREERTOS_SOURCES = \
 $(FREERTOS_ROOT)/tasks.c \
 $(FREERTOS_ROOT)/queue.c \
 $(FREERTOS_ROOT)/list.c \
@@ -34,12 +33,31 @@ $(FREERTOS_ROOT)/event_groups.c \
 $(FREERTOS_ROOT)/stream_buffer.c \
 $(FREERTOS_ROOT)/portable/MemMang/heap_4.c \
 $(FREERTOS_PORTABLE)/port.c \
+
+HAL_SOURCES = \
 $(HAL_ROOT)/Src/stm32f4xx_ll_gpio.c \
 $(HAL_ROOT)/Src/stm32f4xx_ll_usart.c \
+$(HAL_ROOT)/Src/stm32f4xx_ll_spi.c \
+$(HAL_ROOT)/Src/stm32f4xx_ll_tim.c \
 $(HAL_ROOT)/Src/stm32f4xx_ll_dma.c \
 $(HAL_ROOT)/Src/stm32f4xx_ll_rcc.c \
 $(HAL_ROOT)/Src/stm32f4xx_ll_utils.c \
 $(HAL_ROOT)/Src/stm32f4xx_ll_exti.c \
+
+# C sources
+C_SOURCES =  \
+$(PROJ_ROOT)/src/main.c \
+$(PROJ_ROOT)/src/uart.c \
+$(PROJ_ROOT)/src/gpio.c \
+$(PROJ_ROOT)/src/logger.c \
+$(PROJ_ROOT)/src/spi.c \
+$(PROJ_ROOT)/src/device_com.c \
+$(PROJ_ROOT)/src/radio.c \
+$(PROJ_ROOT)/src/stm32f4xx_it.c \
+$(PROJ_ROOT)/src/system_stm32f4xx.c \
+$(RADIO_SOURCES) \
+$(HAL_SOURCES) \
+$(FREERTOS_SOURCES) \
 
 # C includes
 C_INCLUDES += \

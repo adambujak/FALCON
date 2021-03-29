@@ -2,7 +2,6 @@
 
 #include "falcon_common.h"
 #include "board.h"
-#include "grinbuf.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -60,7 +59,7 @@ static int fifo_pop(fifo_t *fifo, uint8_t *dest, uint32_t length)
   return length;
 }
 
-static void uart_hw_init(void)
+static void hw_init(void)
 {
   LL_USART_InitTypeDef uart_config = {0};
   LL_GPIO_InitTypeDef gpio_config = {0};
@@ -130,7 +129,7 @@ int uart_read(uint8_t *data, uint32_t length)
 
 void uart_init(void)
 {
-  uart_hw_init();
+  hw_init();
   fifo_init(&rx_fifo, rx_buffer, UART_RX_BUFFER_SIZE);
   fifo_init(&tx_fifo, tx_buffer, UART_TX_BUFFER_SIZE);
 }

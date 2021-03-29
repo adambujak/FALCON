@@ -1,6 +1,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+#include <stdio.h>
+
 void logger_write(char *string);
 
 #define LOG_LEVEL_DEBUG 1
@@ -22,7 +24,6 @@ void logger_write(char *string);
     sprintf(str, (fmt), ##__VA_ARGS__);  \
     logger_write(str);                   \
   } while (0)
-#else
 
 #if (LOG_LEVEL <= LOG_LEVEL_DEBUG)
 #define LOG_DEBUG(fmt, ...)  LOGX((fmt), ##__VA_ARGS__)
