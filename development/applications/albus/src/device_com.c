@@ -3,8 +3,9 @@
 #include "falcon_common.h"
 
 #include "radio.h"
+#include "uart.h"
 
-// #include "falcon_packet.h"
+#include "falcon_packet.h"
 // #include "fs_decoder.h"
 // #include "fp_decode.h"
 
@@ -108,21 +109,7 @@
 //     DEBUG_LOG("data\r\n");
 // }
 
-// static void uartProcess(void)
-// {
-// 	switch(uartState) {
-// 	  case UART_STATE_IDLE:
-// 		bsp_uart_read(uartBuffer, 2, uart_rx_callback);
-// 		uartState = UART_STATE_READING;
-// 		break;
-// 	  case UART_STATE_READING:
-// 		break;
-// 	  case UART_STATE_READY:
-// 		uartState = UART_STATE_IDLE;
-// 		decode_frame(uartBuffer, MAX_FRAME_SIZE);
-// 	}
 
-// }
 
 
 
@@ -238,17 +225,24 @@
 //   }
 // }
 
+static uint8_t uart_rx_buffer[MAX_FRAME_SIZE];
+
+static void handle_uart(void)
+{
+  if (uart_read(uart_rx_buffer, MAX_FRAME_SIZE) == MAX_FRAME_SIZE) {
+    LOG_DEBUG("recievied frame\r\n");
+  }
+}
+
 void device_com_task(void *pvParameters)
 {
   LOG_DEBUG("Device com task started\r\n");
   radio_init();
 
   while(1) {
-    // rfProcess();
-    // uartProcess();
-    // albus_delay(1);
-    LOG_INFO("device_com process\r\n");
-    vTaskDelay(1500);
+    // radio_process();
+    handle_uart();
+    vTaskDelay(250);
   }
 }
 
@@ -269,7 +263,7 @@ void device_com_start(void)
 
   taskStatus = xTaskCreate(device_com_task,
                         "device_com_task",
-                        configMINIMAL_STACK_SIZE,
+                        configMINIMAL_STACK_SIZE*4,
                         NULL,
                         tskIDLE_PRIORITY + 1,
                         NULL);

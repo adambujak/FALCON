@@ -26,5 +26,7 @@
 #define US_TO_SYSTICK(us) (SYSCLK_FRQ / 1000000) * (us)
 
 void delay_us(uint32_t us);
+void delay_ms(uint32_t ms);
+void rtos_delay_ms(uint32_t ms);
 
 #endif  // ALBUS_H

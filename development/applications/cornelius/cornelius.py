@@ -15,10 +15,11 @@ class Albus(SerialDevice):
         self.encoder = FF_Encoder()
 
     def read_callback(self, byteData):
-        print(byteData.decode('ascii'), end="")
+        print(byteData.decode('utf-8'), end="")
 
     def write_packet(self, packet):
         frame = self.encoder.pack_packets_into_frame([packet])
+        print("writing!!!!!!!", len(frame))
         self.write_bytes(frame)
         time.sleep(0.001)
 
@@ -67,15 +68,14 @@ def main():
     serialPort = ports[selectedPort].device
 
     global albus
-    albus = Albus(serialPort)
+    albus = Albus(serialPort, 115200)
+
     albus.init_frame_encoder()
-    albus.send_control(1.2, 1.5, 1.6, 1.8)
-    print("waiting")
 
-    a = input()
-    print("done waiting")
+    while(1):
+        time.sleep(1)
+        albus.send_control(1.2, 1.5, 1.6, 1.8)
 
-    albus.send_control(1.2, 1.5, 1.6, 1.8)
 
 main()
 

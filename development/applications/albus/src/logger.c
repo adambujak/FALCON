@@ -1,5 +1,6 @@
 #include "logger.h"
 #include "uart.h"
+#include "albus.h"
 
 #include <string.h>
 
@@ -14,6 +15,8 @@ void logger_write(char *string)
   uart_write((uint8_t *)string, (uint32_t)length);
 
 #if LOG_MODE_BLOCKING
-  while(uart_is_writing());
+  while(uart_is_writing()) {
+//  	rtos_delay_ms(1);
+  }
 #endif // LOG_MODE_BLOCKING
 }

@@ -95,7 +95,7 @@ static void hw_init(void)
   NVIC_EnableIRQ(UART_IRQn);
 }
 
-static void tx(void)
+static inline void tx(void)
 {
   uint8_t write_byte;
   if (fifo_pop(&tx_fifo, &write_byte, 1) == 1) {
@@ -142,7 +142,6 @@ void UART_IRQHandler(void)
     data = LL_USART_ReceiveData8(UART);
     LL_USART_ClearFlag_RXNE(UART);
     fifo_push(&rx_fifo, &data, 1);
-    uart_write(&data, 1);
   }
   if (LL_USART_IsActiveFlag_TC(UART)) {
     writing = false;

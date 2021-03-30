@@ -10,13 +10,35 @@
 #include "stm32f4xx_ll_gpio.h"
 #include "stm32f4xx_ll_tim.h"
 
+#include <stdbool.h>
+
+#define ERROR_LED_PORT GPIOE
+#define ERROR_LED_PIN  LL_GPIO_PIN_0
+
 #ifndef NVIC_PRIORITYGROUP_4
 #define NVIC_PRIORITYGROUP_4  ((uint32_t)0x00000003)
 #endif
 
+static bool os_started = false;
+
 void delay_us(uint32_t us) {
   uint32_t start_time = system_time_get();
   while(system_time_cmp_us(start_time, system_time_get()) < us);
+}
+
+void delay_ms(uint32_t ms) {
+  uint32_t start_time = system_time_get();
+  while(system_time_cmp_ms(start_time, system_time_get()) < ms);
+}
+
+void rtos_delay_ms(uint32_t ms)
+{
+  if (os_started) {
+    vTaskDelay(ms);
+  }
+  else {
+    delay_ms(ms);
+  }
 }
 
 void sysclk_init(void)
@@ -62,13 +84,18 @@ static void led_pin_init(void)
   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
   LL_GPIO_InitTypeDef gpio_config = {0};
 
-  LL_GPIO_ResetOutputPin(GPIOE, LL_GPIO_PIN_0);
-  gpio_config.Pin = LL_GPIO_PIN_0;
+  LL_GPIO_ResetOutputPin(ERROR_LED_PORT, ERROR_LED_PIN);
+  gpio_config.Pin = ERROR_LED_PIN;
   gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
   gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
   gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
   gpio_config.Pull = LL_GPIO_PULL_UP;
-  LL_GPIO_Init(GPIOE, &gpio_config);
+  LL_GPIO_Init(ERROR_LED_PORT, &gpio_config);
+}
+
+static void led_toggle(void)
+{
+  LL_GPIO_TogglePin(ERROR_LED_PORT, ERROR_LED_PIN);
 }
 
 static void test_pin_init(void)
@@ -99,6 +126,12 @@ static void board_bringup(void)
   system_time_init();
 }
 
+static void start_os(void)
+{
+  os_started = true;
+  vTaskStartScheduler();
+}
+
 int main(void)
 {
   board_bringup();
@@ -110,7 +143,7 @@ int main(void)
 
   LOG_DEBUG("Starting scheduler\r\n");
 
-  vTaskStartScheduler();
+  start_os();
 
   /* Should never reach here */
   while (1);
@@ -120,8 +153,7 @@ void error_handler(void)
 {
   LOG_ERROR("Error Handler\r\n");
   while (1) {
-    // ToDo: Blink LED
-    // LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_1);
+    led_toggle();
     for (uint32_t i = 0; i < 1000000; i++);
   }
 }
