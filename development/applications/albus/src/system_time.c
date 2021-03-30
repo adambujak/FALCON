@@ -37,13 +37,13 @@ inline uint32_t system_time_cmp_ticks(uint32_t time1, uint32_t time2)
 
 inline uint32_t system_time_cmp_us(uint32_t ticks1, uint32_t ticks2)
 {
-  uint32_t tick_diff = system_time_cmp_us(ticks1, ticks2);
+  uint32_t tick_diff = system_time_cmp_ticks(ticks1, ticks2);
   return TICKS_TO_US(tick_diff);
 }
 
 inline uint32_t system_time_cmp_ms(uint32_t ticks1, uint32_t ticks2)
 {
-  uint32_t tick_diff = system_time_cmp_us(ticks1, ticks2);
+  uint32_t tick_diff = system_time_cmp_ticks(ticks1, ticks2);
   return TICKS_TO_MS(tick_diff);
 }
 
