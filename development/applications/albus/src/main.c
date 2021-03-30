@@ -101,7 +101,6 @@ static void board_bringup(void)
 
 int main(void)
 {
-  DISABLE_IRQ();
   board_bringup();
   led_pin_init();
   test_pin_init();
@@ -112,7 +111,6 @@ int main(void)
   LOG_DEBUG("Starting scheduler\r\n");
 
   vTaskStartScheduler();
-  ENABLE_IRQ();
 
   /* Should never reach here */
   while (1);
