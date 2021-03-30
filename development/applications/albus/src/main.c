@@ -105,18 +105,13 @@ int main(void)
   led_pin_init();
   test_pin_init();
 
-  // device_com_setup();
-  // device_com_start();
+  device_com_setup();
+  device_com_start();
 
-  // vTaskStartScheduler();
+  vTaskStartScheduler();
 
-  LL_GPIO_SetOutputPin(GPIOE, LL_GPIO_PIN_0);
   /* Should never reach here */
-  while (1)  {
-    // LL_GPIO_TogglePin(GPIOE, LL_GPIO_PIN_0);
-    LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_1);
-    delay_us(5);
-  }
+  while (1);
 }
 
 void error_handler(void)
@@ -124,6 +119,7 @@ void error_handler(void)
   LOG_ERROR("Error Handler\r\n");
   while (1) {
     // ToDo: Blink LED
+    LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_1);
     for (uint32_t i = 0; i < 1000000; i++);
   }
 }
