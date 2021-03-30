@@ -9,9 +9,10 @@ void logger_write(char *string);
 #define LOG_LEVEL_INFO  2
 #define LOG_LEVEL_WARN  3
 #define LOG_LEVEL_ERROR 4
+#define LOG_LEVEL_NONE  5
 
 #ifndef LOG_LEVEL
-#define LOG_LEVEL LOG_LEVEL_DEBUG
+#define LOG_LEVEL LOG_LEVEL_NONE
 #endif // LOG_LEVEL
 
 #ifndef LOG_MODE_BLOCKING

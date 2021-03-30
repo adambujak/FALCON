@@ -101,6 +101,7 @@ static void board_bringup(void)
 
 int main(void)
 {
+  DISABLE_IRQ();
   board_bringup();
   led_pin_init();
   test_pin_init();
@@ -108,7 +109,10 @@ int main(void)
   device_com_setup();
   device_com_start();
 
+  LOG_DEBUG("Starting scheduler\r\n");
+
   vTaskStartScheduler();
+  ENABLE_IRQ();
 
   /* Should never reach here */
   while (1);
@@ -119,7 +123,7 @@ void error_handler(void)
   LOG_ERROR("Error Handler\r\n");
   while (1) {
     // ToDo: Blink LED
-    LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_1);
+    // LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_1);
     for (uint32_t i = 0; i < 1000000; i++);
   }
 }

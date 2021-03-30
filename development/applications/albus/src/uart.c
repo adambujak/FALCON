@@ -91,8 +91,8 @@ static void hw_init(void)
   LL_USART_EnableIT_RXNE(UART);
   LL_USART_EnableIT_TC(UART);
 
-  NVIC_SetPriority(UART_IRQn, 0);
-  NVIC_EnableIRQ(UART_IRQn);
+//  NVIC_SetPriority(UART_IRQn, 0);
+//  NVIC_EnableIRQ(UART_IRQn);
 }
 
 static void tx(void)
