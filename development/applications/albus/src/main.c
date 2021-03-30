@@ -84,7 +84,6 @@ static void test_pin_init(void)
   LL_GPIO_Init(GPIOB, &gpio_config);
 }
 
-
 static void board_bringup(void)
 {
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
@@ -97,6 +96,7 @@ static void board_bringup(void)
   gpio_init();
   spi_init();
   uart_init();
+  system_time_init();
 }
 
 int main(void)

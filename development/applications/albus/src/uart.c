@@ -134,7 +134,7 @@ void uart_init(void)
   fifo_init(&tx_fifo, tx_buffer, UART_TX_BUFFER_SIZE);
 }
 
-void UART_IRQHandler()
+void UART_IRQHandler(void)
 {
   DISABLE_IRQ();
   uint8_t data;
