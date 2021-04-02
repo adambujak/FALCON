@@ -20,6 +20,7 @@
 
 # Build directory
 dependencies/gcc/gcc-arm-none-eabi-9-2020-q2-update
+dependencies/stm/STM32F4_Cube/Projects
 development/system/msp_sdk/examples
 development/system/msp_sdk/tools
 development/system/msp_sdk/docs
