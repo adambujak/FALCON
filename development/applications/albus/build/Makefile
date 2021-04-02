@@ -20,61 +20,72 @@ LIBCRC_ROOT = $(LIB_ROOT)/libcrc
 GRINBUF_ROOT = $(LIB_ROOT)/grinbuf
 
 RADIO_SOURCES = \
-$(LIB_ROOT)/frf/frf.c \
-$(DRV_ROOT)/nRF24L01/nRF24L01.c \
-$(COMMON_ROOT)/radio_common.c \
+	$(LIB_ROOT)/frf/frf.c \
+	$(DRV_ROOT)/nRF24L01/nRF24L01.c \
+	$(COMMON_ROOT)/radio_common.c \
+
+FALCON_PACKET_SOURCES = \
+	$(FALCON_PACKET_ROOT)/falcon_packet.c \
+	$(FALCON_PACKET_ROOT)/fs_decoder.c \
+	$(FALCON_PACKET_ROOT)/ff_encoder.c \
+	$(FALCON_PACKET_ROOT)/fp_decoder.c \
+	$(FALCON_PACKET_ROOT)/fp_decode.c \
+	$(FALCON_PACKET_ROOT)/fp_encode.c \
+	$(GRINBUF_ROOT)/grinbuf.c \
+	$(LIBCRC_ROOT)/src/crc16.c \
 
 FREERTOS_SOURCES = \
-$(FREERTOS_ROOT)/tasks.c \
-$(FREERTOS_ROOT)/queue.c \
-$(FREERTOS_ROOT)/list.c \
-$(FREERTOS_ROOT)/timers.c \
-$(FREERTOS_ROOT)/event_groups.c \
-$(FREERTOS_ROOT)/stream_buffer.c \
-$(FREERTOS_ROOT)/portable/MemMang/heap_4.c \
-$(FREERTOS_PORTABLE)/port.c \
+	$(FREERTOS_ROOT)/tasks.c \
+	$(FREERTOS_ROOT)/queue.c \
+	$(FREERTOS_ROOT)/list.c \
+	$(FREERTOS_ROOT)/timers.c \
+	$(FREERTOS_ROOT)/event_groups.c \
+	$(FREERTOS_ROOT)/stream_buffer.c \
+	$(FREERTOS_ROOT)/portable/MemMang/heap_4.c \
+	$(FREERTOS_PORTABLE)/port.c \
 
 HAL_SOURCES = \
-$(HAL_ROOT)/Src/stm32f4xx_ll_gpio.c \
-$(HAL_ROOT)/Src/stm32f4xx_ll_usart.c \
-$(HAL_ROOT)/Src/stm32f4xx_ll_spi.c \
-$(HAL_ROOT)/Src/stm32f4xx_ll_tim.c \
-$(HAL_ROOT)/Src/stm32f4xx_ll_dma.c \
-$(HAL_ROOT)/Src/stm32f4xx_ll_rcc.c \
-$(HAL_ROOT)/Src/stm32f4xx_ll_utils.c \
-$(HAL_ROOT)/Src/stm32f4xx_ll_exti.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_gpio.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_usart.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_spi.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_tim.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_dma.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_rcc.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_utils.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_exti.c \
 
 # C sources
 C_SOURCES =  \
-$(PROJ_ROOT)/src/main.c \
-$(PROJ_ROOT)/src/uart.c \
-$(PROJ_ROOT)/src/gpio.c \
-$(PROJ_ROOT)/src/logger.c \
-$(PROJ_ROOT)/src/spi.c \
-$(PROJ_ROOT)/src/system_time.c \
-$(PROJ_ROOT)/src/device_com.c \
-$(PROJ_ROOT)/src/radio.c \
-$(PROJ_ROOT)/src/stm32f4xx_it.c \
-$(PROJ_ROOT)/src/system_stm32f4xx.c \
-$(RADIO_SOURCES) \
-$(HAL_SOURCES) \
-$(FREERTOS_SOURCES) \
+	$(PROJ_ROOT)/src/main.c \
+	$(PROJ_ROOT)/src/uart.c \
+	$(PROJ_ROOT)/src/gpio.c \
+	$(PROJ_ROOT)/src/logger.c \
+	$(PROJ_ROOT)/src/spi.c \
+	$(PROJ_ROOT)/src/system_time.c \
+	$(PROJ_ROOT)/src/device_com.c \
+	$(PROJ_ROOT)/src/radio.c \
+	$(PROJ_ROOT)/src/stm32f4xx_it.c \
+	$(PROJ_ROOT)/src/system_stm32f4xx.c \
+	$(RADIO_SOURCES) \
+	$(FALCON_PACKET_SOURCES) \
+	$(HAL_SOURCES) \
+	$(FREERTOS_SOURCES) \
 
 # C includes
 C_INCLUDES += \
-			-I$(HAL_ROOT)/Inc \
-			-I$(LIB_ROOT)/frf/ \
-			-I$(DRV_ROOT) \
-			-I$(FALCON_PACKET_ROOT) \
-			-I$(LIBCRC_ROOT)/include \
-			-I$(GRINBUF_ROOT) \
-			-I$(DRV_ROOT)/nRF24L01/ \
-			-I$(PROJ_ROOT)/include \
-			-I$(COMMON_ROOT) \
-			-I$(CMSIS_ROOT)/Device/ST/STM32F4xx/Include \
-			-I$(CMSIS_ROOT)/Include \
-			-I$(FREERTOS_ROOT)/include \
-			-I$(FREERTOS_PORTABLE) \
+	-I$(HAL_ROOT)/Inc \
+	-I$(LIB_ROOT)/frf/ \
+	-I$(DRV_ROOT) \
+	-I$(FALCON_PACKET_ROOT) \
+	-I$(LIBCRC_ROOT)/include \
+	-I$(GRINBUF_ROOT) \
+	-I$(DRV_ROOT)/nRF24L01/ \
+	-I$(PROJ_ROOT)/include \
+	-I$(COMMON_ROOT) \
+	-I$(CMSIS_ROOT)/Device/ST/STM32F4xx/Include \
+	-I$(CMSIS_ROOT)/Include \
+	-I$(FREERTOS_ROOT)/include \
+	-I$(FREERTOS_PORTABLE) \
 
 
 ifeq ($(BOARD_VERSION), DISCO)
@@ -131,21 +142,21 @@ endif
 
 # C defines
 C_DEFS +=  \
--DALBUS \
--DUSE_FULL_LL_DRIVER \
--D$(CHIPSET_DEF) \
--D$(BUILD_CONFIG) \
--DHSE_VALUE=8000000 \
--DHSE_STARTUP_TIMEOUT=100 \
--DLSE_STARTUP_TIMEOUT=5000 \
--DLSE_VALUE=32768 \
--DEXTERNAL_CLOCK_VALUE=12288000 \
--DHSI_VALUE=16000000 \
--DLSI_VALUE=32000 \
--DVDD_VALUE=3300 \
--DPREFETCH_ENABLE=1 \
--DINSTRUCTION_CACHE_ENABLE=1 \
--DDATA_CACHE_ENABLE=1
+	-DALBUS \
+	-DUSE_FULL_LL_DRIVER \
+	-D$(CHIPSET_DEF) \
+	-D$(BUILD_CONFIG) \
+	-DHSE_VALUE=8000000 \
+	-DHSE_STARTUP_TIMEOUT=100 \
+	-DLSE_STARTUP_TIMEOUT=5000 \
+	-DLSE_VALUE=32768 \
+	-DEXTERNAL_CLOCK_VALUE=12288000 \
+	-DHSI_VALUE=16000000 \
+	-DLSI_VALUE=32000 \
+	-DVDD_VALUE=3300 \
+	-DPREFETCH_ENABLE=1 \
+	-DINSTRUCTION_CACHE_ENABLE=1 \
+	-DDATA_CACHE_ENABLE=1
 
 OPT = -O0 -g3
 
