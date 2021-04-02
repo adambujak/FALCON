@@ -6,5 +6,6 @@
 typedef void (*exti_cb_t)(void);
 
 void radio_init(void);
+void radio_process(void);
 
 #endif  // RADIO_H

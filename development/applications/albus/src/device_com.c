@@ -76,6 +76,7 @@ void device_com_task(void *pvParameters)
 
   while(1) {
     handle_uart();
+    radio_process();
     vTaskDelay(100);
   }
 }
