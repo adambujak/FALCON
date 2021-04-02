@@ -6,12 +6,12 @@
 #include <stdlib.h>
 
 #ifdef DEBUG
-#define DEBUG_LOG(fmt, ...)              \
+#define LOG_DEBUG(fmt, ...)              \
   do {                                   \
     printf((fmt), ## __VA_ARGS__); \
   } while (0)
 #else
-#define DEBUG_LOG(...) do {} while (0)
+#define LOG_DEBUG(...) do {} while (0)
 #endif
 
 static void assertBufferIsVal(uint8_t *buffer, uint32_t bufferSize, uint8_t val)
@@ -31,21 +31,21 @@ static void fillBufferRandom(uint8_t *buffer, uint32_t bufferSize)
 static void printBuffer(uint8_t *buffer, uint32_t bufferSize)
 {
   (void) buffer;
-  DEBUG_LOG("\n{\n");
+  LOG_DEBUG("\n{\n");
   for (uint32_t i = 0; i < bufferSize; i++) {
-    DEBUG_LOG("%x, ", buffer[i]);
+    LOG_DEBUG("%x, ", buffer[i]);
   }
-  DEBUG_LOG("\n}\n\n");
+  LOG_DEBUG("\n}\n\n");
 }
 
 static void printBufferDetailed(uint8_t *buffer, uint32_t bufferSize)
 {
   (void) buffer;
-  DEBUG_LOG("\n{\n");
+  LOG_DEBUG("\n{\n");
   for (uint32_t i = 0; i < bufferSize; i++) {
-    DEBUG_LOG("[%u]: %x, \n", i, buffer[i]);
+    LOG_DEBUG("[%u]: %x, \n", i, buffer[i]);
   }
-  DEBUG_LOG("\n}\n\n");
+  LOG_DEBUG("\n}\n\n");
 }
 
 void setUp(void)

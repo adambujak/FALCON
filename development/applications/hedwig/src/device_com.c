@@ -84,23 +84,16 @@ static void rf_event_callback(frf_event_t event)
 {
   switch(event) {
     case FRF_EVENT_TX_FAILED:
-      DEBUG_LOG("RF TX FAILED\r\n");
+      LOG_DEBUG("RF TX FAILED\r\n");
       break;
     case FRF_EVENT_TX_SUCCESS:
-      DEBUG_LOG("RF TX SUCCESS\r\n");
+      LOG_DEBUG("RF TX SUCCESS\r\n");
       break;
     case FRF_EVENT_RX:
       rfRxReady = true;
-      DEBUG_LOG("RF RX Event\r\n");
+      LOG_DEBUG("RF RX Event\r\n");
       break;
   }
-}
-
-static void send_response_frame(void)
-{
-  //lock_frf();
-  //frf_pushPacket(&radio, (uint8_t*)data);
-  //unlock_frf();
 }
 
 static void rx_handler(uint8_t *data, fp_type_t packetType)
@@ -110,7 +103,7 @@ static void rx_handler(uint8_t *data, fp_type_t packetType)
     {
       fpc_flight_control_t controlInput = {};
       fpc_flight_control_decode(data, &controlInput);
-      DEBUG_LOG("CONTROL INPUT: %f, %f, %f, %f\r\n",
+      LOG_DEBUG("CONTROL INPUT: %f, %f, %f, %f\r\n",
                 controlInput.fcsControlCmd.yaw,
                 controlInput.fcsControlCmd.pitch,
                 controlInput.fcsControlCmd.roll,
@@ -121,7 +114,7 @@ static void rx_handler(uint8_t *data, fp_type_t packetType)
     {
       fpc_mode_t mode = {};
       fpc_mode_decode(data, &mode);
-      DEBUG_LOG("MODE COMMAND: %d\r\n", mode.mode);
+      LOG_DEBUG("MODE COMMAND: %d\r\n", mode.mode);
     }
     break;
     default:
@@ -137,11 +130,11 @@ void decoder_callback(uint8_t *data, fp_type_t packetType)
 
 static void device_com_task(void *pvParameters)
 {
-  DEBUG_LOG("Device com task started\r\n");
+  LOG_DEBUG("Device com task started\r\n");
 
   while(1) {
     rfProcess();
-    hedwig_delay(1);
+    rtos_delay_ms(1);
   }
 }
 
@@ -160,7 +153,7 @@ void device_com_setup(void)
     .spiCtx = NULL,
     .setCS = bsp_rf_cs_set,
     .setCE = bsp_rf_ce_set,
-    .delay = hedwig_delay,
+    .delay_us = delay_us,
     .eventCallback = rf_event_callback
   };
 

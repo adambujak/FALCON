@@ -1,5 +1,5 @@
 /******************************************************************************
- * @file     fimu.c 
+ * @file     fimu.c
  * @brief    Falcon IMU
  * @version  1.0
  * @date     2020-11-02
@@ -33,7 +33,7 @@ static int reset_offset_regs(void)
   /* reset accel offset registers */
   if (self_test_done == 0) {
     /* save accel offset register values */
-    DEBUG_LOG("Save the original accel offset register values\r\n");
+    LOG_DEBUG("Save the original accel offset register values\r\n");
     ret = inv_read_mems_reg(REG_XA_OFFS_H, 2, d);
     a_offset_reg_save[0] = (int)((d[0] << 8) | d[1]); // ax
     ret |= inv_read_mems_reg(REG_YA_OFFS_H, 2, d);
@@ -41,11 +41,11 @@ static int reset_offset_regs(void)
     ret |= inv_read_mems_reg(REG_ZA_OFFS_H, 2, d);
     a_offset_reg_save[2] = (int)((d[0] << 8) | d[1]); // az
     if (ret) {
-      DEBUG_LOG("Failed to read accel offset registers\r\n");
+      LOG_DEBUG("Failed to read accel offset registers\r\n");
     }
   } else {
     /* restore accel offset registers to the original */
-    DEBUG_LOG("Restore the original accel offset register values\r\n");
+    LOG_DEBUG("Restore the original accel offset register values\r\n");
     d[0] = (a_offset_reg_save[0] >> 8) & 0xff;
     d[1] = a_offset_reg_save[0] & 0xff;
     ret = inv_write_single_mems_reg(REG_XA_OFFS_H, d[0]);
@@ -59,12 +59,12 @@ static int reset_offset_regs(void)
     ret |= inv_write_single_mems_reg(REG_ZA_OFFS_H, d[0]);
     ret |= inv_write_single_mems_reg(REG_ZA_OFFS_H + 1, d[1]);
     if (ret) {
-      DEBUG_LOG("Failed to reset accel offset registers\r\n");
+      LOG_DEBUG("Failed to reset accel offset registers\r\n");
     }
   }
 
   /* reset gyro offset registers */
-  DEBUG_LOG("Reset gyro offset register values\r\n");
+  LOG_DEBUG("Reset gyro offset register values\r\n");
   d[0] = d[1] = 0;
   ret = inv_write_single_mems_reg(REG_XG_OFFS_USR_H, d[0]);
   ret |= inv_write_single_mems_reg(REG_XG_OFFS_USR_H + 1, d[1]);
@@ -73,7 +73,7 @@ static int reset_offset_regs(void)
   ret |= inv_write_single_mems_reg(REG_ZG_OFFS_USR_H, d[0]);
   ret |= inv_write_single_mems_reg(REG_ZG_OFFS_USR_H + 1, d[1]);
   if (ret) {
-    DEBUG_LOG("Failed to reset gyro offset registers\r\n");
+    LOG_DEBUG("Failed to reset gyro offset registers\r\n");
   }
 
   return ret;
@@ -109,7 +109,7 @@ static int set_offset_regs(int accel_off[3], int gyro_off[3])
   ret |= inv_write_single_mems_reg(REG_ZA_OFFS_H, d[0]);
   ret |= inv_write_single_mems_reg(REG_ZA_OFFS_H + 1, d[1]);
   if (ret) {
-    DEBUG_LOG("Failed to write accel offset registers\r\n");
+    LOG_DEBUG("Failed to write accel offset registers\r\n");
   }
 
   /* Gyro offset registers */
@@ -132,7 +132,7 @@ static int set_offset_regs(int accel_off[3], int gyro_off[3])
   ret |= inv_write_single_mems_reg(REG_ZG_OFFS_USR_H, d[0]);
   ret |= inv_write_single_mems_reg(REG_ZG_OFFS_USR_H + 1, d[1]);
   if (ret) {
-    DEBUG_LOG("Failed to write gyro offset registers\r\n");
+    LOG_DEBUG("Failed to write gyro offset registers\r\n");
   }
   return ret;
 }
@@ -146,11 +146,11 @@ int fimu_init(fimu_config_t config)
   result |= inv_initialize_lower_driver(SERIAL_INTERFACE_I2C, 0);
   result |= inv_set_slave_compass_id(COMPASS_SLAVE_ID);
   if (result) {
-      DEBUG_LOG("Could not initialize.\r\n");
+      LOG_DEBUG("Could not initialize.\r\n");
       return FLN_ERR;
   }
   else {
-      DEBUG_LOG("Initialized.\r\n");
+      LOG_DEBUG("Initialized.\r\n");
       return FLN_OK;
   }
 
@@ -188,7 +188,7 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
   signed long  long_data[3] = { 0 };
   signed long  long_quat[3] = { 0 };
   unsigned short sample_cnt_array[GENERAL_SENSORS_MAX] = { 0 };
-  
+
   float accel_float[3], rv_float[4];
 
   // Process Incoming INT and Get/Pack FIFO Data
@@ -243,7 +243,7 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
           raw_data[1] = raw_data[1] << 5;
           raw_data[2] = raw_data[2] << 5;
           inv_mems_dmp_get_calibrated_gyro(long_data, raw_data, bias_data);
-          inv_convert_dmp3_to_body(long_data, scale, gyro_float);          
+          inv_convert_dmp3_to_body(long_data, scale, gyro_float);
         } // header & GYRO_SET
 
         if (header & QUAT6_SET) {
@@ -289,18 +289,18 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
 
 int fimu_calibrate_DMP(void)
 {
-  DEBUG_LOG("Selftest started.\r\n");
+  LOG_DEBUG("Selftest started.\r\n");
 
   int self_test_result = 0;
   int dmp_bias[9] = { 0 };
   self_test_result = inv_mems_run_selftest();
 
-  DEBUG_LOG("Selftest...Done...Ret=%d\r\n", self_test_result);
-  DEBUG_LOG("Result: Compass=%s, Accel=%s, Gyro=%s\r\n", (self_test_result & 0x04) ? "Pass" : "Fail", (self_test_result & 0x02) ? "Pass" : "Fail", (self_test_result & 0x01) ? "Pass" : "Fail");
-  DEBUG_LOG("Accel Average (LSB@FSR 2g)\r\n");
-  DEBUG_LOG("\tX:%d Y:%d Z:%d\r\n", a_average[0], a_average[1], a_average[2]);
-  DEBUG_LOG("Gyro Average (LSB@FSR 250dps)\r\n");
-  DEBUG_LOG("\tX:%d Y:%d Z:%d\r\n", g_average[0], g_average[1], g_average[2]);
+  LOG_DEBUG("Selftest...Done...Ret=%d\r\n", self_test_result);
+  LOG_DEBUG("Result: Compass=%s, Accel=%s, Gyro=%s\r\n", (self_test_result & 0x04) ? "Pass" : "Fail", (self_test_result & 0x02) ? "Pass" : "Fail", (self_test_result & 0x01) ? "Pass" : "Fail");
+  LOG_DEBUG("Accel Average (LSB@FSR 2g)\r\n");
+  LOG_DEBUG("\tX:%d Y:%d Z:%d\r\n", a_average[0], a_average[1], a_average[2]);
+  LOG_DEBUG("Gyro Average (LSB@FSR 250dps)\r\n");
+  LOG_DEBUG("\tX:%d Y:%d Z:%d\r\n", g_average[0], g_average[1], g_average[2]);
 
   if ((self_test_result & 0x03) != 0x03) {
     return FLN_ERR;
@@ -321,24 +321,24 @@ int fimu_calibrate_DMP(void)
 
 int fimu_calibrate_offset(void)
 {
-  DEBUG_LOG("Selftest started.\r\n");
-  
+  LOG_DEBUG("Selftest started.\r\n");
+
   int self_test_result = 0;
   int accel_offset[3], gyro_offset[3];
   int ret, i;
 
   ret = reset_offset_regs();
     if (ret) {
-      DEBUG_LOG("Failed to reset offset registers\r\n");
+      LOG_DEBUG("Failed to reset offset registers\r\n");
     }
   self_test_result = inv_mems_run_selftest();
 
-  DEBUG_LOG("Selftest...Done...Ret=%d\r\n", self_test_result);
-  DEBUG_LOG("Result: Compass=%s, Accel=%s, Gyro=%s\r\n", (self_test_result & 0x04) ? "Pass" : "Fail", (self_test_result & 0x02) ? "Pass" : "Fail", (self_test_result & 0x01) ? "Pass" : "Fail");
-  DEBUG_LOG("Accel Average (LSB@FSR 2g)\r\n");
-  DEBUG_LOG("\tX:%d Y:%d Z:%d\r\n", a_average[0], a_average[1], a_average[2]);
-  DEBUG_LOG("Gyro Average (LSB@FSR 250dps)\r\n");
-  DEBUG_LOG("\tX:%d Y:%d Z:%d\r\n", g_average[0], g_average[1], g_average[2]);
+  LOG_DEBUG("Selftest...Done...Ret=%d\r\n", self_test_result);
+  LOG_DEBUG("Result: Compass=%s, Accel=%s, Gyro=%s\r\n", (self_test_result & 0x04) ? "Pass" : "Fail", (self_test_result & 0x02) ? "Pass" : "Fail", (self_test_result & 0x01) ? "Pass" : "Fail");
+  LOG_DEBUG("Accel Average (LSB@FSR 2g)\r\n");
+  LOG_DEBUG("\tX:%d Y:%d Z:%d\r\n", a_average[0], a_average[1], a_average[2]);
+  LOG_DEBUG("Gyro Average (LSB@FSR 250dps)\r\n");
+  LOG_DEBUG("\tX:%d Y:%d Z:%d\r\n", g_average[0], g_average[1], g_average[2]);
 
   if ((self_test_result & 0x03) != 0x03) {
     return FLN_ERR;
@@ -359,10 +359,10 @@ int fimu_calibrate_offset(void)
   /* Update offset registers */
   ret = set_offset_regs(accel_offset, gyro_offset);
   if (ret) {
-    DEBUG_LOG("Failed to update offset registers\r\n");
+    LOG_DEBUG("Failed to update offset registers\r\n");
     return FLN_ERR;
   } else {
-    DEBUG_LOG("\r\nSetting the offset registers with one-axis factory calibration values...done\r\n");
+    LOG_DEBUG("\r\nSetting the offset registers with one-axis factory calibration values...done\r\n");
     self_test_done = 1;
     return FLN_OK;
   }
@@ -370,7 +370,7 @@ int fimu_calibrate_offset(void)
 
 void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
 {
-  DEBUG_LOG("Starting IMU Cal\r\n");
+  LOG_DEBUG("Starting IMU Cal\r\n");
 
   int samples = 50;
 
@@ -387,7 +387,7 @@ void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
   for(int i=0; i<samples; i++)
   {
     fimu_fifo_handler(test_gyro, test_accel, test_quat);
-    DEBUG_LOG("Reading %d: gyro: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f quat: %7.4f, %7.4f, %7.4f, %7.4f\r\n",
+    LOG_DEBUG("Reading %d: gyro: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f quat: %7.4f, %7.4f, %7.4f, %7.4f\r\n",
       i,
       test_gyro[0],
       test_gyro[1],
@@ -403,14 +403,14 @@ void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
     gyro_samples[0] += test_gyro[0];
     gyro_samples[1] += test_gyro[1];
     gyro_samples[2] += test_gyro[2];
-    accel_samples[0] += test_accel[0];      
+    accel_samples[0] += test_accel[0];
     accel_samples[1] += test_accel[1];
     accel_samples[2] += test_accel[2];
     quat_samples[0] += test_quat[0];
     quat_samples[1] += test_quat[1];
     quat_samples[2] += test_quat[2];
     quat_samples[3] += test_quat[3];
-    
+
     vTaskDelay(10);
   }
 
@@ -427,7 +427,7 @@ void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
    quat_bias[2] = quat_samples[2]/samples;
    quat_bias[3] = quat_samples[3]/samples;
 
-   DEBUG_LOG("Bias: gyro: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f quat: %7.4f, %7.4f, %7.4f, %7.4f\r\n",
+   LOG_DEBUG("Bias: gyro: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f quat: %7.4f, %7.4f, %7.4f, %7.4f\r\n",
       gyro_bias[0],
       gyro_bias[1],
       gyro_bias[2],

@@ -5,7 +5,7 @@ void motors_init(void)
 {
   bsp_motors_init();
 
-  DEBUG_LOG("Motors Init\r\n");
+  LOG_DEBUG("Motors Init\r\n");
 
   motors_set_motor_us(MOTOR_1, 0);
   motors_set_motor_us(MOTOR_2, 0);
@@ -14,7 +14,7 @@ void motors_init(void)
 
   HAL_Delay(1000);
 
-  DEBUG_LOG("Motors Ready\r\n");
+  LOG_DEBUG("Motors Ready\r\n");
 }
 
 void motors_set_motor_us(uint8_t motor, uint16_t speed)

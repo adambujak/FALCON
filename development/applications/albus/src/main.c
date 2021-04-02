@@ -67,21 +67,21 @@ void sysclk_init(void)
 
 static void led_pin_init(void)
 {
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
-  LL_GPIO_InitTypeDef gpio_config = {0};
-
-  LL_GPIO_ResetOutputPin(ERROR_LED_PORT, ERROR_LED_PIN);
-  gpio_config.Pin = ERROR_LED_PIN;
-  gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
-  gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
-  gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  gpio_config.Pull = LL_GPIO_PULL_UP;
-  LL_GPIO_Init(ERROR_LED_PORT, &gpio_config);
+//  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
+//  LL_GPIO_InitTypeDef gpio_config = {0};
+//
+//  LL_GPIO_ResetOutputPin(ERROR_LED_PORT, ERROR_LED_PIN);
+//  gpio_config.Pin = ERROR_LED_PIN;
+//  gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
+//  gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+//  gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+//  gpio_config.Pull = LL_GPIO_PULL_UP;
+//  LL_GPIO_Init(ERROR_LED_PORT, &gpio_config);
 }
 
 static void led_toggle(void)
 {
-  LL_GPIO_TogglePin(ERROR_LED_PORT, ERROR_LED_PIN);
+//  LL_GPIO_TogglePin(ERROR_LED_PORT, ERROR_LED_PIN);
 }
 
 static void board_bringup(void)
@@ -99,7 +99,7 @@ static void board_bringup(void)
   system_time_init();
 }
 
-static void start_os(void)
+static void os_start(void)
 {
   os_started = true;
   vTaskStartScheduler();
@@ -115,7 +115,7 @@ int main(void)
 
   LOG_DEBUG("Starting scheduler\r\n");
 
-  start_os();
+  os_start();
 
   /* Should never reach here */
   while (1);
