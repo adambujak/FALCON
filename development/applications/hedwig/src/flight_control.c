@@ -84,7 +84,7 @@ void rt_OneStep(RT_MODEL *const rtM)
     unlock_sensor_data();
   }
   else {
-    DEBUG_LOG("sensorDataMutex take failed\r\n");
+    LOG_DEBUG("sensorDataMutex take failed\r\n");
     error_handler();
   }
 
@@ -108,7 +108,7 @@ static void flight_control_callback( TimerHandle_t xTimer )
 {
   rt_OneStep(rtM);
 
-  DEBUG_LOG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
+  LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
           rtY_State_Estim.z,
           rtY_State_Estim.dz,
           rtY_State_Estim.yaw,
@@ -129,7 +129,7 @@ void flight_control_set_sensor_data(float *gyro_data, float *accel_data, float *
     unlock_sensor_data();
   }
   else {
-    DEBUG_LOG("sensorDataMutex take failed\r\n");
+    LOG_DEBUG("sensorDataMutex take failed\r\n");
   }
 }
 
@@ -154,7 +154,7 @@ void flight_control_setup(void)
 //     return 0;
 //   }
 //   else {
-//     DEBUG_LOG("NO STOP WHILE FLYING\r\n");
+//     LOG_DEBUG("NO STOP WHILE FLYING\r\n");
 //     return 1;
 //   }
 // }
@@ -178,7 +178,7 @@ void flight_control_start(void)
 //     return 0;
 //   }
 //   else {
-//     DEBUG_LOG("NO RESET WHILE FLYING\r\n");
+//     LOG_DEBUG("NO RESET WHILE FLYING\r\n");
 //     return 1;
 //   }
 // }

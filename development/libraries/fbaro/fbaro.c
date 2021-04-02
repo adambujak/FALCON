@@ -1,5 +1,5 @@
 /******************************************************************************
- * @file     fbaro.c 
+ * @file     fbaro.c
  * @brief    Falcon Barometer
  * @version  1.0
  * @date     2020-11-11
@@ -69,7 +69,7 @@ int fbaro_calibrate(void)
     return FLN_ERR;
   }
 
-  DEBUG_LOG("Starting Altitude Cal\r\n");
+  LOG_DEBUG("Starting Altitude Cal\r\n");
 
   MPL3115A2_OutputSampleRate(SR3);
 
@@ -82,7 +82,7 @@ int fbaro_calibrate(void)
   for(int i=0; i<samples; i++)
   {
     float temp = MPL3115A2_ReadAltitude();
-    DEBUG_LOG("Reading %d: %7.5f\r\n",i,temp);
+    LOG_DEBUG("Reading %d: %7.5f\r\n",i,temp);
 
     if (temp != 0) {
       test_data += temp;

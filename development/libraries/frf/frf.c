@@ -87,7 +87,7 @@ static void powerUpRx(frf_t *instance)
 
   nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
   nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PRX);
-  instance->delay(1);
+  instance->delay_us(130);
   nRF24L01_flush_rx(&instance->rfInstance);
 
   CE_HIGH();
@@ -104,7 +104,7 @@ static void powerUpTx(frf_t *instance)
 
   nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
   nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PTX);
-  instance->delay(1);
+  instance->delay_us(130);
 }
 
 static void readPacket(frf_t *instance)
@@ -179,7 +179,7 @@ static void handleInterrupt(frf_t *instance)
 void frf_init(frf_t *instance, frf_config_t *config)
 {
   instance->setCE = config->setCE;
-  instance->delay = config->delay;
+  instance->delay_us = config->delay_us;
   instance->eventCallback = config->eventCallback;
   instance->interruptFired = false;
   instance->txScheduled = true;
@@ -191,7 +191,7 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
                uint8_t rxAddr[FRF_ADDR_WIDTH], uint8_t txAddr[FRF_ADDR_WIDTH])
 {
   CE_LOW();
-  instance->delay(100);
+  instance->delay_us(100000);
 
   nRF24L01_set_rf_channel(&instance->rfInstance, channel);
 
@@ -294,7 +294,7 @@ void frf_finishSending(frf_t *instance)
 {
   while (frf_isSending(instance)) {
     frf_process(instance);
-    instance->delay(1);
+    instance->delay_us(200);
   }
 }
 
@@ -304,7 +304,7 @@ void frf_powerUp(frf_t *instance)
 
   if (instance->powerState == FRF_POWER_STATE_OFF) {
     nRF24L01_set_power_mode(&instance->rfInstance, NRF24L01_PWR_UP);
-    instance->delay(2);
+    instance->delay_us(2000);
   }
 
   instance->transferState = FRF_TRANSFER_STATE_NONE;

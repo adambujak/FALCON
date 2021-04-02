@@ -66,7 +66,7 @@ void IMU_data_ready_cb(void)
 
 static void sensors_task(void *pvParameters)
 {
-  DEBUG_LOG("SENSORS TASK STARTED\r\n");
+  LOG_DEBUG("SENSORS TASK STARTED\r\n");
 
   FLN_ERR_CHECK(fbaro_calibrate());
 
@@ -92,14 +92,14 @@ static void sensors_task(void *pvParameters)
       }
 
       if (baro_delay_count == BARO_DELAY_COUNT) {
-        fbaro_get_altitude(&alt_data);      
+        fbaro_get_altitude(&alt_data);
         baro_delay_count = 0;
       }
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
     }
     else {
-       DEBUG_LOG("sensor notification not received\r\n");
+       LOG_DEBUG("sensor notification not received\r\n");
        error_handler();
     }
   }

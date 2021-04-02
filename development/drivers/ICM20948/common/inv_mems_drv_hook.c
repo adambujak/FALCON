@@ -9,7 +9,7 @@
 
 #include "bsp.h"
 #include <FreeRTOS.h>
-fln_i2c_handle_t *ICM_i2c_handle; 
+fln_i2c_handle_t *ICM_i2c_handle;
 void ICM_connect_i2c(fln_i2c_handle_t *handle)
 {
     ICM_i2c_handle = handle;
@@ -28,7 +28,7 @@ int inv_serial_interface_write_hook(uint16_t reg, uint32_t length, uint8_t *data
 int inv_serial_interface_read_hook(uint16_t reg, uint32_t length, uint8_t *data)
 {
 	int status;
-    
+
     status = bsp_i2c_read(ICM_i2c_handle, ACCEL_GYRO_CHIP_ADDR, (uint8_t)reg, (uint16_t)length, data);
 
 	return status;
@@ -47,7 +47,7 @@ void inv_sleep(unsigned long mSecs)
 //
 //    /* must add one tick to ensure a full duration of xDelay ticks */
 //    vTaskDelay(xDelay + 1);
-	hedwig_delay(mSecs);
+	rtos_delay_ms(mSecs);
 }
 
 void inv_sleep_100us(unsigned long nHowMany100MicroSecondsToSleep)

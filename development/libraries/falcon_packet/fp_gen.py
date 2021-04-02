@@ -100,16 +100,27 @@ def python_class_str(className, fields, isPacket=False):
     output += "\n        else:"
     for field in fields:
         output += "\n            self.{} = kwargs.get(\"{}\", 0)".format(field.name, field.name)
-    output += "\n\n    def encode(self, dest, offset=0):"
+
+    output += "\n"
     offset = 0
 
-    if (isPacket):
+    if isPacket:
+        output += "\n    def encode(self, offset=0):"
+        output += "\n        dest = bytearray(get_packet_size(fp_type_t.{}) + {})\n".format(
+            packetTypesDict[className]["typeName"], PACKET_HEADER_SIZE)
         output += "\n        encode_header(dest, fp_type_t.{}, 0)".format(packetTypesDict[className]["typeName"])
         offset = PACKET_HEADER_SIZE
+
+    else:
+        output += "\n    def encode(self, dest, offset=0):"
 
     for field in fields:
         output += "\n        {}".format(python_encode_field_str(field, offset))
         offset += field.varType.size
+
+    if isPacket:
+        output += "\n        return dest"
+
     output += "\n"
     output += "\n"
     return output

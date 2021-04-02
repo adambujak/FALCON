@@ -7,30 +7,26 @@
 #include "timers.h"
 #include "semphr.h"
 
-#include "falcon_common.h"
-
 #include "logger.h"
-#ifdef DEBUG
-#define DEBUG_LOG(fmt, ...)              \
-  do {                                   \
-    char str[128];                       \
-    sprintf(str, (fmt), ## __VA_ARGS__); \
-    logger_write(str);                   \
-  } while (0)
-#else
-#define DEBUG_LOG(...) do {} while (0)
-#endif // DEBUG
 
-#define RTOS_ERR_CHECK(x)   \
-  do {                      \
-    int retval = (x);       \
-    if (retval != pdPASS) { \
-      error_handler();      \
-    }                       \
-  } while (0)
+#include <stdint.h>
 
-extern void albus_delay(uint32_t ms);
-extern void albus_sysTickHandler(void);
-extern void OSSysTickHandler(void);
+#define DISABLE_IRQ()        \
+  uint32_t prim;             \
+  prim = __get_PRIMASK();    \
+  __disable_irq();           \
+
+#define ENABLE_IRQ()         \
+  if (!prim) {               \
+    __enable_irq();          \
+  }                          \
+
+#define SYSCLK_FRQ 96000000
+
+#define US_TO_SYSTICK(us) (SYSCLK_FRQ / 1000000) * (us)
+
+void delay_us(uint32_t us);
+void delay_ms(uint32_t ms);
+void rtos_delay_ms(uint32_t ms);
 
 #endif  // ALBUS_H

@@ -1,189 +1,101 @@
 #include "device_com.h"
 
 #include "falcon_common.h"
-#include "radio_common.h"
-#include "frf.h"
-#include "bsp.h"
+
+#include "radio.h"
+#include "uart.h"
 
 #include "falcon_packet.h"
+#include "fs_decoder.h"
+#include "fp_decode.h"
 
-#define RTOS_TIMEOUT_TICKS 25
+static uint8_t uart_rx_buffer[MAX_FRAME_SIZE];
+static fs_decoder_t decoder;
 
-static uint8_t hedwigAddress[RADIO_ADDRESS_LENGTH];
-static uint8_t albusAddress[RADIO_ADDRESS_LENGTH];
-
-static frf_t radio;
-static volatile bool rfTxReady = false;
-static volatile bool rfRxReady = false;
-static TimerHandle_t rfTxTimer;
-static SemaphoreHandle_t rfTxReadyMutex;
-static SemaphoreHandle_t frfMutex;
-
-static void rf_spi_transfer (void * context, uint8_t * tx_buf, uint16_t tx_len,
-                             uint8_t * rx_buf, uint16_t rx_len)
+static void decoder_callback(uint8_t *data, fp_type_t packetType)
 {
-  bsp_rf_transceive(tx_buf, tx_len, rx_buf, rx_len);
-}
-
-static inline void rfISR(void)
-{
-  frf_isr(&radio);
-}
-
-static inline void lock_rf_tx_ready_flag(void)
-{
-  xSemaphoreTake(rfTxReadyMutex, RTOS_TIMEOUT_TICKS);
-}
-
-static inline void unlock_rf_tx_ready_flag(void)
-{
-  xSemaphoreGive(rfTxReadyMutex);
-}
-
-static inline void createRFTxReadyMutex(void)
-{
-  rfTxReadyMutex = xSemaphoreCreateMutex();
-  if (rfTxReadyMutex == NULL) {
-    error_handler();
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wswitch"
+  switch (packetType) {
+  case FPT_FLIGHT_CONTROL_COMMAND:
+  {
+    fpc_flight_control_t control = {{0}};
+    fpc_flight_control_decode(data, &control);
+    LOG_DEBUG("received motor cmd\r\n");
+    LOG_DEBUG("MOTOR COMMAND: %f, %f, %f, %f\r\n",
+           control.fcsControlCmd.yaw,
+           control.fcsControlCmd.pitch,
+           control.fcsControlCmd.roll,
+           control.fcsControlCmd.alt);
   }
-}
-
-static inline void lock_frf(void)
-{
-  xSemaphoreTake(frfMutex, RTOS_TIMEOUT_TICKS);
-}
-
-static inline void unlock_frf(void)
-{
-  xSemaphoreGive(frfMutex);
-}
-
-static inline void createFRFMutex(void)
-{
-  frfMutex = xSemaphoreCreateMutex();
-  if (frfMutex == NULL) {
-    error_handler();
+    break;
+//    case FPT_SET_DESTINATION_COMMAND:
+//    {
+//      fpc_set_destination_t dest = {0};
+//      fpc_set_destination_decode(data, &dest);
+//      printf("decoded dest: %f\r\n", dest.gpsData.latitude);
+//    }
+//      break;
+//    case FPT_FLIGHT_CONTROL_POSITION_COMMAND:
+//    {
+//      fpc_flight_control_position_t pos = {0};
+//      fpc_flight_control_position_decode(data, &pos);
+//      printf("decoded posi: %f %f %f %f\r\n", pos.positionReferenceCMD.x, pos.positionReferenceCMD.y, pos.positionReferenceCMD.z, pos.positionReferenceCMD.yaw);
+//    }
+//      break;
+//    default:
+//      break;
   }
+  #pragma GCC diagnostic pop
 }
 
-static inline void setRFTxReadyFlag(bool val)
+static void decode_frame(uint8_t *data, uint32_t length)
 {
-  lock_rf_tx_ready_flag();
-  rfTxReady = val;
-  unlock_rf_tx_ready_flag();
+  fs_decoder_decode(&decoder, data, length);
 }
 
-static inline bool getRFTxReadyFlag(void)
+static void decoder_init(void)
 {
-  bool retval;
-  lock_rf_tx_ready_flag();
-  retval = rfTxReady;
-  unlock_rf_tx_ready_flag();
-  return retval;
+   fs_decoder_config_t decoder_config = {
+     .callback = decoder_callback
+   };
+   fs_decoder_init(&decoder, &decoder_config);
 }
 
-static void rfTxTimerCallback(TimerHandle_t timer)
+static void handle_uart(void)
 {
-  setRFTxReadyFlag(true);
-}
-
-static inline void createRFTxTimer(void)
-{
-  rfTxTimer = xTimerCreate("rfTxTimer",
-                    TICKS_TO_MS(FRF_DEFAULT_TX_TIMER_PERIOD_MS*80),
-                    pdTRUE,
-                    (void *) 0,
-                    rfTxTimerCallback
-                    );
-  xTimerStart(rfTxTimer, RTOS_TIMEOUT_TICKS);
-}
-
-static inline void handleRFTx(void)
-{
-  if (getRFTxReadyFlag()) {
-    frf_tx(&radio);
-    setRFTxReadyFlag(false);
+  if (uart_read(uart_rx_buffer, MAX_FRAME_SIZE) == MAX_FRAME_SIZE) {
+    decode_frame(uart_rx_buffer, MAX_FRAME_SIZE);
+    LOG_DEBUG("received frame\r\n");
   }
-}
-
-static inline void handleRFRx(void)
-{
-  if (rfRxReady) {
-    frf_packet_t packet;
-    if (frf_getPacket(&radio, packet) == 0) {
-      DEBUG_LOG("HEDWIG: %s\r\n", (char*)packet);
-    }
-    rfRxReady = false;
-  }
-}
-
-static inline void rfProcess(void)
-{
-  lock_frf();
-  //handleRFRx();
-  handleRFTx();
-  frf_process(&radio);
-  unlock_frf();
-}
-
-static void rf_event_callback(frf_event_t event)
-{
-  switch(event) {
-    case FRF_EVENT_TX_FAILED:
-      DEBUG_LOG("RF TX FAILED\r\n");
-      xTimerChangePeriod(rfTxTimer, 1000, 25);
-      break;
-    case FRF_EVENT_TX_SUCCESS:
-      DEBUG_LOG("RF TX SUCCESS\r\n");
-      break;
-    case FRF_EVENT_RX:
-      rfRxReady = true;
-      DEBUG_LOG("RF RX Event\r\n");
-      break;
-  }
-}
-
-void device_com_send_frame(uint8_t *frame)
-{
-  lock_frf();
-  for (uint8_t i = 0; i < MAX_FRAME_SIZE; i += FRF_PACKET_SIZE) {
-    frf_pushPacket(&radio, &frame[i]);
-    DEBUG_LOG("frame send\r\n");
-  }
-  unlock_frf();
-}
-
-void device_com_setup(void)
-{
-  FLN_ERR_CHECK(bsp_rf_init(rfISR));
-
-  radio_get_hedwig_address(hedwigAddress);
-  radio_get_albus_address(albusAddress);
-
-  frf_config_t config = {
-    .transferFunc = rf_spi_transfer,
-    .spiCtx = NULL,
-    .setCS = bsp_rf_cs_set,
-    .setCE = bsp_rf_ce_set,
-    .delay = albus_delay,
-    .eventCallback = rf_event_callback
-  };
-
-  frf_init(&radio, &config);
-  frf_start(&radio, 2, FRF_PACKET_SIZE, albusAddress, hedwigAddress);
-
-  createFRFMutex();
-  createRFTxTimer();
-  createRFTxReadyMutex();
 }
 
 void device_com_task(void *pvParameters)
 {
-  DEBUG_LOG("Device com task started\r\n");
+  LOG_DEBUG("Device com task started\r\n");
 
   while(1) {
-    rfProcess();
-    albus_delay(1);
+    handle_uart();
+    vTaskDelay(100);
   }
 }
 
+void device_com_setup(void)
+{
+  decoder_init();
+  radio_init();
+}
+
+void device_com_start(void)
+{
+  int32_t taskStatus;
+
+  taskStatus = xTaskCreate(device_com_task,
+                        "device_com_task",
+                        configMINIMAL_STACK_SIZE*4,
+                        NULL,
+                        tskIDLE_PRIORITY + 1,
+                        NULL);
+
+  ASSERT(taskStatus == pdTRUE);
+}
