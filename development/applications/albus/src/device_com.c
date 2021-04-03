@@ -76,6 +76,7 @@ void device_com_task(void *pvParameters)
 
   while(1) {
     handle_uart();
+    radio_process();
     vTaskDelay(100);
   }
 }
@@ -92,7 +93,7 @@ void device_com_start(void)
 
   taskStatus = xTaskCreate(device_com_task,
                         "device_com_task",
-                        configMINIMAL_STACK_SIZE*4,
+                        1024,
                         NULL,
                         tskIDLE_PRIORITY + 1,
                         NULL);

@@ -35,13 +35,13 @@ static void rf_cs_pin_init(void)
   RF_GPIO_SS_CLK_EN();
   LL_GPIO_InitTypeDef gpio_config = {0};
 
-  LL_GPIO_ResetOutputPin(RF_SPI_GPIO_PORT, RF_SPI_SS_PIN);
+  LL_GPIO_ResetOutputPin(RF_SS_GPIO_PORT, RF_SPI_SS_PIN);
   gpio_config.Pin = RF_SPI_SS_PIN;
   gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
   gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
   gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
   gpio_config.Pull = LL_GPIO_PULL_UP;
-  LL_GPIO_Init(RF_SPI_GPIO_PORT, &gpio_config);
+  LL_GPIO_Init(RF_SS_GPIO_PORT, &gpio_config);
 }
 
 static void rf_irq_pin_init(void)
@@ -72,7 +72,7 @@ void gpio_rf_ce_write(uint8_t value)
 
 void gpio_rf_cs_write(uint8_t value)
 {
-  PIN_WRITE(RF_SPI_SS_PIN, RF_SPI_GPIO_PORT, value);
+  PIN_WRITE(RF_SPI_SS_PIN, RF_SS_GPIO_PORT, value);
 }
 
 void gpio_rf_irq_register(exti_cb_t callback)

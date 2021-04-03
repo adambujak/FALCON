@@ -21,6 +21,7 @@
 #include "stm32f4xx_ll_spi.h"
 #include "stm32f4xx_ll_tim.h"
 #include "stm32f4xx_ll_gpio.h"
+#include "stm32f4xx_hal.h"
 
 #define SYSCLK_FREQ            96000000
 
@@ -40,7 +41,26 @@
 #define GPIO_UART_CLK_EN()     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA)
 
 /* RF */
-#define RF_SPI                     SPI2
+#define RF_SPI                           SPI2
+#define RF_SPI_CLK_ENABLE()              __HAL_RCC_SPI2_CLK_ENABLE()
+#define RF_SPI_SCK_GPIO_CLK_ENABLE()     __HAL_RCC_GPIOB_CLK_ENABLE()
+#define RF_SPI_MISO_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOB_CLK_ENABLE()
+#define RF_SPI_MOSI_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOB_CLK_ENABLE()
+#define RF_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE(); __HAL_RCC_GPIOC_CLK_ENABLE()
+#define RF_IRQ_GPIO_CLK_ENABLE()         __HAL_RCC_GPIOB_CLK_ENABLE()
+
+#define RF_SPI_FORCE_RESET()             __HAL_RCC_SPI2_FORCE_RESET()
+#define RF_SPI_RELEASE_RESET()           __HAL_RCC_SPI2_RELEASE_RESET()
+
+#define RF_SPI_SCK_PIN                   GPIO_PIN_13
+#define RF_SPI_SCK_GPIO_PORT             GPIOB
+#define RF_SPI_SCK_AF                    GPIO_AF5_SPI2
+#define RF_SPI_MISO_PIN                  GPIO_PIN_14
+#define RF_SPI_MISO_GPIO_PORT            GPIOB
+#define RF_SPI_MISO_AF                   GPIO_AF5_SPI2
+#define RF_SPI_MOSI_PIN                  GPIO_PIN_15
+#define RF_SPI_MOSI_GPIO_PORT            GPIOB
+#define RF_SPI_MOSI_AF                   GPIO_AF5_SPI2
 
 #define RF_IRQ_PIN                 LL_GPIO_PIN_10
 #define RF_IRQ_GPIO_PORT           GPIOB
@@ -57,15 +77,8 @@
 #define RF_GPIO_SS_CLK_EN()        LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
 
 #define RF_SPI_SS_PIN              LL_GPIO_PIN_12
-#define RF_SPI_SCK_PIN             LL_GPIO_PIN_13
-#define RF_SPI_MISO_PIN            LL_GPIO_PIN_14
-#define RF_SPI_MOSI_PIN            LL_GPIO_PIN_15
+#define RF_SS_GPIO_PORT            GPIOB
 
-#define RF_SPI_GPIO_AF             LL_GPIO_AF_5
-#define RF_SPI_GPIO_PORT           GPIOB
-
-#define RF_SPI_GPIO_CLK_EN()       LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2); \
-                                   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
 
 #define SYSTEM_TIME_TIMER          TIM2
 

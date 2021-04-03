@@ -1,6 +1,6 @@
 TARGET = ALBUS
 BUILD_CONFIG ?= DEBUG
-BOARD_VERSION ?= V1
+BOARD_VERSION ?= DISCO
 
 # Build path
 BUILD_DIR = _build
@@ -45,9 +45,12 @@ FREERTOS_SOURCES = \
 	$(FREERTOS_PORTABLE)/port.c \
 
 HAL_SOURCES = \
+	$(HAL_ROOT)/Src/stm32f4xx_hal.c \
+	$(HAL_ROOT)/Src/stm32f4xx_hal_gpio.c \
+	$(HAL_ROOT)/Src/stm32f4xx_hal_rcc.c \
+	$(HAL_ROOT)/Src/stm32f4xx_hal_spi.c \
 	$(HAL_ROOT)/Src/stm32f4xx_ll_gpio.c \
 	$(HAL_ROOT)/Src/stm32f4xx_ll_usart.c \
-	$(HAL_ROOT)/Src/stm32f4xx_ll_spi.c \
 	$(HAL_ROOT)/Src/stm32f4xx_ll_tim.c \
 	$(HAL_ROOT)/Src/stm32f4xx_ll_dma.c \
 	$(HAL_ROOT)/Src/stm32f4xx_ll_rcc.c \
@@ -144,6 +147,7 @@ endif
 # C defines
 C_DEFS +=  \
 	-DALBUS \
+	-DUSE_HAL_DRIVER \
 	-DUSE_FULL_LL_DRIVER \
 	-D$(CHIPSET_DEF) \
 	-D$(BUILD_CONFIG) \
@@ -154,10 +158,8 @@ C_DEFS +=  \
 	-DEXTERNAL_CLOCK_VALUE=12288000 \
 	-DHSI_VALUE=16000000 \
 	-DLSI_VALUE=32000 \
-	-DVDD_VALUE=3300 \
 	-DPREFETCH_ENABLE=1 \
 	-DINSTRUCTION_CACHE_ENABLE=1 \
-	-DDATA_CACHE_ENABLE=1
 
 OPT = -O0 -g3
 
