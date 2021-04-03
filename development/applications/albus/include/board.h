@@ -25,9 +25,13 @@
 
 #define SYSCLK_FREQ            96000000
 
+/* System Time */
+#define SYSTEM_TIME_TIMER          TIM2
+#define SYSTEM_TIME_CLK_EN()       LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2)
+
+
 /* UART */
-#define UART                   USART2
-#define UART_IRQn              USART2_IRQn
+#define UART                   USART2 #define UART_IRQn              USART2_IRQn
 #define UART_IRQHandler        USART2_IRQHandler
 
 #define UART_RX_PIN            LL_GPIO_PIN_3
@@ -78,8 +82,5 @@
 
 #define RF_SPI_SS_PIN              LL_GPIO_PIN_12
 #define RF_SS_GPIO_PORT            GPIOB
-
-
-#define SYSTEM_TIME_TIMER          TIM2
 
 #endif  // BOARD_H

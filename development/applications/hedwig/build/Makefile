@@ -93,12 +93,12 @@ C_SOURCES = \
 	$(PROJ_ROOT)/src/system_stm32f4xx.c \
 	$(PROJ_ROOT)/src/leds.c \
 	$(PROJ_ROOT)/src/uart.c \
-	$(PROJ_ROOT)/src/system_time.c \
 	$(PROJ_ROOT)/src/device_com.c \
 	$(PROJ_ROOT)/src/motors.c \
 	$(PROJ_ROOT)/src/sensors.c \
 	$(PROJ_ROOT)/src/flight_control.c \
 	$(COMMON_ROOT)/logger/logger.c \
+	$(COMMON_ROOT)/system_time/system_time.c \
 	$(FALCON_PACKET_SOURCES) \
 	$(RADIO_SOURCES) \
 	$(IMU_SOURCES) \
@@ -112,7 +112,7 @@ STARTUP_FILE = startup_stm32f412zx.s
 else
 STARTUP_FILE = startup_stm32f412rx.s
 endif
-ASM_SOURCES += $(STARTUP_FILE) 
+ASM_SOURCES += $(STARTUP_FILE)
 
 # AS includes
 AS_INCLUDES =
@@ -130,6 +130,7 @@ C_INCLUDES += \
 	-I$(PROJ_ROOT)/include \
 	-I$(COMMON_ROOT) \
 	-I$(COMMON_ROOT)/logger \
+	-I$(COMMON_ROOT)/system_time \
 	-I$(CMSIS_ROOT)/Device/ST/STM32F4xx/Include \
 	-I$(CMSIS_ROOT)/Include \
 	-I$(FREERTOS_ROOT)/include \
@@ -282,7 +283,7 @@ flash: all
 	st-flash reset
 
 pyflash: all
-	@python3 $(FLASH_SCRIPT) $(TARGET_PATH) 0x8000000 
+	@python3 $(FLASH_SCRIPT) $(TARGET_PATH) 0x8000000
 
 #######################################
 # dependencies

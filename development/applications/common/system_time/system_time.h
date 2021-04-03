@@ -4,25 +4,25 @@
 #include <stdint.h>
 
 /** Get difference between two system times in ticks
- * @param  time1 First system time - (in ticks)
- * @param  time2 Second system time - (in ticks)
+ * @param  old_time - first system time - (in ticks)
+ * @param  new_time - second system time - (in ticks)
  * @retval Difference between times in ticks
 */
-uint32_t system_time_cmp_ticks(uint32_t time1, uint32_t time2);
+uint32_t system_time_cmp_ticks(uint32_t old_time, uint32_t new_time);
 
 /** Get difference between two system times in us
- * @param  time1 First system time - (in ticks)
- * @param  time2 Second system time - (in ticks)
+ * @param  old_time - first system time - (in ticks)
+ * @param  new_time - second system time - (in ticks)
  * @retval Difference between times in us
 */
-uint32_t system_time_cmp_us(uint32_t ticks1, uint32_t ticks2);
+uint32_t system_time_cmp_us(uint32_t old_time, uint32_t new_time);
 
 /** Get difference between two system times in ms
- * @param  time1 First system time - (in ticks)
- * @param  time2 Second system time - (in ticks)
+ * @param  old_time - first system time - (in ticks)
+ * @param  new_time - second system time - (in ticks)
  * @retval Difference between times in ms
 */
-uint32_t system_time_cmp_ms(uint32_t ticks1, uint32_t ticks2);
+uint32_t system_time_cmp_ms(uint32_t old_time, uint32_t new_time);
 
 /** Get timer's cnt
  * @retval Tick count of system time timer

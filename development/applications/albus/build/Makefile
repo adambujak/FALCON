@@ -63,12 +63,12 @@ C_SOURCES =  \
 	$(PROJ_ROOT)/src/uart.c \
 	$(PROJ_ROOT)/src/gpio.c \
 	$(PROJ_ROOT)/src/spi.c \
-	$(PROJ_ROOT)/src/system_time.c \
 	$(PROJ_ROOT)/src/device_com.c \
 	$(PROJ_ROOT)/src/radio.c \
 	$(PROJ_ROOT)/src/stm32f4xx_it.c \
 	$(PROJ_ROOT)/src/system_stm32f4xx.c \
 	$(COMMON_ROOT)/logger/logger.c \
+	$(COMMON_ROOT)/system_time/system_time.c \
 	$(RADIO_SOURCES) \
 	$(FALCON_PACKET_SOURCES) \
 	$(HAL_SOURCES) \
@@ -86,6 +86,7 @@ C_INCLUDES += \
 	-I$(PROJ_ROOT)/include \
 	-I$(COMMON_ROOT) \
 	-I$(COMMON_ROOT)/logger \
+	-I$(COMMON_ROOT)/system_time \
 	-I$(CMSIS_ROOT)/Device/ST/STM32F4xx/Include \
 	-I$(CMSIS_ROOT)/Include \
 	-I$(FREERTOS_ROOT)/include \
