@@ -17,9 +17,9 @@
 
 #define INCLUDE_LEDS           0
 #define INCLUDE_MOTORS         0
-#define INCLUDE_SENSORS        0
+#define INCLUDE_SENSORS        1
 #define INCLUDE_DEVICE_COM     1
-#define INCLUDE_FLIGHT_CONTROL 0
+#define INCLUDE_FLIGHT_CONTROL 1
 
 static uint8_t os_started= 0;
 
