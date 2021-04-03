@@ -13,7 +13,7 @@ static void timer_init(void)
 {
   LL_TIM_InitTypeDef timer_config = {0};
 
-  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+  SYSTEM_TIME_CLK_EN();
 
   timer_config.Prescaler = PRESCALER;
   timer_config.CounterMode = LL_TIM_COUNTERMODE_UP;
@@ -27,23 +27,23 @@ static void timer_init(void)
   LL_TIM_EnableCounter(SYSTEM_TIME_TIMER);
 }
 
-inline uint32_t system_time_cmp_ticks(uint32_t time1, uint32_t time2)
+inline uint32_t system_time_cmp_ticks(uint32_t old_time, uint32_t new_time)
 {
-  if (time2 < time1) {
-    return (AUTORELOAD - time1) + time2;
+  if (new_time < old_time) {
+    return (AUTORELOAD - old_time) + new_time;
   }
-  return time2 - time1;
+  return new_time - old_time;
 }
 
-inline uint32_t system_time_cmp_us(uint32_t ticks1, uint32_t ticks2)
+inline uint32_t system_time_cmp_us(uint32_t old_time, uint32_t new_time)
 {
-  uint32_t tick_diff = system_time_cmp_ticks(ticks1, ticks2);
+  uint32_t tick_diff = system_time_cmp_ticks(old_time, new_time);
   return TICKS_TO_US(tick_diff);
 }
 
-inline uint32_t system_time_cmp_ms(uint32_t ticks1, uint32_t ticks2)
+inline uint32_t system_time_cmp_ms(uint32_t old_time, uint32_t new_time)
 {
-  uint32_t tick_diff = system_time_cmp_ticks(ticks1, ticks2);
+  uint32_t tick_diff = system_time_cmp_ticks(old_time, new_time);
   return TICKS_TO_MS(tick_diff);
 }
 

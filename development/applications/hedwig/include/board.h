@@ -11,7 +11,9 @@
 
 #define SYSCLK_FREQ            96000000
 
+/* System Time */
 #define SYSTEM_TIME_TIMER          TIM2
+#define SYSTEM_TIME_CLK_EN()       LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2)
 
 /* LEDS */
 #ifdef BOARD_V1
