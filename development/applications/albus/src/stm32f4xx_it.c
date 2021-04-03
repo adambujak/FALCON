@@ -1,5 +1,8 @@
 #include "stm32f4xx_it.h"
 
+#include "falcon_common.h"
+#include "board.h"
+
 void NMI_Handler(void)
 {
 }
@@ -26,6 +29,12 @@ void UsageFault_Handler(void)
 
 void DebugMon_Handler(void)
 {
+}
+
+void SysTick_Handler(void)
+{
+  HAL_IncTick();
+  albus_sysTickHandler();
 }
 
 

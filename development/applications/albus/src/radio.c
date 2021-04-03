@@ -55,15 +55,13 @@ static void rf_tx(void)
   if (system_time_cmp_ms(last_tx_time, now) < 1000) {
     return;
   }
-  LOG_DEBUG("trying to send packet\r\n");
-  frf_sendPacket(&radio, frame_buffer);
-  frf_finishSending(&radio);
+  frf_pushPacket(&radio, frame_buffer);
+  frf_tx(&radio);
   last_tx_time = now;
 }
 
 void radio_process(void)
 {
-  LOG_DEBUG("radio process\r\n");
   rf_tx();
   frf_process(&radio);
 }

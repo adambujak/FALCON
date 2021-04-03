@@ -108,6 +108,7 @@ static void os_start(void)
 int main(void)
 {
   board_bringup();
+
   led_pin_init();
 
   device_com_setup();
@@ -119,6 +120,13 @@ int main(void)
 
   /* Should never reach here */
   while (1);
+}
+
+void albus_sysTickHandler(void)
+{
+  if (os_started) {
+    OSSysTickHandler();
+  }
 }
 
 void error_handler(void)

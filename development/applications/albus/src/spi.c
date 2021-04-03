@@ -6,90 +6,85 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SPI_ERROR_MASK (LL_SPI_SR_MODF | LL_SPI_SR_OVR | LL_SPI_SR_FRE)
+#define max(a,b) (a)>(b)?a:b
 
-static bool error_detected(SPI_TypeDef *spi)
+static SPI_HandleTypeDef spi_instance;
+
+int hw_init(void)
 {
-  if ((spi->SR & SPI_ERROR_MASK) != 0) {
-    return true;
+  spi_instance.Instance               = RF_SPI;
+  spi_instance.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  spi_instance.Init.Direction         = SPI_DIRECTION_2LINES;
+  spi_instance.Init.CLKPhase          = SPI_PHASE_1EDGE;
+  spi_instance.Init.CLKPolarity       = SPI_POLARITY_LOW;
+  spi_instance.Init.DataSize          = SPI_DATASIZE_8BIT;
+  spi_instance.Init.FirstBit          = SPI_FIRSTBIT_MSB;
+  spi_instance.Init.TIMode            = SPI_TIMODE_DISABLE;
+  spi_instance.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
+  spi_instance.Init.CRCPolynomial     = 7;
+  spi_instance.Init.NSS               = SPI_NSS_SOFT;
+  spi_instance.Init.Mode              = SPI_MODE_MASTER;
+
+  GPIO_InitTypeDef gpio_config;
+
+  RF_SPI_SCK_GPIO_CLK_ENABLE();
+  RF_SPI_MISO_GPIO_CLK_ENABLE();
+  RF_SPI_MOSI_GPIO_CLK_ENABLE();
+  RF_SPI_CLK_ENABLE();
+
+  if(HAL_SPI_Init(&spi_instance) != HAL_OK)
+  {
+    /* Initialization Error */
+    return FLN_ERR;
   }
-  return false;
+
+  gpio_config.Pin       = RF_SPI_SCK_PIN;
+  gpio_config.Mode      = GPIO_MODE_AF_PP;
+  gpio_config.Pull      = GPIO_PULLDOWN;
+  gpio_config.Speed     = GPIO_SPEED_HIGH;
+  gpio_config.Alternate = RF_SPI_SCK_AF;
+  HAL_GPIO_Init(RF_SPI_SCK_GPIO_PORT, &gpio_config);
+
+  gpio_config.Pin = RF_SPI_MISO_PIN;
+  gpio_config.Alternate = RF_SPI_MISO_AF;
+  HAL_GPIO_Init(RF_SPI_MISO_GPIO_PORT, &gpio_config);
+
+  gpio_config.Pin = RF_SPI_MOSI_PIN;
+  gpio_config.Alternate = RF_SPI_MOSI_AF;
+  HAL_GPIO_Init(RF_SPI_MOSI_GPIO_PORT, &gpio_config);
+
+  return FLN_OK;
 }
 
-static void hw_init(void)
+void bsp_rf_spi_deinit(void)
 {
-  LL_SPI_InitTypeDef spi_config = {0};
-  LL_GPIO_InitTypeDef gpio_config = {0};
+  if(spi_instance.Instance == RF_SPI) {
+    RF_SPI_FORCE_RESET();
+    RF_SPI_RELEASE_RESET();
 
-  RF_SPI_GPIO_CLK_EN();
-
-  gpio_config.Pin = RF_SPI_SCK_PIN | RF_SPI_MISO_PIN | RF_SPI_MOSI_PIN;
-  gpio_config.Mode = LL_GPIO_MODE_ALTERNATE;
-  gpio_config.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-  gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  gpio_config.Pull = LL_GPIO_PULL_NO;
-  gpio_config.Alternate = RF_SPI_GPIO_AF;
-  LL_GPIO_Init(RF_SPI_GPIO_PORT, &gpio_config);
-
-  spi_config.TransferDirection = LL_SPI_FULL_DUPLEX;
-  spi_config.Mode = LL_SPI_MODE_MASTER;
-  spi_config.DataWidth = LL_SPI_DATAWIDTH_8BIT;
-  spi_config.ClockPolarity = LL_SPI_POLARITY_LOW;
-  spi_config.ClockPhase = LL_SPI_PHASE_1EDGE;
-  spi_config.NSS = LL_SPI_NSS_SOFT;
-  spi_config.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV256;
-  spi_config.BitOrder = LL_SPI_MSB_FIRST;
-  spi_config.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
-  spi_config.CRCPoly = 10;
-  LL_SPI_Init(RF_SPI, &spi_config);
-  LL_SPI_SetStandard(RF_SPI, LL_SPI_PROTOCOL_MOTOROLA);
-  LL_SPI_Enable(RF_SPI);
-}
-
-static int transfer_byte(uint8_t *tx_byte, uint8_t *rx_byte)
-{
-  LL_SPI_TransmitData8(RF_SPI, *tx_byte);
-
-  while (!LL_SPI_IsActiveFlag_TXE(RF_SPI)) {
-    if (error_detected(RF_SPI)) {
-      return -1;
-    }
+    HAL_GPIO_DeInit(RF_SPI_SCK_GPIO_PORT, RF_SPI_SCK_PIN);
+    HAL_GPIO_DeInit(RF_SPI_MISO_GPIO_PORT, RF_SPI_MISO_PIN);
+    HAL_GPIO_DeInit(RF_SPI_MOSI_GPIO_PORT, RF_SPI_MOSI_PIN);
   }
-
-  if (rx_byte != NULL) {
-    while (!LL_SPI_IsActiveFlag_RXNE(RF_SPI)) {
-      if (error_detected(RF_SPI)) {
-        return -1;
-      }
-    }
-    *rx_byte = LL_SPI_ReceiveData8(RF_SPI);
-  }
-  return 0;
 }
 
 void spi_init(void)
 {
-  hw_init();
+  if (hw_init() != FLN_OK) {
+    error_handler();
+  }
 }
 
-int spi_transfer(uint8_t *tx_buf, uint32_t tx_len,
-              uint8_t *rx_buf, uint32_t rx_len)
+int spi_transfer(uint8_t *tx_buffer, uint16_t tx_size, uint8_t *rx_buffer, uint16_t rx_size)
 {
-  uint32_t bytes_transferred = 0;
-
-  for (uint32_t i = 0; i < tx_len; i++) {
-    if (transfer_byte(&tx_buf[i], &rx_buf[i]) == -1) {
-      return -1;
-    }
-    bytes_transferred++;
+  if (tx_size == 0 || tx_buffer == NULL) {
+    hal_custom_receive(&spi_instance, rx_buffer, rx_size, 5000);
   }
-
-  uint8_t tx_byte = 0xFF;
-  for (uint32_t i = bytes_transferred; i < rx_len; i++) {
-    if (transfer_byte(&tx_byte, &rx_buf[i]) == -1) {
-      return -1;
-    }
-    bytes_transferred++;
+  else if (rx_size == 0 || rx_buffer == NULL) {
+    hal_custom_transmit(&spi_instance, tx_buffer, tx_size, 5000);
   }
-  return 0;
+  else {
+    HAL_SPI_TransmitReceive(&spi_instance, tx_buffer, rx_buffer, max(rx_size,tx_size), 5000);
+  }
+  return FLN_OK;
 }
