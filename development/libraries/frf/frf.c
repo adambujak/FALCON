@@ -186,7 +186,7 @@ void frf_init(frf_t *instance, frf_config_t *config)
 
   nRF24L01_initialize(&instance->rfInstance, config->transferFunc, config->spiCtx, config->setCS);
 }
-  #include "falcon_common.h"
+
 void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
                uint8_t rxAddr[FRF_ADDR_WIDTH], uint8_t txAddr[FRF_ADDR_WIDTH])
 {
@@ -223,11 +223,6 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
   nRF24L01_set_irq_mode(&instance->rfInstance, 6, true);
 
   nRF24L01_flush_tx(&instance->rfInstance);
-
-
-  uint8_t width = nRF24L01_get_rx_payload_width(&instance->rfInstance, NRF24L01_PIPE1);
-  LOG_DEBUG("width, %d, %d\r\n", payload_len, width);
-
 
 
   instance->powerState = FRF_POWER_STATE_OFF;
