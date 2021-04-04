@@ -49,14 +49,13 @@ static void rf_event_callback(frf_event_t event)
   }
 }
 
-static void rf_tx(void)
+static inline void rf_tx(void)
 {
   uint32_t now = system_time_get();
   if (system_time_cmp_ms(last_tx_time, now) < 1000) {
     return;
   }
-  frf_pushPacket(&radio, frame_buffer);
-  frf_tx(&radio);
+  frf_sendPacket(&radio, frame_buffer);
   last_tx_time = now;
 }
 

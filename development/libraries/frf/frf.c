@@ -87,7 +87,6 @@ static void powerUpRx(frf_t *instance)
 
   nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
   nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PRX);
-  instance->delay_us(130);
   nRF24L01_flush_rx(&instance->rfInstance);
 
   CE_HIGH();
@@ -104,7 +103,6 @@ static void powerUpTx(frf_t *instance)
 
   nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
   nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PTX);
-  instance->delay_us(130);
 }
 
 static void readPacket(frf_t *instance)
