@@ -58,6 +58,7 @@ static void device_com_task(void *pvParameters)
       fs_decoder_decode(&decoder, rx_buffer, 32);
       radio_send_data(tx_buffer, 32);
     }
+    rtos_delay_ms(1);
   }
 }
 

@@ -31,7 +31,8 @@
 
 
 /* UART */
-#define UART                   USART2 #define UART_IRQn              USART2_IRQn
+#define UART                   USART2
+#define UART_IRQn              USART2_IRQn
 #define UART_IRQHandler        USART2_IRQHandler
 
 #define UART_RX_PIN            LL_GPIO_PIN_3
