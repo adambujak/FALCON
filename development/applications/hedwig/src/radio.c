@@ -28,7 +28,7 @@ static inline void rf_isr(void)
 static inline void handleRFRx(void)
 {
   if (rfRxReady) {
-    // fs_decoder_decode(&decoder, rx_buffer, FRF_PACKET_SIZE);
+
     rfRxReady = false;
   }
 }
@@ -83,7 +83,11 @@ uint32_t radio_send_data(uint8_t *source, uint32_t length)
 
 uint32_t radio_get_data(uint8_t *dest, uint32_t length)
 {
-  return 32;
+  if (rfRxReady) {
+    memcpy(dest, rx_buffer, 32);
+    return 32;
+  }
+  return 0;
 }
 
 void radio_init(void)
