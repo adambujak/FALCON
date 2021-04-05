@@ -47,7 +47,7 @@ int fifo_drop(frf_fifo_t *fifo)
   return 0;
 }
 
-static int fifo_peek(frf_fifo_t *fifo, frf_packet_t packet)
+int fifo_peek(frf_fifo_t *fifo, frf_packet_t packet)
 {
   if (fifo->byteCnt == 0) {
     return -1;
@@ -102,20 +102,7 @@ static void readPacket(frf_t *instance)
 {
   frf_packet_t packet;
   nRF24L01_read_rx_payload(&instance->rfInstance, packet);
-  nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
   fifo_push(&instance->rxFifo, packet);
-}
-
-void sendPayload(frf_t *instance)
-{
-  frf_packet_t packet;
-  if (fifo_peek(&instance->txFifo, packet) == 0) {
-    powerUpTx(instance);
-    nRF24L01_flush_tx(&instance->rfInstance);
-    nRF24L01_write_tx_payload(&instance->rfInstance, packet, FRF_PACKET_SIZE);
-    instance->isSending = true;
-    CE_HIGH();
-  }
 }
 
 static void handleInterrupt(frf_t *instance)
@@ -127,20 +114,17 @@ static void handleInterrupt(frf_t *instance)
   if (irqFlags & (1 << 4)) {
     instance->isSending = false;
     nRF24L01_flush_tx(&instance->rfInstance);
-    nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
     instance->eventCallback(FRF_EVENT_TX_FAILED);
   }
 
   /* TX Event */
   if (irqFlags & (1 << 5)) {
     instance->isSending = false;
-    nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
     instance->eventCallback(FRF_EVENT_TX_SUCCESS);
   }
 
   /* RX Event */
   if (irqFlags & (1 << 6)) {
-    nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
     readPacket(instance);
     instance->eventCallback(FRF_EVENT_RX);
   }
