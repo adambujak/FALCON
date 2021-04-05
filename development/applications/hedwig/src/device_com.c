@@ -24,7 +24,6 @@ uint8_t tx_buffer[MAX_FRAME_SIZE];
 
 static frf_t radio;
 static volatile bool rfRxReady = false;
-static SemaphoreHandle_t frfMutex;
 
 static void rf_spi_transfer(void * context, uint8_t * tx_buf, uint16_t tx_len,
                              uint8_t * rx_buf, uint16_t rx_len)
@@ -35,24 +34,6 @@ static void rf_spi_transfer(void * context, uint8_t * tx_buf, uint16_t tx_len,
 static inline void rfISR(void)
 {
   frf_isr(&radio);
-}
-
-static inline void lock_frf(void)
-{
-  xSemaphoreTake(frfMutex, RTOS_TIMEOUT_TICKS);
-}
-
-static inline void unlock_frf(void)
-{
-  xSemaphoreGive(frfMutex);
-}
-
-static inline void createFRFMutex(void)
-{
-  frfMutex = xSemaphoreCreateMutex();
-  if (frfMutex == NULL) {
-    error_handler();
-  }
 }
 
 static inline void handleRFRx(void)
@@ -70,10 +51,8 @@ static inline void handleRFRx(void)
 
 static inline void rfProcess(void)
 {
-  lock_frf();
   handleRFRx();
   frf_process(&radio);
-  unlock_frf();
 }
 
 static void rf_event_callback(frf_event_t event)
@@ -181,8 +160,6 @@ void device_com_setup(void)
   };
 
   fs_decoder_init(&decoder, &decoder_config);
-
-  createFRFMutex();
 }
 
 void device_com_start(void)
