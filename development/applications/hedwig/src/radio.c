@@ -14,14 +14,13 @@ static volatile bool rfRxReady = false;
 
 static frf_t radio;
 
-
 static void rf_spi_transfer(void * context, uint8_t * tx_buf, uint16_t tx_len,
                              uint8_t * rx_buf, uint16_t rx_len)
 {
   bsp_rf_transceive(tx_buf, tx_len, rx_buf, rx_len);
 }
 
-static inline void rfISR(void)
+static inline void rf_isr(void)
 {
   frf_isr(&radio);
 }
@@ -82,7 +81,7 @@ void radio_init(void)
   radio_get_hedwig_address(hedwigAddress);
   radio_get_albus_address(albusAddress);
 
-  FLN_ERR_CHECK(bsp_rf_init(rfISR));
+  FLN_ERR_CHECK(bsp_rf_init(rf_isr));
 
   /* RF Module Init */
   frf_config_t config = {

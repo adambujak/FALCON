@@ -10,8 +10,6 @@
 
 #include <string.h>
 
-#include "falcon_common.h"
-
 #define FRF_DEFAULT_SIZE_PACKET 32
 #define FRF_NB_BITS_FOR_ERROR_RATE_CALC 100000
 #define FRF_NB_BYTES_FOR_ERROR_RATE_CALC 12500
@@ -196,11 +194,8 @@ void frf_powerUp(frf_t *instance)
 
   if (instance->role == FRF_DEVICE_ROLE_RX) {
     powerUpRx(instance);
-    LOG_DEBUG("POWER RX\r\n");
   }
   else if (instance->role == FRF_DEVICE_ROLE_TX) {
     powerUpTx(instance);
-    LOG_DEBUG("POWER tX\r\n");
   }
 }
-

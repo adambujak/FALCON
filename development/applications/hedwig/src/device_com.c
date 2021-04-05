@@ -13,7 +13,6 @@
 
 static fs_decoder_t decoder;
 
-
 static void rx_handler(uint8_t *data, fp_type_t packetType)
 {
   switch (packetType) {
@@ -52,7 +51,6 @@ static void device_com_task(void *pvParameters)
 
   while(1) {
     radio_process();
-    rtos_delay_ms(1);
   }
 }
 
