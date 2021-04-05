@@ -128,7 +128,7 @@ void rt_OneStep(RT_MODEL *const rtM)
         unlock_output_data();
       }
       else {
-        DEBUG_LOG("outputDataMutex take failed\r\n");
+        LOG_DEBUG("outputDataMutex take failed\r\n");
         error_handler();
       }
       unlock_command_data();
@@ -219,7 +219,7 @@ void flight_control_get_outputs(fpr_status_t *status_response)
     unlock_output_data();
   }
   else {
-    DEBUG_LOG("commandDataMutex take failed\r\n");
+    LOG_DEBUG("commandDataMutex take failed\r\n");
   }
 }
 
@@ -281,24 +281,24 @@ static void flight_control_reset(void)
           unlock_output_data();
         }
         else {
-          DEBUG_LOG("outputDataMutex take failed\r\n");
+          LOG_DEBUG("outputDataMutex take failed\r\n");
           error_handler();
         }
         unlock_command_data();
       }
       else {
-        DEBUG_LOG("commandDataMutex take failed\r\n");
+        LOG_DEBUG("commandDataMutex take failed\r\n");
         error_handler();
       }
       unlock_sensor_data();
     }
     else {
-      DEBUG_LOG("sensorDataMutex take failed\r\n");
+      LOG_DEBUG("sensorDataMutex take failed\r\n");
       error_handler();
     }
   }
   else {
-    DEBUG_LOG("Cannot reset while flying");
+    LOG_DEBUG("Cannot reset while flying");
   }  
 }
 
