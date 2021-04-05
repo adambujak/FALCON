@@ -92,6 +92,7 @@ C_SOURCES = \
 	$(PROJ_ROOT)/src/stm32f4xx_it.c \
 	$(PROJ_ROOT)/src/system_stm32f4xx.c \
 	$(PROJ_ROOT)/src/leds.c \
+	$(PROJ_ROOT)/src/radio.c \
 	$(PROJ_ROOT)/src/uart.c \
 	$(PROJ_ROOT)/src/device_com.c \
 	$(PROJ_ROOT)/src/motors.c \

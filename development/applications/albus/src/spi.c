@@ -13,7 +13,7 @@ static SPI_HandleTypeDef spi_instance;
 int hw_init(void)
 {
   spi_instance.Instance               = RF_SPI;
-  spi_instance.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  spi_instance.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   spi_instance.Init.Direction         = SPI_DIRECTION_2LINES;
   spi_instance.Init.CLKPhase          = SPI_PHASE_1EDGE;
   spi_instance.Init.CLKPolarity       = SPI_POLARITY_LOW;

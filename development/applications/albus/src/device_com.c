@@ -4,13 +4,18 @@
 
 #include "radio.h"
 #include "uart.h"
+#include "system_time.h"
 
 #include "falcon_packet.h"
-#include "fs_decoder.h"
 #include "fp_decode.h"
+#include "fs_decoder.h"
+#include "fp_encode.h"
+#include "ff_encoder.h"
 
 static uint8_t uart_rx_buffer[MAX_FRAME_SIZE];
+static uint8_t rf_tx_buffer[MAX_FRAME_SIZE];
 static fs_decoder_t decoder;
+static uint32_t last_rf_tx_time;
 
 static void decoder_callback(uint8_t *data, fp_type_t packetType)
 {
@@ -29,22 +34,6 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
            control.fcsControlCmd.alt);
   }
     break;
-//    case FPT_SET_DESTINATION_COMMAND:
-//    {
-//      fpc_set_destination_t dest = {0};
-//      fpc_set_destination_decode(data, &dest);
-//      printf("decoded dest: %f\r\n", dest.gpsData.latitude);
-//    }
-//      break;
-//    case FPT_FLIGHT_CONTROL_POSITION_COMMAND:
-//    {
-//      fpc_flight_control_position_t pos = {0};
-//      fpc_flight_control_position_decode(data, &pos);
-//      printf("decoded posi: %f %f %f %f\r\n", pos.positionReferenceCMD.x, pos.positionReferenceCMD.y, pos.positionReferenceCMD.z, pos.positionReferenceCMD.yaw);
-//    }
-//      break;
-//    default:
-//      break;
   }
   #pragma GCC diagnostic pop
 }
@@ -62,11 +51,46 @@ static void decoder_init(void)
    fs_decoder_init(&decoder, &decoder_config);
 }
 
+void temp_func(void)
+{
+  ff_encoder_t encoder;
+  ff_encoder_init(&encoder);
+  ff_encoder_set_buffer(&encoder, rf_tx_buffer);
+
+  fpc_flight_control_t control = {
+    {
+      1.2,1.4,1.6,1.8
+    }
+  };
+
+  if (ff_encoder_append_packet(&encoder, &control, FPT_FLIGHT_CONTROL_COMMAND) == FLN_ERR) {
+    error_handler();
+  }
+
+  ff_encoder_append_footer(&encoder);
+}
+
 static void handle_uart(void)
 {
   if (uart_read(uart_rx_buffer, MAX_FRAME_SIZE) == MAX_FRAME_SIZE) {
     decode_frame(uart_rx_buffer, MAX_FRAME_SIZE);
     LOG_DEBUG("received frame\r\n");
+  }
+}
+
+static void handle_rf(void)
+{
+  radio_process();
+
+  uint8_t temp[32];
+  if (radio_get_data(temp, 32)) {
+    fs_decoder_decode(&decoder, temp, 32);
+  }
+
+  uint32_t now = system_time_get();
+  if (system_time_cmp_ms(last_rf_tx_time, now) > 500) {
+    radio_send_data(rf_tx_buffer, 32);
+    last_rf_tx_time = now;
   }
 }
 
@@ -76,15 +100,16 @@ void device_com_task(void *pvParameters)
 
   while(1) {
     handle_uart();
-    radio_process();
-    vTaskDelay(100);
+    handle_rf();
   }
 }
 
 void device_com_setup(void)
 {
+  last_rf_tx_time = system_time_get();
   decoder_init();
   radio_init();
+  temp_func();
 }
 
 void device_com_start(void)

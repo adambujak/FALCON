@@ -2,14 +2,8 @@
 
 #include "falcon_common.h"
 #include "radio_common.h"
-
-#include "falcon_packet.h"
-#include "fp_encode.h"
-#include "ff_encoder.h"
-
-#include "spi.h"
-#include "gpio.h"
 #include "frf.h"
+#include "bsp.h"
 
 #define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
 
@@ -24,16 +18,16 @@ typedef struct {
 #define RF_RX_BUFFER_SIZE 512
 #define RF_TX_BUFFER_SIZE 512
 
-static frf_t radio;
-
 static uint8_t rx_buffer[RF_RX_BUFFER_SIZE];
 static uint8_t tx_buffer[RF_TX_BUFFER_SIZE];
 
 static fifo_t rx_fifo;
 static fifo_t tx_fifo;
 
-static uint8_t hedwig_address[RADIO_ADDRESS_LENGTH];
-static uint8_t albus_address[RADIO_ADDRESS_LENGTH];
+static uint8_t hedwigAddress[RADIO_ADDRESS_LENGTH];
+static uint8_t albusAddress[RADIO_ADDRESS_LENGTH];
+
+static frf_t radio;
 
 static void fifo_init(fifo_t *fifo, uint8_t *buffer, uint32_t size)
 {
@@ -69,12 +63,10 @@ static int fifo_pop(fifo_t *fifo, uint8_t *dest, uint32_t length)
   return length;
 }
 
-static inline void rf_spi_transfer(void *context,
-                                   uint8_t *tx_buf, uint16_t tx_len,
-                                   uint8_t *rx_buf, uint16_t rx_len)
+static void rf_spi_transfer(void * context, uint8_t * tx_buf, uint16_t tx_len,
+                             uint8_t * rx_buf, uint16_t rx_len)
 {
-  (void) context;
-  spi_transfer(tx_buf, tx_len, rx_buf, rx_len);
+  bsp_rf_transceive(tx_buf, tx_len, rx_buf, rx_len);
 }
 
 static inline void rf_isr(void)
@@ -117,36 +109,39 @@ uint32_t radio_get_data(uint8_t *dest, uint32_t length)
   return fifo_pop(&rx_fifo, dest, length);
 }
 
+void radio_init(void)
+{
+  radio_get_hedwig_address(hedwigAddress);
+  radio_get_albus_address(albusAddress);
+
+  fifo_init(&rx_fifo, rx_buffer, RF_RX_BUFFER_SIZE);
+  fifo_init(&tx_fifo, tx_buffer, RF_TX_BUFFER_SIZE);
+
+  FLN_ERR_CHECK(bsp_rf_init(rf_isr));
+
+  /* RF Module Init */
+  frf_config_t config = {
+    .transferFunc = rf_spi_transfer,
+    .role = FRF_DEVICE_ROLE_RX,
+    .spiCtx = NULL,
+    .setCS = bsp_rf_cs_set,
+    .setCE = bsp_rf_ce_set,
+    .delay = rtos_delay_ms,
+    .eventCallback = rf_event_callback
+  };
+
+  frf_init(&radio, &config);
+  frf_start(&radio, 2, FRF_PACKET_SIZE, hedwigAddress, albusAddress);
+}
+
 void radio_process(void)
 {
   frf_process(&radio);
+
   if (!frf_isSending(&radio)) {
     uint8_t temp[FRF_PACKET_SIZE];
     if (fifo_pop(&tx_fifo, temp, FRF_PACKET_SIZE) == FRF_PACKET_SIZE) {
       frf_sendPacket(&radio, temp);
     }
   }
-}
-
-void radio_init(void)
-{
-  gpio_rf_irq_register(rf_isr);
-  radio_get_hedwig_address(hedwig_address);
-  radio_get_albus_address(albus_address);
-
-  fifo_init(&rx_fifo, rx_buffer, RF_RX_BUFFER_SIZE);
-  fifo_init(&tx_fifo, tx_buffer, RF_TX_BUFFER_SIZE);
-
-  frf_config_t config = {
-    .transferFunc = rf_spi_transfer,
-    .role = FRF_DEVICE_ROLE_TX,
-    .spiCtx = NULL,
-    .setCS = gpio_rf_cs_write,
-    .setCE = gpio_rf_ce_write,
-    .delay = rtos_delay_ms,
-    .eventCallback = rf_event_callback
-  };
-
-  frf_init(&radio, &config);
-  frf_start(&radio, 2, FRF_PACKET_SIZE, albus_address, hedwig_address);
 }
