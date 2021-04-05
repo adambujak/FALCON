@@ -45,8 +45,8 @@ static void rf_event_callback(frf_event_t event)
     case FRF_EVENT_RX:
       rfRxReady = true;
       frf_getPacket(&radio, rx_buffer);
+      radio_send_data(tx_buffer, 32);
       LOG_DEBUG("RF RX Event\r\n");
-      frf_sendPacket(&radio, tx_buffer);
       break;
   }
 }
@@ -73,6 +73,17 @@ static void temp_func()
   }
 
   ff_encoder_append_footer(&encoder);
+}
+
+uint32_t radio_send_data(uint8_t *source, uint32_t length)
+{
+  frf_sendPacket(&radio, source);
+  return 32;
+}
+
+uint32_t radio_get_data(uint8_t *dest, uint32_t length)
+{
+  return 32;
 }
 
 void radio_init(void)
