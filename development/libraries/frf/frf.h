@@ -50,13 +50,13 @@ typedef enum {
 } frf_power_state_t;
 
 typedef enum {
-  FRF_TRANSFER_STATE_NONE = 0,
-  FRF_TRANSFER_STATE_RX,
-  FRF_TRANSFER_STATE_TX
-} frf_transfer_state_t;
+  FRF_DEVICE_ROLE_RX = 0,
+  FRF_DEVICE_ROLE_TX
+} frf_device_role_t;
 
 typedef struct {
   spi_transfer_t transferFunc;
+  frf_device_role_t role;
   void          *spiCtx;
   gpio_setter_t  setCS;
   gpio_setter_t  setCE;
@@ -66,7 +66,7 @@ typedef struct {
 
 typedef struct {
   frf_power_state_t    powerState;
-  frf_transfer_state_t transferState;
+  frf_device_role_t    role;
   gpio_setter_t        setCE;
   frf_delay_t          delay_us;
   nRF24L01_t           rfInstance;

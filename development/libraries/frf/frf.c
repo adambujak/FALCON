@@ -10,6 +10,8 @@
 
 #include <string.h>
 
+#include "falcon_common.h"
+
 #define FRF_DEFAULT_SIZE_PACKET 32
 #define FRF_NB_BITS_FOR_ERROR_RATE_CALC 100000
 #define FRF_NB_BYTES_FOR_ERROR_RATE_CALC 12500
@@ -77,12 +79,8 @@ static bool fifo_isEmpty(frf_fifo_t *fifo)
 
 static void powerUpRx(frf_t *instance)
 {
-  if (instance->transferState == FRF_TRANSFER_STATE_RX) {
-    return;
-  }
   CE_LOW();
 
-  instance->transferState = FRF_TRANSFER_STATE_RX;
   instance->isSending = false;
 
   nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
@@ -94,12 +92,7 @@ static void powerUpRx(frf_t *instance)
 
 static void powerUpTx(frf_t *instance)
 {
-  if (instance->transferState == FRF_TRANSFER_STATE_TX) {
-    return;
-  }
   CE_LOW();
-
-  instance->transferState = FRF_TRANSFER_STATE_TX;
 
   nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
   nRF24L01_set_operation_mode(&instance->rfInstance, NRF24L01_PTX);
@@ -158,7 +151,7 @@ static void handleInterrupt(frf_t *instance)
     instance->isSending = false;
     nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
     fifo_drop(&instance->txFifo);
-    powerUpRx(instance);
+//    powerUpRx(instance);
     instance->eventCallback(FRF_EVENT_TX_SUCCESS);
   }
 
@@ -177,6 +170,7 @@ static void handleInterrupt(frf_t *instance)
 void frf_init(frf_t *instance, frf_config_t *config)
 {
   instance->setCE = config->setCE;
+  instance->role = config->role;
   instance->delay_us = config->delay_us;
   instance->eventCallback = config->eventCallback;
   instance->interruptFired = false;
@@ -212,6 +206,11 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
 
   nRF24L01_set_address_width(&instance->rfInstance, FRF_ADDR_WIDTH);
 
+  // Enable ACK with custom payload
+  nRF24L01_enable_dynamic_payload(&instance->rfInstance, true);
+  nRF24L01_setup_dynamic_payload(&instance->rfInstance, (1 << NRF24L01_PIPE1) | (1 << NRF24L01_PIPE0));
+  nRF24L01_enable_ack_payload(&instance->rfInstance, true);
+
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_PIPE1, rxAddr);
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_PIPE0, txAddr);
   nRF24L01_set_address(&instance->rfInstance, NRF24L01_TX, txAddr);
@@ -222,9 +221,7 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
 
   nRF24L01_flush_tx(&instance->rfInstance);
 
-
   instance->powerState = FRF_POWER_STATE_OFF;
-  instance->transferState = FRF_TRANSFER_STATE_NONE;
 
   frf_powerUp(instance);
 }
@@ -246,23 +243,9 @@ void frf_process(frf_t *instance)
   }
 }
 
-void frf_tx(frf_t *instance)
-{
-  instance->txScheduled = true;
-}
-
 int frf_getPacket(frf_t *instance, frf_packet_t packet)
 {
   return fifo_pop(&instance->rxFifo, packet);
-}
-
-int frf_pushPacket(frf_t *instance, frf_packet_t packet)
-{
-  if (instance->powerState != FRF_POWER_STATE_ACTIVE) {
-    return -1;
-  }
-
-  return fifo_push(&instance->txFifo, packet);
 }
 
 void frf_sendPacket(frf_t *instance, frf_packet_t packet)
@@ -305,25 +288,13 @@ void frf_powerUp(frf_t *instance)
     instance->delay_us(2000);
   }
 
-  instance->transferState = FRF_TRANSFER_STATE_NONE;
-  instance->powerState = FRF_POWER_STATE_ACTIVE;
-  powerUpRx(instance);
+  if (instance->role == FRF_DEVICE_ROLE_RX) {
+    powerUpRx(instance);
+    LOG_DEBUG("POWER RX\r\n");
+  }
+  else if (instance->role == FRF_DEVICE_ROLE_TX) {
+    powerUpTx(instance);
+    LOG_DEBUG("POWER tX\r\n");
+  }
 }
 
-void frf_standby(frf_t *instance)
-{
-  CE_LOW();
-
-  instance->powerState = FRF_POWER_STATE_STANDBY;
-  instance->transferState = FRF_TRANSFER_STATE_NONE;
-}
-
-void frf_powerDown(frf_t *instance)
-{
-  CE_LOW();
-
-  instance->powerState = FRF_POWER_STATE_OFF;
-  instance->transferState = FRF_TRANSFER_STATE_NONE;
-
-  nRF24L01_set_power_mode(&instance->rfInstance, NRF24L01_PWR_DOWN);
-}

@@ -150,6 +150,7 @@ void device_com_setup(void)
   /* RF Module Init */
   frf_config_t config = {
     .transferFunc = rf_spi_transfer,
+    .role = FRF_DEVICE_ROLE_RX,
     .spiCtx = NULL,
     .setCS = bsp_rf_cs_set,
     .setCE = bsp_rf_ce_set,

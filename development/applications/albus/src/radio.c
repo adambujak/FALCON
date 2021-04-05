@@ -37,13 +37,11 @@ static void rf_event_callback(frf_event_t event)
   switch(event) {
     case FRF_EVENT_TX_FAILED:
       LOG_DEBUG("RF TX FAILED\r\n");
-      // xTimerChangePeriod(rfTxTimer, 1000, 25);
       break;
     case FRF_EVENT_TX_SUCCESS:
       LOG_DEBUG("RF TX SUCCESS\r\n");
       break;
     case FRF_EVENT_RX:
-      // rfRxReady = true;
       LOG_DEBUG("RF RX Event\r\n");
       break;
   }
@@ -94,6 +92,7 @@ void radio_init(void)
 
   frf_config_t config = {
     .transferFunc = rf_spi_transfer,
+    .role = FRF_DEVICE_ROLE_TX,
     .spiCtx = NULL,
     .setCS = gpio_rf_cs_write,
     .setCE = gpio_rf_ce_write,
