@@ -168,7 +168,7 @@ void device_com_setup(void)
     .spiCtx = NULL,
     .setCS = bsp_rf_cs_set,
     .setCE = bsp_rf_ce_set,
-    .delay_us = delay_us,
+    .delay = rtos_delay_ms,
     .eventCallback = rf_event_callback
   };
 

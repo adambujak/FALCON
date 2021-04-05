@@ -60,7 +60,7 @@ typedef struct {
   void          *spiCtx;
   gpio_setter_t  setCS;
   gpio_setter_t  setCE;
-  frf_delay_t    delay_us;
+  frf_delay_t    delay;
   frf_cb_t       eventCallback;
 } frf_config_t;
 
@@ -68,7 +68,7 @@ typedef struct {
   frf_power_state_t    powerState;
   frf_device_role_t    role;
   gpio_setter_t        setCE;
-  frf_delay_t          delay_us;
+  frf_delay_t          delay;
   nRF24L01_t           rfInstance;
   frf_fifo_t           rxFifo;
   frf_fifo_t           txFifo;
@@ -86,14 +86,11 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
 void frf_isr(frf_t *instance);
 void frf_process(frf_t *instance);
 
-void frf_tx(frf_t *instance);
 bool frf_isSending(frf_t *instance);
 
-int frf_getPacket(frf_t *instance, frf_packet_t packet);
-int frf_pushPacket(frf_t *instance, frf_packet_t packet);
-void frf_finishSending(frf_t *instance);
-
+void frf_getPacket(frf_t *instance, frf_packet_t packet);
 void frf_sendPacket(frf_t *instance, frf_packet_t packet);
+void frf_finishSending(frf_t *instance);
 
 void frf_powerUp(frf_t *instance);
 void frf_standby(frf_t *instance);

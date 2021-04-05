@@ -96,7 +96,7 @@ void radio_init(void)
     .spiCtx = NULL,
     .setCS = gpio_rf_cs_write,
     .setCE = gpio_rf_ce_write,
-    .delay_us = delay_us,
+    .delay = rtos_delay_ms,
     .eventCallback = rf_event_callback
   };
 

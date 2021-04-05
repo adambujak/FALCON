@@ -24,7 +24,7 @@
 #define CE_LOW()  (instance->setCE(0))
 #define CE_HIGH() (instance->setCE(1))
 
-static int fifo_push(frf_fifo_t *fifo, frf_packet_t packet)
+int fifo_push(frf_fifo_t *fifo, frf_packet_t packet)
 {
   if (fifo->byteCnt > FRF_FIFO_SIZE) {
     return -1;
@@ -36,7 +36,7 @@ static int fifo_push(frf_fifo_t *fifo, frf_packet_t packet)
   return 0;
 }
 
-static int fifo_drop(frf_fifo_t *fifo)
+int fifo_drop(frf_fifo_t *fifo)
 {
   if (fifo->byteCnt == 0) {
     return -1;
@@ -106,7 +106,7 @@ static void readPacket(frf_t *instance)
   fifo_push(&instance->rxFifo, packet);
 }
 
-static void sendPayload(frf_t *instance)
+void sendPayload(frf_t *instance)
 {
   frf_packet_t packet;
   if (fifo_peek(&instance->txFifo, packet) == 0) {
@@ -116,20 +116,6 @@ static void sendPayload(frf_t *instance)
     instance->isSending = true;
     CE_HIGH();
   }
-}
-
-static bool isTxReady(frf_t *instance)
-{
-  if (!instance->txScheduled) {
-    return false;
-  }
-  if (instance->isSending) {
-    return false;
-  }
-  if (fifo_isEmpty(&instance->txFifo)) {
-    return false;
-  }
-  return true;
 }
 
 static void handleInterrupt(frf_t *instance)
@@ -142,7 +128,6 @@ static void handleInterrupt(frf_t *instance)
     instance->isSending = false;
     nRF24L01_flush_tx(&instance->rfInstance);
     nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
-    powerUpRx(instance);
     instance->eventCallback(FRF_EVENT_TX_FAILED);
   }
 
@@ -150,16 +135,12 @@ static void handleInterrupt(frf_t *instance)
   if (irqFlags & (1 << 5)) {
     instance->isSending = false;
     nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
-    fifo_drop(&instance->txFifo);
-//    powerUpRx(instance);
     instance->eventCallback(FRF_EVENT_TX_SUCCESS);
   }
 
   /* RX Event */
   if (irqFlags & (1 << 6)) {
     nRF24L01_clear_irq_flags_get_status(&instance->rfInstance);
-    // TODO add read until receive error code
-    // nRF24L01_get_rx_fifo_status
     readPacket(instance);
     instance->eventCallback(FRF_EVENT_RX);
   }
@@ -171,7 +152,7 @@ void frf_init(frf_t *instance, frf_config_t *config)
 {
   instance->setCE = config->setCE;
   instance->role = config->role;
-  instance->delay_us = config->delay_us;
+  instance->delay = config->delay;
   instance->eventCallback = config->eventCallback;
   instance->interruptFired = false;
   instance->txScheduled = true;
@@ -183,7 +164,7 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
                uint8_t rxAddr[FRF_ADDR_WIDTH], uint8_t txAddr[FRF_ADDR_WIDTH])
 {
   CE_LOW();
-  instance->delay_us(100000);
+  instance->delay(100);
 
   nRF24L01_set_rf_channel(&instance->rfInstance, channel);
 
@@ -236,16 +217,11 @@ void frf_process(frf_t *instance)
   if (instance->interruptFired) {
     handleInterrupt(instance);
   }
-
-  if (isTxReady(instance)) {
-    sendPayload(instance);
-    instance->txScheduled = false;
-  }
 }
 
-int frf_getPacket(frf_t *instance, frf_packet_t packet)
+void frf_getPacket(frf_t *instance, frf_packet_t packet)
 {
-  return fifo_pop(&instance->rxFifo, packet);
+  fifo_pop(&instance->rxFifo, packet);
 }
 
 void frf_sendPacket(frf_t *instance, frf_packet_t packet)
@@ -280,7 +256,7 @@ void frf_finishSending(frf_t *instance)
 {
   while (frf_isSending(instance)) {
     frf_process(instance);
-    instance->delay_us(200);
+    instance->delay(1);
   }
 }
 
@@ -290,7 +266,7 @@ void frf_powerUp(frf_t *instance)
 
   if (instance->powerState == FRF_POWER_STATE_OFF) {
     nRF24L01_set_power_mode(&instance->rfInstance, NRF24L01_PWR_UP);
-    instance->delay_us(2000);
+    instance->delay(2);
   }
 
   if (instance->role == FRF_DEVICE_ROLE_RX) {
