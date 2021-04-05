@@ -25,14 +25,6 @@ static inline void rf_isr(void)
   frf_isr(&radio);
 }
 
-static inline void handleRFRx(void)
-{
-  if (rfRxReady) {
-
-    rfRxReady = false;
-  }
-}
-
 static void rf_event_callback(frf_event_t event)
 {
   switch(event) {
@@ -45,7 +37,6 @@ static void rf_event_callback(frf_event_t event)
     case FRF_EVENT_RX:
       rfRxReady = true;
       frf_getPacket(&radio, rx_buffer);
-      // radio_send_data(tx_buffer, 32);
       LOG_DEBUG("RF RX Event\r\n");
       break;
   }
@@ -61,6 +52,7 @@ uint32_t radio_get_data(uint8_t *dest, uint32_t length)
 {
   if (rfRxReady) {
     memcpy(dest, rx_buffer, 32);
+    rfRxReady = false;
     return 32;
   }
   return 0;
@@ -90,6 +82,5 @@ void radio_init(void)
 
 void radio_process(void)
 {
-  handleRFRx();
   frf_process(&radio);
 }
