@@ -19,11 +19,12 @@ static fs_decoder_t decoder;
 static uint8_t hedwigAddress[RADIO_ADDRESS_LENGTH];
 static uint8_t albusAddress[RADIO_ADDRESS_LENGTH];
 
-uint8_t frame_buffer[MAX_FRAME_SIZE];
-uint8_t tx_buffer[MAX_FRAME_SIZE];
+uint8_t rx_buffer[32];
+uint8_t tx_buffer[32];
+static volatile bool rfRxReady = false;
 
 static frf_t radio;
-static volatile bool rfRxReady = false;
+
 
 static void rf_spi_transfer(void * context, uint8_t * tx_buf, uint16_t tx_len,
                              uint8_t * rx_buf, uint16_t rx_len)
@@ -39,12 +40,7 @@ static inline void rfISR(void)
 static inline void handleRFRx(void)
 {
   if (rfRxReady) {
-    frf_packet_t packet;
-    frf_getPacket(&radio, packet);
-    /* Convert frf packet to byte array - in this case just cast */
-    //fp_decoder_decode(&decoder, buffer);
-    fs_decoder_decode(&decoder, (uint8_t *) packet, FRF_PACKET_SIZE);
-
+    fs_decoder_decode(&decoder, rx_buffer, FRF_PACKET_SIZE);
     rfRxReady = false;
   }
 }
@@ -66,6 +62,7 @@ static void rf_event_callback(frf_event_t event)
       break;
     case FRF_EVENT_RX:
       rfRxReady = true;
+      frf_getPacket(&radio, rx_buffer);
       LOG_DEBUG("RF RX Event\r\n");
       break;
   }
@@ -137,8 +134,6 @@ void device_com_setup(void)
 
   radio_get_hedwig_address(hedwigAddress);
   radio_get_albus_address(albusAddress);
-
-  memset(frame_buffer, 0, MAX_FRAME_SIZE);
 
   /* RF Module Init */
   frf_config_t config = {
