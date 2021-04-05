@@ -8,6 +8,7 @@
 #include "falcon_packet.h"
 #include "fs_decoder.h"
 #include "fp_decode.h"
+#include "ff_encoder.h"
 
 #include <string.h>
 
@@ -18,8 +19,8 @@ static fs_decoder_t decoder;
 static uint8_t hedwigAddress[RADIO_ADDRESS_LENGTH];
 static uint8_t albusAddress[RADIO_ADDRESS_LENGTH];
 
-uint8_t packetCnt = 0;
 uint8_t frame_buffer[MAX_FRAME_SIZE];
+uint8_t tx_buffer[MAX_FRAME_SIZE];
 
 static frf_t radio;
 static volatile bool rfRxReady = false;
@@ -58,15 +59,10 @@ static inline void handleRFRx(void)
 {
   if (rfRxReady) {
     frf_packet_t packet;
-    while (frf_getPacket(&radio, packet) == 0) {
-      /* Convert frf packet to byte array - in this case just cast */
-      uint8_t *buffer = (uint8_t *) packet;
-      memcpy(&frame_buffer[packetCnt*FRF_PACKET_SIZE], buffer, FRF_PACKET_SIZE);
-      packetCnt++;
-      //fp_decoder_decode(&decoder, buffer);
-    }
-    fs_decoder_decode(&decoder, frame_buffer, FRF_PACKET_SIZE*packetCnt);
-    packetCnt = 0;
+    frf_getPacket(&radio, packet);
+    /* Convert frf packet to byte array - in this case just cast */
+    //fp_decoder_decode(&decoder, buffer);
+    fs_decoder_decode(&decoder, (uint8_t *) packet, FRF_PACKET_SIZE);
 
     rfRxReady = false;
   }
@@ -108,6 +104,8 @@ static void rx_handler(uint8_t *data, fp_type_t packetType)
                 controlInput.fcsControlCmd.pitch,
                 controlInput.fcsControlCmd.roll,
                 controlInput.fcsControlCmd.alt);
+
+      frf_sendPacket(&radio, tx_buffer);
     }
     break;
     case FPT_MODE_COMMAND:
@@ -140,6 +138,22 @@ static void device_com_task(void *pvParameters)
 
 void device_com_setup(void)
 {
+  ff_encoder_t encoder;
+  ff_encoder_init(&encoder);
+  ff_encoder_set_buffer(&encoder, tx_buffer);
+
+  fpc_flight_control_t control = {
+    {
+      2.2,2.4,1.6,1.8
+    }
+  };
+
+  if (ff_encoder_append_packet(&encoder, &control, FPT_FLIGHT_CONTROL_COMMAND) == FLN_ERR) {
+    error_handler();
+  }
+
+  ff_encoder_append_footer(&encoder);
+
   FLN_ERR_CHECK(bsp_rf_init(rfISR));
 
   radio_get_hedwig_address(hedwigAddress);

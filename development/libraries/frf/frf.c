@@ -250,10 +250,15 @@ int frf_getPacket(frf_t *instance, frf_packet_t packet)
 
 void frf_sendPacket(frf_t *instance, frf_packet_t packet)
 {
-  powerUpTx(instance);
-  nRF24L01_write_tx_payload(&instance->rfInstance, packet, FRF_PACKET_SIZE);
-  instance->isSending = true;
-  CE_HIGH();
+  if (instance->role == FRF_DEVICE_ROLE_TX) {
+    powerUpTx(instance);
+    nRF24L01_write_tx_payload(&instance->rfInstance, packet, FRF_PACKET_SIZE);
+    instance->isSending = true;
+    CE_HIGH();
+  }
+  else {
+    nRF24L01_write_ack_payload(&instance->rfInstance, NRF24L01_PIPE1, packet, FRF_PACKET_SIZE);
+  }
 }
 
 bool frf_isSending(frf_t *instance)
