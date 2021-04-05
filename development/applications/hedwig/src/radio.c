@@ -45,34 +45,10 @@ static void rf_event_callback(frf_event_t event)
     case FRF_EVENT_RX:
       rfRxReady = true;
       frf_getPacket(&radio, rx_buffer);
-      radio_send_data(tx_buffer, 32);
+      // radio_send_data(tx_buffer, 32);
       LOG_DEBUG("RF RX Event\r\n");
       break;
   }
-}
-
-#include "falcon_packet.h"
-#include "fs_decoder.h"
-#include "fp_decode.h"
-#include "ff_encoder.h"
-
-static void temp_func()
-{
-  ff_encoder_t encoder;
-  ff_encoder_init(&encoder);
-  ff_encoder_set_buffer(&encoder, tx_buffer);
-
-  fpc_flight_control_t control = {
-    {
-      2.2,2.4,1.6,1.8
-    }
-  };
-
-  if (ff_encoder_append_packet(&encoder, &control, FPT_FLIGHT_CONTROL_COMMAND) == FLN_ERR) {
-    error_handler();
-  }
-
-  ff_encoder_append_footer(&encoder);
 }
 
 uint32_t radio_send_data(uint8_t *source, uint32_t length)
@@ -92,7 +68,6 @@ uint32_t radio_get_data(uint8_t *dest, uint32_t length)
 
 void radio_init(void)
 {
-  temp_func();
   radio_get_hedwig_address(hedwigAddress);
   radio_get_albus_address(albusAddress);
 

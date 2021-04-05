@@ -13,6 +13,8 @@
 
 static fs_decoder_t decoder;
 
+static uint8_t tx_buffer[32];
+
 static void rx_handler(uint8_t *data, fp_type_t packetType)
 {
   switch (packetType) {
@@ -54,12 +56,33 @@ static void device_com_task(void *pvParameters)
     radio_process();
     if (radio_get_data(rx_buffer, 32) == 32) {
       fs_decoder_decode(&decoder, rx_buffer, 32);
+      radio_send_data(tx_buffer, 32);
     }
   }
 }
 
+static void temp_func()
+{
+  ff_encoder_t encoder;
+  ff_encoder_init(&encoder);
+  ff_encoder_set_buffer(&encoder, tx_buffer);
+
+  fpc_flight_control_t control = {
+    {
+      2.2,2.4,1.6,1.8
+    }
+  };
+
+  if (ff_encoder_append_packet(&encoder, &control, FPT_FLIGHT_CONTROL_COMMAND) == FLN_ERR) {
+    error_handler();
+  }
+
+  ff_encoder_append_footer(&encoder);
+}
+
 void device_com_setup(void)
 {
+  temp_func();
   radio_init();
 
   /* Falcon Packet Decoder Init */
