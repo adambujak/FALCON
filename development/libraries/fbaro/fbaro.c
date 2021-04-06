@@ -73,7 +73,7 @@ int fbaro_calibrate(void)
 
   MPL3115A2_OutputSampleRate(SR3);
 
-  vTaskDelay(50);
+  rtos_delay_ms(50);
 
   int samples = 25;
 
@@ -90,7 +90,7 @@ int fbaro_calibrate(void)
     else {
       i--;
     }
-    vTaskDelay(20);
+    rtos_delay_ms(20);
   }
 
   barometer.start_alt = test_data/samples;
