@@ -80,6 +80,7 @@ void rt_OneStep(RT_MODEL *const rtM)
 
   /* Step the model */
   if(lock_sensor_data() == pdTRUE) {
+    LOG_DEBUG("flight controller step\r\n");
     flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
     unlock_sensor_data();
   }
@@ -106,9 +107,10 @@ void rt_OneStep(RT_MODEL *const rtM)
 
 static void flight_control_callback( TimerHandle_t xTimer )
 {
+  LOG_DEBUG("flight control callback\r\n");
   rt_OneStep(rtM);
 
-  LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
+  LOG_INFO("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
           rtY_State_Estim.z,
           rtY_State_Estim.dz,
           rtY_State_Estim.yaw,
@@ -129,7 +131,7 @@ void flight_control_set_sensor_data(float *gyro_data, float *accel_data, float *
     unlock_sensor_data();
   }
   else {
-    LOG_DEBUG("sensorDataMutex take failed\r\n");
+    LOG_WARN("sensorDataMutex take failed\r\n");
   }
 }
 
@@ -193,6 +195,7 @@ static void flight_control_task(void *pvParameters)
   while(1)
   {
     // getShitFromSensorsANDCom();
+    LOG_DEBUG("flight_control_task\r\n");
     vTaskDelay(2);
   }
 }
@@ -201,7 +204,7 @@ void flight_control_task_start(void)
 {
   BaseType_t taskStatus = xTaskCreate(flight_control_task,
                           "sensors_task",
-                          512,
+                          1024,
                           NULL,
                           sensors_TASK_PRIORITY,
                           &flight_control_task_handle);

@@ -22,7 +22,7 @@ static void rx_handler(uint8_t *data, fp_type_t packetType)
     {
       fpc_flight_control_t controlInput = {};
       fpc_flight_control_decode(data, &controlInput);
-      LOG_DEBUG("CONTROL INPUT: %f, %f, %f, %f\r\n",
+      LOG_INFO("CONTROL INPUT: %f, %f, %f, %f\r\n",
                 controlInput.fcsControlCmd.yaw,
                 controlInput.fcsControlCmd.pitch,
                 controlInput.fcsControlCmd.roll,
@@ -33,7 +33,7 @@ static void rx_handler(uint8_t *data, fp_type_t packetType)
     {
       fpc_mode_t mode = {};
       fpc_mode_decode(data, &mode);
-      LOG_DEBUG("MODE COMMAND: %d\r\n", mode.mode);
+      LOG_INFO("MODE COMMAND: %d\r\n", mode.mode);
     }
     break;
     default:
@@ -52,7 +52,9 @@ static void device_com_task(void *pvParameters)
   LOG_DEBUG("Device com task started\r\n");
 
   uint8_t rx_buffer[32];
+
   while(1) {
+    LOG_DEBUG("Device com task process\r\n");
     radio_process();
     if (radio_get_data(rx_buffer, 32) == 32) {
       fs_decoder_decode(&decoder, rx_buffer, 32);
@@ -81,6 +83,7 @@ static void temp_func()
   ff_encoder_append_footer(&encoder);
 }
 
+
 void device_com_setup(void)
 {
   temp_func();
@@ -98,7 +101,7 @@ void device_com_start(void)
 {
   BaseType_t taskStatus = xTaskCreate(device_com_task,
                           "device_com_task",
-                          4*configMINIMAL_STACK_SIZE,
+                          5*configMINIMAL_STACK_SIZE,
                           NULL,
                           device_com_TASK_PRIORITY,
                           NULL);
