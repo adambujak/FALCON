@@ -92,6 +92,16 @@ static void sensors_task(void *pvParameters)
         baro_delay_count = 0;
       }
 
+      LOG_DEBUG("accel: %7.4f, %7.4f, %7.4f gyro: %7.4f, %7.4f, %7.4f alt: %7.4f\r\n",
+    		  accel_data[0],
+			  accel_data[1],
+			  accel_data[2],
+			  gyro_data[0],
+			  gyro_data[1],
+			  gyro_data[2],
+          	  alt_data);
+//      LOG_DEBUG("s\r\n");
+
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
     }
     else {

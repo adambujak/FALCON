@@ -304,9 +304,10 @@ static void flight_control_reset(void)
 
 static void flight_control_task(void *pvParameters)
 {
-  while(flight_control_mode < FE_FLIGHT_MODE_FCS_READY) {
-    vTaskDelay(10);
-  }
+  vTaskDelay(3000);
+//  while(flight_control_mode < FE_FLIGHT_MODE_FCS_READY) {
+//    vTaskDelay(10);
+//  }
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
@@ -315,7 +316,7 @@ static void flight_control_task(void *pvParameters)
 
   while(1)
   { 
-    if (flight_control_mode >= FE_FLIGHT_MODE_FCS_READY) {
+    if (flight_control_mode >= 0) {
       /* Wait to be notified of an interrupt. */
       flightTimerNotification = xTaskNotifyWait(pdFALSE,
                                            0xFFFFFFFF,
@@ -335,6 +336,7 @@ static void flight_control_task(void *pvParameters)
             rtY_State_Estim.p,
             rtY_State_Estim.q,
             rtY_State_Estim.r);
+//        LOG_DEBUG("f\r\n");
       }
       else {
         LOG_DEBUG("timer notif not received\r\n");
