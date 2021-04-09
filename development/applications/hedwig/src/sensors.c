@@ -69,16 +69,12 @@ static void sensors_task(void *pvParameters)
   LOG_DEBUG("SENSORS TASK STARTED\r\n");
 
   FLN_ERR_CHECK(fbaro_calibrate());
-
   FLN_ERR_CHECK(fimu_start(IMU_config));
-
   fimu_calibrate(gyro_bias, accel_bias, quat_bias);
 
   BaseType_t sensorNotification;
 
   while (1) {
-
-
     /* Wait to be notified of an interrupt. */
     sensorNotification = xTaskNotifyWait(pdFALSE,
                                          0xFFFFFFFF,
@@ -109,11 +105,8 @@ static void sensors_task(void *pvParameters)
 void sensors_task_setup(void)
 {
   FLN_ERR_CHECK(bsp_i2c_init(&i2cHandle));
-
   FLN_ERR_CHECK(fimu_init(IMU_config));
-
   FLN_ERR_CHECK(fbaro_init(&baro_config));
-
   bsp_IMU_int_init(IMU_data_ready_cb);
 }
 

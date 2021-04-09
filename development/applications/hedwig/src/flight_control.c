@@ -107,7 +107,6 @@ void rt_OneStep(RT_MODEL *const rtM)
 
 static void flight_control_callback( TimerHandle_t xTimer )
 {
-  LOG_DEBUG("flight control callback\r\n");
   rt_OneStep(rtM);
 
   LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
