@@ -438,7 +438,5 @@ void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
       quat_bias[1],
       quat_bias[2],
       quat_bias[3]);
-
-  return FLN_OK;
 }
 
