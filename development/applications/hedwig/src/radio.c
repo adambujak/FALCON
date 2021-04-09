@@ -24,8 +24,8 @@ static uint8_t tx_buffer[RF_TX_BUFFER_SIZE];
 static fifo_t rx_fifo;
 static fifo_t tx_fifo;
 
-static uint8_t hedwigAddress[RADIO_ADDRESS_LENGTH];
-static uint8_t albusAddress[RADIO_ADDRESS_LENGTH];
+static uint8_t hedwig_address[RADIO_ADDRESS_LENGTH];
+static uint8_t albus_address[RADIO_ADDRESS_LENGTH];
 
 static frf_t radio;
 
@@ -94,7 +94,7 @@ static void rf_event_callback(frf_event_t event)
   }
 }
 
-uint32_t radio_send_data(uint8_t *source, uint32_t length)
+uint32_t radio_data_send(uint8_t *source, uint32_t length)
 {
   if (length > RF_TX_BUFFER_SIZE) {
     return 0;
@@ -104,15 +104,25 @@ uint32_t radio_send_data(uint8_t *source, uint32_t length)
   return length;
 }
 
-uint32_t radio_get_data(uint8_t *dest, uint32_t length)
+uint32_t radio_data_get(uint8_t *dest, uint32_t length)
 {
   return fifo_pop(&rx_fifo, dest, length);
 }
 
+uint32_t radio_rx_cnt_get(void)
+{
+  return rx_fifo.bytes_available;
+}
+
+void radio_reset(void)
+{
+  frf_start(&radio, 2, FRF_PACKET_SIZE, albus_address, hedwig_address);
+}
+
 void radio_init(void)
 {
-  radio_get_hedwig_address(hedwigAddress);
-  radio_get_albus_address(albusAddress);
+  radio_get_hedwig_address(hedwig_address);
+  radio_get_albus_address(albus_address);
 
   fifo_init(&rx_fifo, rx_buffer, RF_RX_BUFFER_SIZE);
   fifo_init(&tx_fifo, tx_buffer, RF_TX_BUFFER_SIZE);
@@ -131,7 +141,7 @@ void radio_init(void)
   };
 
   frf_init(&radio, &config);
-  frf_start(&radio, 2, FRF_PACKET_SIZE, hedwigAddress, albusAddress);
+  frf_start(&radio, 2, FRF_PACKET_SIZE, hedwig_address, albus_address);
 }
 
 void radio_process(void)
