@@ -85,7 +85,6 @@ static void sensors_task(void *pvParameters)
                                          NULL,
                                          MS_TO_TICKS(10));
 
-    LOG_DEBUG("sensor task \r\n");
     if (sensorNotification == pdPASS) {
       fimu_fifo_handler(gyro_data, accel_data, quat_data);
       for (int i=0; i<3; i++) {

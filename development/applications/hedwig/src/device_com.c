@@ -54,7 +54,6 @@ static void device_com_task(void *pvParameters)
   uint8_t rx_buffer[32];
 
   while(1) {
-    LOG_DEBUG("Device com task process\r\n");
     radio_process();
     if (radio_get_data(rx_buffer, 32) == 32) {
       fs_decoder_decode(&decoder, rx_buffer, 32);

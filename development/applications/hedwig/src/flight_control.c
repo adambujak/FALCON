@@ -110,7 +110,7 @@ static void flight_control_callback( TimerHandle_t xTimer )
   LOG_DEBUG("flight control callback\r\n");
   rt_OneStep(rtM);
 
-  LOG_INFO("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
+  LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
           rtY_State_Estim.z,
           rtY_State_Estim.dz,
           rtY_State_Estim.yaw,
@@ -195,7 +195,6 @@ static void flight_control_task(void *pvParameters)
   while(1)
   {
     // getShitFromSensorsANDCom();
-    LOG_DEBUG("flight_control_task\r\n");
     vTaskDelay(2);
   }
 }
