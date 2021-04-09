@@ -98,12 +98,12 @@ void device_com_setup(void)
 
 void device_com_start(void)
 {
-  BaseType_t taskStatus = xTaskCreate(device_com_task,
-                          "device_com_task",
-                          5*configMINIMAL_STACK_SIZE,
-                          NULL,
-                          device_com_TASK_PRIORITY,
-                          NULL);
+  BaseType_t task_status = xTaskCreate(device_com_task,
+                           "device_com_task",
+                           DEVICE_COM_STACK_SIZE,
+                           NULL,
+                           device_com_TASK_PRIORITY,
+                           NULL);
 
-  RTOS_ERR_CHECK(taskStatus);
+  RTOS_ERR_CHECK(task_status);
 }

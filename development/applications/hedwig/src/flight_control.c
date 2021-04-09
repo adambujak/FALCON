@@ -202,10 +202,10 @@ static void flight_control_task(void *pvParameters)
 void flight_control_task_start(void)
 {
   BaseType_t taskStatus = xTaskCreate(flight_control_task,
-                          "sensors_task",
-                          1024,
+                          "flight control task",
+                          FLIGHT_CONTROL_STACK_SIZE,
                           NULL,
-                          sensors_TASK_PRIORITY,
+                          flight_control_TASK_PRIORITY,
                           &flight_control_task_handle);
 
   RTOS_ERR_CHECK(taskStatus);

@@ -121,7 +121,7 @@ void sensors_task_start(void)
 {
   BaseType_t taskStatus = xTaskCreate(sensors_task,
                           "sensors_task",
-                          1024,
+                          SENSORS_STACK_SIZE,
                           NULL,
                           sensors_TASK_PRIORITY,
                           &sensors_task_handle);

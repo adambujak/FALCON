@@ -103,7 +103,7 @@ void leds_task_start(void)
 {
   BaseType_t taskStatus = xTaskCreate(leds_task,
                            "led_task",
-                           2*configMINIMAL_STACK_SIZE,
+                           LED_STACK_SIZE,
                            NULL,
                            led_TASK_PRIORITY,
                            NULL);
