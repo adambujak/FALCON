@@ -83,13 +83,13 @@ static void handle_rf(void)
   radio_process();
 
   uint8_t temp[32];
-  if (radio_get_data(temp, 32)) {
+  if (radio_data_get(temp, 32)) {
     fs_decoder_decode(&decoder, temp, 32);
   }
 
   uint32_t now = system_time_get();
   if (system_time_cmp_ms(last_rf_tx_time, now) > 500) {
-    radio_send_data(rf_tx_buffer, 32);
+    radio_data_send(rf_tx_buffer, 32);
     last_rf_tx_time = now;
   }
 }

@@ -86,7 +86,7 @@ static void rf_event_callback(frf_event_t event)
 {
   switch(event) {
     case FRF_EVENT_TX_FAILED:
-      LOG_DEBUG("RF TX FAILED\r\n");
+      LOG_WARN("RF TX FAILED\r\n");
       break;
     case FRF_EVENT_TX_SUCCESS:
       LOG_DEBUG("RF TX SUCCESS\r\n");
