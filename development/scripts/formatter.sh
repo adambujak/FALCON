@@ -9,7 +9,7 @@ printHelp ()
     echo "### -i, --inplace -> Edit file inplace (overwrite existing file)"
     exit 1
 }
-GIT_ROOT_DIR=$(git rev-parse --show-toplevel)/development
+GIT_ROOT_DIR=$(git rev-parse --show-toplevel)/
 RECURSIVE="0"
 INPLACE="0"
 EXCLUDE="0"
