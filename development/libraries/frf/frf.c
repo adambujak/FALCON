@@ -10,17 +10,17 @@
 
 #include <string.h>
 
-#define FRF_DEFAULT_SIZE_PACKET 32
-#define FRF_NB_BITS_FOR_ERROR_RATE_CALC 100000
+#define FRF_DEFAULT_SIZE_PACKET          32
+#define FRF_NB_BITS_FOR_ERROR_RATE_CALC  100000
 #define FRF_NB_BYTES_FOR_ERROR_RATE_CALC 12500
-#define FRF_ADDR_WIDTH NRF24L01_AW_5BYTES
+#define FRF_ADDR_WIDTH                   NRF24L01_AW_5BYTES
 
-#define FRF_ENABLE() (RFCKEN = 1);
-#define FRF_IRQ_ENABLE() (RF = 1);
-#define FRF_IRQ_DISABLE() (RF = 0);
+#define FRF_ENABLE()                     (RFCKEN = 1);
+#define FRF_IRQ_ENABLE()                 (RF = 1);
+#define FRF_IRQ_DISABLE()                (RF = 0);
 
-#define CE_LOW()  (instance->setCE(0))
-#define CE_HIGH() (instance->setCE(1))
+#define CE_LOW()                         (instance->setCE(0))
+#define CE_HIGH()                        (instance->setCE(1))
 
 static uint8_t rx_buffer[FRF_PACKET_SIZE];
 
@@ -89,8 +89,8 @@ void frf_init(frf_t *instance, frf_config_t *config)
   nRF24L01_initialize(&instance->rfInstance, config->transferFunc, config->spiCtx, config->setCS);
 }
 
-void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len,
-               uint8_t rxAddr[FRF_ADDR_WIDTH], uint8_t txAddr[FRF_ADDR_WIDTH])
+void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t rxAddr[FRF_ADDR_WIDTH],
+               uint8_t txAddr[FRF_ADDR_WIDTH])
 {
   CE_LOW();
   instance->delay(100);

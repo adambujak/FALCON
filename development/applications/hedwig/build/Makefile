@@ -162,6 +162,7 @@ endif
 # C defines
 C_DEFS +=  \
 	-DHEDWIG \
+	-DLOG_LEVEL=LOG_LEVEL_INFO \
 	-DUSE_HAL_DRIVER \
 	-DUSE_FULL_LL_DRIVER \
 	-D$(CHIPSET_DEF) \

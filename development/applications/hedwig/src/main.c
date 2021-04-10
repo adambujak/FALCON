@@ -1,27 +1,27 @@
 #include "falcon_common.h"
 
 #include "board.h"
-#include "uart.h"
 #include "stm32f4xx_it.h"
+#include "uart.h"
 
+#include "device_com.h"
+#include "flight_control.h"
 #include "leds.h"
 #include "motors.h"
-#include "device_com.h"
 #include "sensors.h"
-#include "flight_control.h"
 #include "system_time.h"
 
 #include <stdint.h>
 
-#define PRIORITYGROUP  ((uint32_t)0x00000003)
+#define PRIORITYGROUP          ((uint32_t)0x00000003)
 
 #define INCLUDE_LEDS           0
 #define INCLUDE_MOTORS         0
-#define INCLUDE_SENSORS        0
+#define INCLUDE_SENSORS        1
 #define INCLUDE_DEVICE_COM     1
-#define INCLUDE_FLIGHT_CONTROL 0
+#define INCLUDE_FLIGHT_CONTROL 1
 
-static uint8_t os_started= 0;
+static uint8_t os_started = 0;
 
 static void os_start(void)
 {
@@ -29,12 +29,14 @@ static void os_start(void)
   vTaskStartScheduler();
 }
 
-void delay_us(uint32_t us) {
+void delay_us(uint32_t us)
+{
   uint32_t start_time = system_time_get();
   while(system_time_cmp_us(start_time, system_time_get()) < us);
 }
 
-void delay_ms(uint32_t ms) {
+void delay_ms(uint32_t ms)
+{
   uint32_t start_time = system_time_get();
   while(system_time_cmp_ms(start_time, system_time_get()) < ms);
 }
@@ -66,20 +68,17 @@ void sysclk_init(void)
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
     error_handler();
   }
 
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
-  {
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK) {
     error_handler();
   }
 }
@@ -100,34 +99,34 @@ int main(void)
   board_bringup();
   LOG_DEBUG("Hedwig Started!\r\n");
 
-  #if INCLUDE_MOTORS
+#if INCLUDE_MOTORS
   motors_init();
-  #endif
-  #if INCLUDE_LEDS
+#endif
+#if INCLUDE_LEDS
   leds_task_setup();
-  #endif
-  #if INCLUDE_SENSORS
+#endif
+#if INCLUDE_SENSORS
   sensors_task_setup();
-  #endif
-  #if INCLUDE_DEVICE_COM
+#endif
+#if INCLUDE_DEVICE_COM
   device_com_setup();
-  #endif
-  #if INCLUDE_FLIGHT_CONTROL
+#endif
+#if INCLUDE_FLIGHT_CONTROL
   flight_control_setup();
-  #endif
+#endif
 
-  #if INCLUDE_LEDS
+#if INCLUDE_LEDS
   leds_task_tart();
-  #endif
-  #if INCLUDE_DEVICE_COM
+#endif
+#if INCLUDE_DEVICE_COM
   device_com_start();
-  #endif
-  #if INCLUDE_SENSORS
+#endif
+#if INCLUDE_SENSORS
   sensors_task_start();
-  #endif
-  #if INCLUDE_FLIGHT_CONTROL
+#endif
+#if INCLUDE_FLIGHT_CONTROL
   flight_control_task_start();
-  #endif
+#endif
 
   os_start();
 

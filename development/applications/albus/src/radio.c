@@ -4,12 +4,12 @@
 #include "radio_common.h"
 
 #include "falcon_packet.h"
-#include "fp_encode.h"
 #include "ff_encoder.h"
+#include "fp_encode.h"
 
-#include "spi.h"
-#include "gpio.h"
 #include "frf.h"
+#include "gpio.h"
+#include "spi.h"
 
 #define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
 
@@ -84,25 +84,24 @@ static inline void rf_isr(void)
 
 static void rf_event_callback(frf_event_t event)
 {
-  switch(event) {
-    case FRF_EVENT_TX_FAILED:
-      LOG_DEBUG("RF TX FAILED\r\n");
-      break;
-    case FRF_EVENT_TX_SUCCESS:
-      LOG_DEBUG("RF TX SUCCESS\r\n");
-      break;
-    case FRF_EVENT_RX:
-    {
-      uint8_t temp[FRF_PACKET_SIZE];
-      frf_getPacket(&radio, temp);
-      fifo_push(&rx_fifo, temp, FRF_PACKET_SIZE);
-      LOG_DEBUG("RF RX Event\r\n");
-      break;
-    }
+  switch (event) {
+  case FRF_EVENT_TX_FAILED:
+    LOG_WARN("RF TX FAILED\r\n");
+    break;
+  case FRF_EVENT_TX_SUCCESS:
+    LOG_DEBUG("RF TX SUCCESS\r\n");
+    break;
+  case FRF_EVENT_RX: {
+    uint8_t temp[FRF_PACKET_SIZE];
+    frf_getPacket(&radio, temp);
+    fifo_push(&rx_fifo, temp, FRF_PACKET_SIZE);
+    LOG_DEBUG("RF RX Event\r\n");
+    break;
+  }
   }
 }
 
-uint32_t radio_send_data(uint8_t *source, uint32_t length)
+uint32_t radio_data_send(uint8_t *source, uint32_t length)
 {
   if (length > RF_TX_BUFFER_SIZE) {
     return 0;
@@ -112,9 +111,19 @@ uint32_t radio_send_data(uint8_t *source, uint32_t length)
   return length;
 }
 
-uint32_t radio_get_data(uint8_t *dest, uint32_t length)
+uint32_t radio_data_get(uint8_t *dest, uint32_t length)
 {
   return fifo_pop(&rx_fifo, dest, length);
+}
+
+uint32_t radio_rx_cnt_get(void)
+{
+  return rx_fifo.bytes_available;
+}
+
+void radio_reset(void)
+{
+  frf_start(&radio, 2, FRF_PACKET_SIZE, albus_address, hedwig_address);
 }
 
 void radio_process(void)
