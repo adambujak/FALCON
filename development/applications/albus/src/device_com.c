@@ -3,14 +3,14 @@
 #include "falcon_common.h"
 
 #include "radio.h"
-#include "uart.h"
 #include "system_time.h"
+#include "uart.h"
 
 #include "falcon_packet.h"
-#include "fp_decode.h"
-#include "fs_decoder.h"
-#include "fp_encode.h"
 #include "ff_encoder.h"
+#include "fp_decode.h"
+#include "fp_encode.h"
+#include "fs_decoder.h"
 
 static uint8_t uart_rx_buffer[MAX_FRAME_SIZE];
 static uint8_t rf_tx_buffer[MAX_FRAME_SIZE];
@@ -19,23 +19,18 @@ static uint32_t last_rf_tx_time;
 
 static void decoder_callback(uint8_t *data, fp_type_t packetType)
 {
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wswitch"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
   switch (packetType) {
-  case FPT_FLIGHT_CONTROL_COMMAND:
-  {
+  case FPT_FLIGHT_CONTROL_COMMAND: {
     fpc_flight_control_t control = {{0}};
     fpc_flight_control_decode(data, &control);
     LOG_DEBUG("received motor cmd\r\n");
-    LOG_DEBUG("MOTOR COMMAND: %f, %f, %f, %f\r\n",
-           control.fcsControlCmd.yaw,
-           control.fcsControlCmd.pitch,
-           control.fcsControlCmd.roll,
-           control.fcsControlCmd.alt);
+    LOG_DEBUG("MOTOR COMMAND: %f, %f, %f, %f\r\n", control.fcsControlCmd.yaw, control.fcsControlCmd.pitch,
+              control.fcsControlCmd.roll, control.fcsControlCmd.alt);
+  } break;
   }
-    break;
-  }
-  #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 }
 
 static void decode_frame(uint8_t *data, uint32_t length)
@@ -45,10 +40,8 @@ static void decode_frame(uint8_t *data, uint32_t length)
 
 static void decoder_init(void)
 {
-   fs_decoder_config_t decoder_config = {
-     .callback = decoder_callback
-   };
-   fs_decoder_init(&decoder, &decoder_config);
+  fs_decoder_config_t decoder_config = {.callback = decoder_callback};
+  fs_decoder_init(&decoder, &decoder_config);
 }
 
 void temp_func(void)
@@ -57,11 +50,7 @@ void temp_func(void)
   ff_encoder_init(&encoder);
   ff_encoder_set_buffer(&encoder, rf_tx_buffer);
 
-  fpc_flight_control_t control = {
-    {
-      1.2,1.4,1.6,1.8
-    }
-  };
+  fpc_flight_control_t control = {{1.2, 1.4, 1.6, 1.8}};
 
   if (ff_encoder_append_packet(&encoder, &control, FPT_FLIGHT_CONTROL_COMMAND) == FLN_ERR) {
     error_handler();
@@ -98,7 +87,7 @@ void device_com_task(void *pvParameters)
 {
   LOG_DEBUG("Device com task started\r\n");
 
-  while(1) {
+  while (1) {
     handle_uart();
     handle_rf();
   }

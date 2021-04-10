@@ -4,12 +4,12 @@
 #include "radio_common.h"
 
 #include "falcon_packet.h"
-#include "fp_encode.h"
 #include "ff_encoder.h"
+#include "fp_encode.h"
 
-#include "spi.h"
-#include "gpio.h"
 #include "frf.h"
+#include "gpio.h"
+#include "spi.h"
 
 #define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
 
@@ -84,21 +84,20 @@ static inline void rf_isr(void)
 
 static void rf_event_callback(frf_event_t event)
 {
-  switch(event) {
-    case FRF_EVENT_TX_FAILED:
-      LOG_WARN("RF TX FAILED\r\n");
-      break;
-    case FRF_EVENT_TX_SUCCESS:
-      LOG_DEBUG("RF TX SUCCESS\r\n");
-      break;
-    case FRF_EVENT_RX:
-    {
-      uint8_t temp[FRF_PACKET_SIZE];
-      frf_getPacket(&radio, temp);
-      fifo_push(&rx_fifo, temp, FRF_PACKET_SIZE);
-      LOG_DEBUG("RF RX Event\r\n");
-      break;
-    }
+  switch (event) {
+  case FRF_EVENT_TX_FAILED:
+    LOG_WARN("RF TX FAILED\r\n");
+    break;
+  case FRF_EVENT_TX_SUCCESS:
+    LOG_DEBUG("RF TX SUCCESS\r\n");
+    break;
+  case FRF_EVENT_RX: {
+    uint8_t temp[FRF_PACKET_SIZE];
+    frf_getPacket(&radio, temp);
+    fifo_push(&rx_fifo, temp, FRF_PACKET_SIZE);
+    LOG_DEBUG("RF RX Event\r\n");
+    break;
+  }
   }
 }
 

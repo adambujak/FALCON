@@ -9,23 +9,22 @@
 #include "flightController.h"
 #include "rtwtypes.h"
 
-
 fln_i2c_handle_t i2cHandle;
 
-#define IMU_SAMPLE_RATE (100.f)
+#define IMU_SAMPLE_RATE  (100.f)
 #define BARO_SAMPLE_RATE (100.f)
 
-#define BARO_DELAY_COUNT ( IMU_SAMPLE_RATE / BARO_SAMPLE_RATE )
+#define BARO_DELAY_COUNT (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)
 
 int baro_delay_count = BARO_DELAY_COUNT;
 
-static float gyro_bias[3] = { 0.0F, 0.0F, 0.0F };
-static float accel_bias[3] = { 0.0F, 0.0F, 0.0F };
-static float quat_bias[4] = { 0.0F, 0.0F, 0.0F, 0.0F };
+static float gyro_bias[3] = {0.0F, 0.0F, 0.0F};
+static float accel_bias[3] = {0.0F, 0.0F, 0.0F};
+static float quat_bias[4] = {0.0F, 0.0F, 0.0F, 0.0F};
 
-static float gyro_data[3] = { 0.0F, 0.0F, 0.0F };
-static float accel_data[3] = { 0.0F, 0.0F, 0.0F };
-static float quat_data[4] = { 0.0F, 0.0F, 0.0F, 0.0F };
+static float gyro_data[3] = {0.0F, 0.0F, 0.0F};
+static float accel_data[3] = {0.0F, 0.0F, 0.0F};
+static float quat_data[4] = {0.0F, 0.0F, 0.0F, 0.0F};
 static float alt_data = 0.0F;
 
 static fimu_config_t IMU_config = {
@@ -83,7 +82,7 @@ static void sensors_task(void *pvParameters)
 
     if (sensorNotification == pdPASS) {
       fimu_fifo_handler(gyro_data, accel_data, quat_data);
-      for (int i=0; i<3; i++) {
+      for (int i = 0; i < 3; i++) {
         accel_data[i] -= accel_bias[i];
         gyro_data[i] -= gyro_bias[i];
       }
@@ -96,8 +95,8 @@ static void sensors_task(void *pvParameters)
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
     }
     else {
-       LOG_DEBUG("sensor notification not received\r\n");
-       error_handler();
+      LOG_DEBUG("sensor notification not received\r\n");
+      error_handler();
     }
   }
 }

@@ -1,12 +1,12 @@
 #include "leds.h"
 
-#include <stdio.h>
-#include <stdbool.h>
 #include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
 
-#include "logger.h"
-#include "falcon_common.h"
 #include "bsp.h"
+#include "falcon_common.h"
+#include "logger.h"
 
 #define LED_CMD 0x3A000000
 
@@ -31,7 +31,7 @@ typedef struct {
 
 static cmd_state_t cmd_state;
 
-#define LED_LOW() FLN_LED_PORT->BSRR = (uint32_t)FLN_LED_PIN << 16
+#define LED_LOW()  FLN_LED_PORT->BSRR = (uint32_t)FLN_LED_PIN << 16
 #define LED_HIGH() FLN_LED_PORT->BSRR = FLN_LED_PIN
 
 static void callback(void)
@@ -40,8 +40,8 @@ static void callback(void)
   bsp_leds_set(0);
 
   if (cmd_state.value & (1 << cmd_state.index)) {
-	bsp_leds_set(1);
-	bsp_leds_set(0);
+    bsp_leds_set(1);
+    bsp_leds_set(0);
   }
 
   if (cmd_state.index == 0) {
@@ -55,7 +55,7 @@ static void callback(void)
 static void set_led(uint8_t r, uint8_t g, uint8_t b)
 {
   bsp_leds_timer_start();
-  uint32_t color =  (r << 16) | (g << 8) | b;
+  uint32_t color = (r << 16) | (g << 8) | b;
 
   cmd_state.isDone = false;
   cmd_state.index = 32;
@@ -68,7 +68,7 @@ void leds_set_color(uint8_t r, uint8_t g, uint8_t b)
   led_state.g = g;
   led_state.b = b;
   led_state.pwrState = LED_PWR_STATE_ON;
-  set_led(r,g,b);
+  set_led(r, g, b);
 }
 
 void leds_toggle(void)
@@ -79,13 +79,13 @@ void leds_toggle(void)
   }
   else {
     led_state.pwrState = LED_PWR_STATE_OFF;
-    set_led(0,0,0);
+    set_led(0, 0, 0);
   }
 }
 
 void leds_task(void *pvParameters)
 {
- while (1) {
+  while (1) {
     LOG_DEBUG("LED Task\r\n");
     leds_toggle();
     vTaskDelay(1500);
@@ -96,7 +96,7 @@ void leds_task_setup(void)
 {
   LED_LOW();
   FLN_ERR_CHECK(bsp_leds_init(callback));
-  leds_set_color(0x15,0x0,0x10);
+  leds_set_color(0x15, 0x0, 0x10);
 }
 
 void leds_task_start(void)
@@ -110,5 +110,3 @@ void leds_task_start(void)
 
   RTOS_ERR_CHECK(taskStatus);
 }
-
-

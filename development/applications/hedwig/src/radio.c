@@ -1,9 +1,9 @@
 #include "radio.h"
 
-#include "falcon_common.h"
-#include "radio_common.h"
-#include "frf.h"
 #include "bsp.h"
+#include "falcon_common.h"
+#include "frf.h"
+#include "radio_common.h"
 
 #define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
 
@@ -63,8 +63,7 @@ static int fifo_pop(fifo_t *fifo, uint8_t *dest, uint32_t length)
   return length;
 }
 
-static void rf_spi_transfer(void * context, uint8_t * tx_buf, uint16_t tx_len,
-                             uint8_t * rx_buf, uint16_t rx_len)
+static void rf_spi_transfer(void *context, uint8_t *tx_buf, uint16_t tx_len, uint8_t *rx_buf, uint16_t rx_len)
 {
   bsp_rf_transceive(tx_buf, tx_len, rx_buf, rx_len);
 }

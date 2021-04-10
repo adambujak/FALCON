@@ -6,12 +6,12 @@
 #include "flightController.h"
 #include "rtwtypes.h"
 
-#define FC_PERIOD_MS MS_TO_TICKS(10)
+#define FC_PERIOD_MS       MS_TO_TICKS(10)
 #define RTOS_TIMEOUT_TICKS MS_TO_TICKS(5)
 
 static RT_MODEL rtM_;
 static RT_MODEL *const rtM = &rtM_; /* Real-time model */
-static DW rtDW;                        /* Observable states */
+static DW rtDW;                     /* Observable states */
 
 /* '<Root>/Commands' */
 static FCS_command_t rtU_Commands;
@@ -79,7 +79,7 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Set model inputs here */
 
   /* Step the model */
-  if(lock_sensor_data() == pdTRUE) {
+  if (lock_sensor_data() == pdTRUE) {
     LOG_DEBUG("flight controller step\r\n");
     flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
     unlock_sensor_data();
@@ -105,24 +105,18 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Enable interrupts here */
 }
 
-static void flight_control_callback( TimerHandle_t xTimer )
+static void flight_control_callback(TimerHandle_t xTimer)
 {
   rt_OneStep(rtM);
 
   LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
-          rtY_State_Estim.z,
-          rtY_State_Estim.dz,
-          rtY_State_Estim.yaw,
-          rtY_State_Estim.pitch,
-          rtY_State_Estim.roll,
-          rtY_State_Estim.p,
-          rtY_State_Estim.q,
-          rtY_State_Estim.r);
+            rtY_State_Estim.z, rtY_State_Estim.dz, rtY_State_Estim.yaw, rtY_State_Estim.pitch, rtY_State_Estim.roll,
+            rtY_State_Estim.p, rtY_State_Estim.q, rtY_State_Estim.r);
 }
 
 void flight_control_set_sensor_data(float *gyro_data, float *accel_data, float *quat_data, float alt_data)
 {
-  if(lock_sensor_data() == pdTRUE) {
+  if (lock_sensor_data() == pdTRUE) {
     memcpy(rtU_Sensors.gyro_data_SI, gyro_data, sizeof(rtU_Sensors.gyro_data_SI));
     memcpy(rtU_Sensors.accel_data_SI, accel_data, sizeof(rtU_Sensors.accel_data_SI));
     memcpy(rtU_Sensors.quat_data, quat_data, sizeof(rtU_Sensors.quat_data));
@@ -162,7 +156,7 @@ void flight_control_setup(void)
 
 void flight_control_start(void)
 {
-  FC_timerStatus = xTimerStart( flight_control_timer, 0 );
+  FC_timerStatus = xTimerStart(flight_control_timer, 0);
   RTOS_ERR_CHECK(FC_timerStatus);
 }
 
@@ -186,13 +180,11 @@ void flight_control_start(void)
 
 static void flight_control_task(void *pvParameters)
 {
-
   vTaskDelay(20000);
 
   flight_control_start();
 
-  while(1)
-  {
+  while (1) {
     // getShitFromSensorsANDCom();
     vTaskDelay(2);
   }

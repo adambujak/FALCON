@@ -8,21 +8,17 @@
 
 #include "fimu.h"
 
-signed char ACCEL_GYRO_ORIENTATION[9] = {0,1,0,
-                                         1,0,0,
-                                         0,0,-1};
-signed char COMPASS_ORIENTATION[9] = {0,-1,0,
-                                      1,0,0,
-                                      0,0,1};
+signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0, 1, 0, 0, 0, 0, -1};
+signed char COMPASS_ORIENTATION[9] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
 
 const unsigned char ACCEL_GYRO_CHIP_ADDR = 0x68;
 const unsigned char COMPASS_SLAVE_ID = HW_AK09916;
 const unsigned char COMPASS_CHIP_ADDR = 0x0C;
 const unsigned char PRESSURE_CHIP_ADDR = 0x00;
-long SOFT_IRON_MATRIX[] = {0,0,0,0,0,0,0,0,0};
+long SOFT_IRON_MATRIX[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 int a_average[3];
 int g_average[3];
-static int a_offset_reg_save[3]; // original accel offset register values
+static int a_offset_reg_save[3];  // original accel offset register values
 static int self_test_done = 0;
 
 static int reset_offset_regs(void)
@@ -35,15 +31,16 @@ static int reset_offset_regs(void)
     /* save accel offset register values */
     LOG_DEBUG("Save the original accel offset register values\r\n");
     ret = inv_read_mems_reg(REG_XA_OFFS_H, 2, d);
-    a_offset_reg_save[0] = (int)((d[0] << 8) | d[1]); // ax
+    a_offset_reg_save[0] = (int)((d[0] << 8) | d[1]);  // ax
     ret |= inv_read_mems_reg(REG_YA_OFFS_H, 2, d);
-    a_offset_reg_save[1] = (int)((d[0] << 8) | d[1]); // ay
+    a_offset_reg_save[1] = (int)((d[0] << 8) | d[1]);  // ay
     ret |= inv_read_mems_reg(REG_ZA_OFFS_H, 2, d);
-    a_offset_reg_save[2] = (int)((d[0] << 8) | d[1]); // az
+    a_offset_reg_save[2] = (int)((d[0] << 8) | d[1]);  // az
     if (ret) {
       LOG_DEBUG("Failed to read accel offset registers\r\n");
     }
-  } else {
+  }
+  else {
     /* restore accel offset registers to the original */
     LOG_DEBUG("Restore the original accel offset register values\r\n");
     d[0] = (a_offset_reg_save[0] >> 8) & 0xff;
@@ -116,8 +113,7 @@ static int set_offset_regs(int accel_off[3], int gyro_off[3])
 
   /* gyro bias from self-test is 250dps
      convert to 1000dps */
-  for (i = 0; i < 3; i++)
-    bias[i] = -(gyro_off[i] >> 2);
+  for (i = 0; i < 3; i++) bias[i] = -(gyro_off[i] >> 2);
 
   d[0] = (bias[0] >> 8) & 0xff;
   d[1] = bias[0] & 0xff;
@@ -146,12 +142,12 @@ int fimu_init(fimu_config_t config)
   result |= inv_initialize_lower_driver(SERIAL_INTERFACE_I2C, 0);
   result |= inv_set_slave_compass_id(COMPASS_SLAVE_ID);
   if (result) {
-      LOG_DEBUG("Could not initialize.\r\n");
-      return FLN_ERR;
+    LOG_DEBUG("Could not initialize.\r\n");
+    return FLN_ERR;
   }
   else {
-      LOG_DEBUG("Initialized.\r\n");
-      return FLN_OK;
+    LOG_DEBUG("Initialized.\r\n");
+    return FLN_OK;
   }
 
   return FLN_OK;
@@ -161,14 +157,14 @@ int fimu_start(fimu_config_t config)
 {
   int result = 0;
 
-  result |= inv_set_gyro_divider(1U);       //Initial sampling rate 1125Hz/10+1 = 102Hz.
-  result |= inv_set_accel_divider(1U);      //Initial sampling rate 1125Hz/10+1 = 102Hz.
+  result |= inv_set_gyro_divider(1U);   // Initial sampling rate 1125Hz/10+1 = 102Hz.
+  result |= inv_set_accel_divider(1U);  // Initial sampling rate 1125Hz/10+1 = 102Hz.
   result |= inv_set_gyro_fullscale(config.gyro_fsr);
   result |= inv_set_accel_fullscale(config.accel_fsr);
   result |= inv_enable_sensor(ANDROID_SENSOR_GYROSCOPE, 1);
   result |= inv_enable_sensor(ANDROID_SENSOR_LINEAR_ACCELERATION, 1);
   result |= inv_enable_sensor(ANDROID_SENSOR_ROTATION_VECTOR, 1);
-  unsigned short data_output_delay_ms = (unsigned short)( 1000 / config.output_data_rate);
+  unsigned short data_output_delay_ms = (unsigned short)(1000 / config.output_data_rate);
   result |= inv_set_odr(ANDROID_SENSOR_GYROSCOPE, data_output_delay_ms);
   result |= inv_set_odr(ANDROID_SENSOR_LINEAR_ACCELERATION, data_output_delay_ms);
   result |= inv_set_odr(ANDROID_SENSOR_ROTATION_VECTOR, data_output_delay_ms);
@@ -184,46 +180,43 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
   short int_read_back = 0;
   unsigned short header = 0, header2 = 0;
   int data_left_in_fifo = 0;
-  short short_data[3] = { 0 };
-  signed long  long_data[3] = { 0 };
-  signed long  long_quat[3] = { 0 };
-  unsigned short sample_cnt_array[GENERAL_SENSORS_MAX] = { 0 };
+  short short_data[3] = {0};
+  signed long long_data[3] = {0};
+  signed long long_quat[3] = {0};
+  unsigned short sample_cnt_array[GENERAL_SENSORS_MAX] = {0};
 
   float accel_float[3], rv_float[4];
 
   // Process Incoming INT and Get/Pack FIFO Data
   inv_identify_interrupt(&int_read_back);
   if (int_read_back & (BIT_MSG_DMP_INT | BIT_MSG_DMP_INT_0 | BIT_MSG_DMP_INT_2 | BIT_MSG_DMP_INT_5)) {
-
     // Read FIFO contents and parse it.
     unsigned short total_sample_cnt = 0;
 
     do {
-      if (inv_mems_fifo_swmirror(&data_left_in_fifo, &total_sample_cnt, sample_cnt_array))
-        break;
+      if (inv_mems_fifo_swmirror(&data_left_in_fifo, &total_sample_cnt, sample_cnt_array)) break;
 
-      while (total_sample_cnt--){
-        if (inv_mems_fifo_pop(&header, &header2, &data_left_in_fifo))
-          break;
+      while (total_sample_cnt--) {
+        if (inv_mems_fifo_pop(&header, &header2, &data_left_in_fifo)) break;
 
         if (header & ACCEL_SET) {
           float scale;
           dmp_get_accel(long_data);
-          scale = (1 << inv_get_accel_fullscale()) * 2.f / (1L << 30); // Convert from raw units to g's
-          scale *= 9.80665f; // Convert to m/s^2
+          scale = (1 << inv_get_accel_fullscale()) * 2.f / (1L << 30);  // Convert from raw units to g's
+          scale *= 9.80665f;                                            // Convert to m/s^2
           inv_convert_dmp3_to_body(long_data, scale, accel_float);
-        } // header & ACCEL_SET
+        }  // header & ACCEL_SET
 
         if (header & GYRO_SET) {
           float scale;
-          signed long  raw_data[3] = { 0 };
-          signed long  bias_data[3] = { 0 };
-          float gyro_bias_float[3] = { 0 };
-          float gyro_raw_float[3] = { 0 };
+          signed long raw_data[3] = {0};
+          signed long bias_data[3] = {0};
+          float gyro_bias_float[3] = {0};
+          float gyro_raw_float[3] = {0};
 
           dmp_get_raw_gyro(short_data);
-          scale = (1 << inv_get_gyro_fullscale()) * 250.f / (1L << 15); // From raw to dps
-          scale *= (float)M_PI / 180.f; // Convert to radian.
+          scale = (1 << inv_get_gyro_fullscale()) * 250.f / (1L << 15);  // From raw to dps
+          scale *= (float)M_PI / 180.f;                                  // Convert to radian.
           raw_data[0] = (long)short_data[0];
           raw_data[1] = (long)short_data[1];
           raw_data[2] = (long)short_data[2];
@@ -231,8 +224,8 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
 
           // We have gyro bias data in raw units, scaled by 2^5
           dmp_get_gyro_bias(short_data);
-          scale = (1 << inv_get_gyro_fullscale()) * 250.f / (1L << 20); // From raw to dps
-          scale *= (float)M_PI / 180.f; // Convert to radian.
+          scale = (1 << inv_get_gyro_fullscale()) * 250.f / (1L << 20);  // From raw to dps
+          scale *= (float)M_PI / 180.f;                                  // Convert to radian.
           bias_data[0] = (long)short_data[0];
           bias_data[1] = (long)short_data[1];
           bias_data[2] = (long)short_data[2];
@@ -244,7 +237,7 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
           raw_data[2] = raw_data[2] << 5;
           inv_mems_dmp_get_calibrated_gyro(long_data, raw_data, bias_data);
           inv_convert_dmp3_to_body(long_data, scale, gyro_float);
-        } // header & GYRO_SET
+        }  // header & GYRO_SET
 
         if (header & QUAT6_SET) {
           dmp_get_6quaternion(long_quat);
@@ -258,14 +251,14 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
           inv_mems_augmented_sensors_get_gravity(gravityQ16, temp_gravityQ16);
 
           /*Calculate Linear Acceleration*/
-          accelQ16[0] = (int32_t)((float)(accel_float[0])*(1ULL << 16) + ((accel_float[0] >= 0) - 0.5f));
-          accelQ16[1] = (int32_t)((float)(accel_float[1])*(1ULL << 16) + ((accel_float[1] >= 0) - 0.5f));
-          accelQ16[2] = (int32_t)((float)(accel_float[2])*(1ULL << 16) + ((accel_float[2] >= 0) - 0.5f));
+          accelQ16[0] = (int32_t)((float)(accel_float[0]) * (1ULL << 16) + ((accel_float[0] >= 0) - 0.5f));
+          accelQ16[1] = (int32_t)((float)(accel_float[1]) * (1ULL << 16) + ((accel_float[1] >= 0) - 0.5f));
+          accelQ16[2] = (int32_t)((float)(accel_float[2]) * (1ULL << 16) + ((accel_float[2] >= 0) - 0.5f));
           inv_mems_augmented_sensors_get_linearacceleration(linAccQ16, gravityQ16, accelQ16);
           linAccFloat[0] = inv_q16_to_float(linAccQ16[0]);
           linAccFloat[1] = inv_q16_to_float(linAccQ16[1]);
           linAccFloat[2] = inv_q16_to_float(linAccQ16[2]);
-        } // header & QUAT6_SET
+        }  // header & QUAT6_SET
 
         if (header & QUAT9_SET) {
           dmp_get_9quaternion(long_quat);
@@ -276,15 +269,15 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
           quat_float[2] = rv_float[2];
           quat_float[3] = -rv_float[1];
 
-        } // header & QUAT9_SET
+        }  // header & QUAT9_SET
 
-      } // total_sample_cnt
+      }  // total_sample_cnt
 
-      if (!data_left_in_fifo)
-        break;
+      if (!data_left_in_fifo) break;
     } while (data_left_in_fifo);
   }
-  else return;
+  else
+    return;
 }
 
 int fimu_calibrate_DMP(void)
@@ -292,11 +285,12 @@ int fimu_calibrate_DMP(void)
   LOG_DEBUG("Selftest started.\r\n");
 
   int self_test_result = 0;
-  int dmp_bias[9] = { 0 };
+  int dmp_bias[9] = {0};
   self_test_result = inv_mems_run_selftest();
 
   LOG_DEBUG("Selftest...Done...Ret=%d\r\n", self_test_result);
-  LOG_DEBUG("Result: Compass=%s, Accel=%s, Gyro=%s\r\n", (self_test_result & 0x04) ? "Pass" : "Fail", (self_test_result & 0x02) ? "Pass" : "Fail", (self_test_result & 0x01) ? "Pass" : "Fail");
+  LOG_DEBUG("Result: Compass=%s, Accel=%s, Gyro=%s\r\n", (self_test_result & 0x04) ? "Pass" : "Fail",
+            (self_test_result & 0x02) ? "Pass" : "Fail", (self_test_result & 0x01) ? "Pass" : "Fail");
   LOG_DEBUG("Accel Average (LSB@FSR 2g)\r\n");
   LOG_DEBUG("\tX:%d Y:%d Z:%d\r\n", a_average[0], a_average[1], a_average[2]);
   LOG_DEBUG("Gyro Average (LSB@FSR 250dps)\r\n");
@@ -306,10 +300,10 @@ int fimu_calibrate_DMP(void)
     return FLN_ERR;
   }
 
-  dmp_bias[0] = a_average[0] * (1 << 11);   // Change from LSB to format expected by DMP
+  dmp_bias[0] = a_average[0] * (1 << 11);  // Change from LSB to format expected by DMP
   dmp_bias[1] = a_average[1] * (1 << 11);
-  dmp_bias[2] = (a_average[2] - 16384) * (1 << 11); //remove the gravity and scale (FSR=2 in selftest)
-  int scale = 2000 / 250; //self-test uses 250dps FSR, main() set the FSR to 2000dps
+  dmp_bias[2] = (a_average[2] - 16384) * (1 << 11);  // remove the gravity and scale (FSR=2 in selftest)
+  int scale = 2000 / 250;                            // self-test uses 250dps FSR, main() set the FSR to 2000dps
   dmp_bias[3] = g_average[0] * (1 << 15) / scale;
   dmp_bias[4] = g_average[1] * (1 << 15) / scale;
   dmp_bias[5] = g_average[2] * (1 << 15) / scale;
@@ -328,13 +322,14 @@ int fimu_calibrate_offset(void)
   int ret, i;
 
   ret = reset_offset_regs();
-    if (ret) {
-      LOG_DEBUG("Failed to reset offset registers\r\n");
-    }
+  if (ret) {
+    LOG_DEBUG("Failed to reset offset registers\r\n");
+  }
   self_test_result = inv_mems_run_selftest();
 
   LOG_DEBUG("Selftest...Done...Ret=%d\r\n", self_test_result);
-  LOG_DEBUG("Result: Compass=%s, Accel=%s, Gyro=%s\r\n", (self_test_result & 0x04) ? "Pass" : "Fail", (self_test_result & 0x02) ? "Pass" : "Fail", (self_test_result & 0x01) ? "Pass" : "Fail");
+  LOG_DEBUG("Result: Compass=%s, Accel=%s, Gyro=%s\r\n", (self_test_result & 0x04) ? "Pass" : "Fail",
+            (self_test_result & 0x02) ? "Pass" : "Fail", (self_test_result & 0x01) ? "Pass" : "Fail");
   LOG_DEBUG("Accel Average (LSB@FSR 2g)\r\n");
   LOG_DEBUG("\tX:%d Y:%d Z:%d\r\n", a_average[0], a_average[1], a_average[2]);
   LOG_DEBUG("Gyro Average (LSB@FSR 250dps)\r\n");
@@ -350,7 +345,8 @@ int fimu_calibrate_offset(void)
       // assume the device is put horizontal and z axis shows 1g during self-test.
       // self-test uses 2g FSR and 1g = 16384LSB
       accel_offset[i] = a_average[i] - 16384;
-    } else {
+    }
+    else {
       accel_offset[i] = a_average[i];
     }
     // gyro FSR is 250dps for self-test
@@ -361,7 +357,8 @@ int fimu_calibrate_offset(void)
   if (ret) {
     LOG_DEBUG("Failed to update offset registers\r\n");
     return FLN_ERR;
-  } else {
+  }
+  else {
     LOG_DEBUG("\r\nSetting the offset registers with one-axis factory calibration values...done\r\n");
     self_test_done = 1;
     return FLN_OK;
@@ -384,21 +381,11 @@ void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
 
   vTaskDelay(200);
 
-  for(int i=0; i<samples; i++)
-  {
+  for (int i = 0; i < samples; i++) {
     fimu_fifo_handler(test_gyro, test_accel, test_quat);
     LOG_DEBUG("Reading %d: gyro: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f quat: %7.4f, %7.4f, %7.4f, %7.4f\r\n",
-      i,
-      test_gyro[0],
-      test_gyro[1],
-      test_gyro[2],
-      test_accel[0],
-      test_accel[1],
-      test_accel[2],
-      test_quat[0],
-      test_quat[1],
-      test_quat[2],
-      test_quat[3]);
+              i, test_gyro[0], test_gyro[1], test_gyro[2], test_accel[0], test_accel[1], test_accel[2], test_quat[0],
+              test_quat[1], test_quat[2], test_quat[3]);
 
     gyro_samples[0] += test_gyro[0];
     gyro_samples[1] += test_gyro[1];
@@ -414,29 +401,20 @@ void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
     vTaskDelay(10);
   }
 
-   gyro_bias[0] = gyro_samples[0]/samples;
-   gyro_bias[1] = gyro_samples[1]/samples;
-   gyro_bias[2] = gyro_samples[2]/samples;
+  gyro_bias[0] = gyro_samples[0] / samples;
+  gyro_bias[1] = gyro_samples[1] / samples;
+  gyro_bias[2] = gyro_samples[2] / samples;
 
-   accel_bias[0] = accel_samples[0]/samples;
-   accel_bias[1] = accel_samples[1]/samples;
-   accel_bias[2] = accel_samples[2]/samples;
+  accel_bias[0] = accel_samples[0] / samples;
+  accel_bias[1] = accel_samples[1] / samples;
+  accel_bias[2] = accel_samples[2] / samples;
 
-   quat_bias[0] = quat_samples[0]/samples;
-   quat_bias[1] = quat_samples[1]/samples;
-   quat_bias[2] = quat_samples[2]/samples;
-   quat_bias[3] = quat_samples[3]/samples;
+  quat_bias[0] = quat_samples[0] / samples;
+  quat_bias[1] = quat_samples[1] / samples;
+  quat_bias[2] = quat_samples[2] / samples;
+  quat_bias[3] = quat_samples[3] / samples;
 
-   LOG_DEBUG("Bias: gyro: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f quat: %7.4f, %7.4f, %7.4f, %7.4f\r\n",
-      gyro_bias[0],
-      gyro_bias[1],
-      gyro_bias[2],
-      accel_bias[0],
-      accel_bias[1],
-      accel_bias[2],
-      quat_bias[0],
-      quat_bias[1],
-      quat_bias[2],
-      quat_bias[3]);
+  LOG_DEBUG("Bias: gyro: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f quat: %7.4f, %7.4f, %7.4f, %7.4f\r\n",
+            gyro_bias[0], gyro_bias[1], gyro_bias[2], accel_bias[0], accel_bias[1], accel_bias[2], quat_bias[0],
+            quat_bias[1], quat_bias[2], quat_bias[3]);
 }
-
