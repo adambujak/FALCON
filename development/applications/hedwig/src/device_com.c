@@ -52,8 +52,7 @@ static inline void rf_process(void)
 void decoder_callback(uint8_t *data, fp_type_t packetType)
 {
   switch (packetType) {
-    case FPT_FLIGHT_CONTROL_COMMAND:
-    {
+    case FPT_FLIGHT_CONTROL_COMMAND: {
       fpc_flight_control_t controlInput = {};
       fpc_flight_control_decode(data, &controlInput);
       flight_control_set_command_data(&controlInput);
@@ -62,15 +61,12 @@ void decoder_callback(uint8_t *data, fp_type_t packetType)
                 controlInput.fcsControlCmd.pitch,
                 controlInput.fcsControlCmd.roll,
                 controlInput.fcsControlCmd.alt);
-    }
-    break;
-    case FPT_MODE_COMMAND:
-    {
+    } break;
+    case FPT_MODE_COMMAND: {
       fpc_mode_t mode = {};
       fpc_mode_decode(data, &mode);
       LOG_INFO("MODE COMMAND: %d\r\n", mode.mode);
-    }
-    break;
+    } break;
     default:
       break;
   }
