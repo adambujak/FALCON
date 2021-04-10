@@ -3,7 +3,7 @@
 printHelp ()
 {
     echo "###################### Commands ######################"
-    echo "Set environment variable JDRF_CLANG_FORMAT to the desired clang-format executable"
+    echo "Set environment variable FLN_CLANG_FORMAT to the desired clang-format executable"
     echo "### -r, --recursive -> Run recursively in specified folder"
     echo "### -g, --git-diff-master -> Run only on files that have changed since origin/master"
     echo "### -i, --inplace -> Edit file inplace (overwrite existing file)"
@@ -218,9 +218,9 @@ assertMinimumClangFormatVersion()
 ##################################################################
 getClangFormatExe()
 {
-    if [ "0" != "${#JDRF_CLANG_FORMAT}" ];
+    if [ "0" != "${#FLN_CLANG_FORMAT}" ];
     then
-        CLANG_FORMAT_EXE="${JDRF_CLANG_FORMAT}"
+        CLANG_FORMAT_EXE="${FLN_CLANG_FORMAT}"
     else
         CLANG_FORMAT_EXE="clang-format"
     fi
