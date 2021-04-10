@@ -8,18 +8,9 @@
 #include "fp_encode.h"
 
 #include "frf.h"
+#include "fifo.h"
 #include "gpio.h"
 #include "spi.h"
-
-#define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
-
-typedef struct {
-  uint8_t *buffer;
-  uint32_t write_index;
-  uint32_t read_index;
-  uint32_t bytes_available;
-  uint32_t size;
-} fifo_t;
 
 #define RF_RX_BUFFER_SIZE 512
 #define RF_TX_BUFFER_SIZE 512
@@ -34,40 +25,6 @@ static fifo_t tx_fifo;
 
 static uint8_t hedwig_address[RADIO_ADDRESS_LENGTH];
 static uint8_t albus_address[RADIO_ADDRESS_LENGTH];
-
-static void fifo_init(fifo_t *fifo, uint8_t *buffer, uint32_t size)
-{
-  ASSERT(IS_POWER_OF_TWO(size));
-  fifo->buffer = buffer;
-  fifo->size = size;
-  fifo->write_index = 0;
-  fifo->read_index = 0;
-  fifo->bytes_available = 0;
-}
-
-static void fifo_push(fifo_t *fifo, uint8_t *buffer, uint32_t length)
-{
-  for (uint32_t i = 0; i < length; i++) {
-    fifo->buffer[fifo->write_index] = buffer[i];
-    fifo->write_index = (fifo->write_index + 1) & (fifo->size - 1);
-  }
-
-  fifo->bytes_available = (fifo->bytes_available + length) & (fifo->size - 1);
-}
-
-static int fifo_pop(fifo_t *fifo, uint8_t *dest, uint32_t length)
-{
-  if (length > fifo->bytes_available) {
-    return 0;
-  }
-
-  for (uint32_t i = 0; i < length; i++) {
-    dest[i] = fifo->buffer[fifo->read_index];
-    fifo->read_index = (fifo->read_index + 1) & (fifo->size - 1);
-  }
-  fifo->bytes_available -= length;
-  return length;
-}
 
 static inline void rf_spi_transfer(void *context,
                                    uint8_t *tx_buf, uint16_t tx_len,
@@ -143,8 +100,8 @@ void radio_init(void)
   radio_get_hedwig_address(hedwig_address);
   radio_get_albus_address(albus_address);
 
-  fifo_init(&rx_fifo, rx_buffer, RF_RX_BUFFER_SIZE);
-  fifo_init(&tx_fifo, tx_buffer, RF_TX_BUFFER_SIZE);
+  ASSERT(fifo_init(&rx_fifo, rx_buffer, RF_RX_BUFFER_SIZE) == 0);
+  ASSERT(fifo_init(&tx_fifo, tx_buffer, RF_TX_BUFFER_SIZE) == 0);
 
   frf_config_t config = {
     .transferFunc = rf_spi_transfer,
