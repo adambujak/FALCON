@@ -67,6 +67,7 @@ C_SOURCES =  \
 	$(PROJ_ROOT)/src/radio.c \
 	$(PROJ_ROOT)/src/stm32f4xx_it.c \
 	$(PROJ_ROOT)/src/system_stm32f4xx.c \
+	$(LIB_ROOT)/fast_fifo/fifo.c \
 	$(COMMON_ROOT)/logger/logger.c \
 	$(COMMON_ROOT)/system_time/system_time.c \
 	$(RADIO_SOURCES) \
@@ -78,6 +79,7 @@ C_SOURCES =  \
 C_INCLUDES += \
 	-I$(HAL_ROOT)/Inc \
 	-I$(LIB_ROOT)/frf/ \
+	-I$(LIB_ROOT)/fast_fifo/ \
 	-I$(DRV_ROOT) \
 	-I$(FALCON_PACKET_ROOT) \
 	-I$(LIBCRC_ROOT)/include \
