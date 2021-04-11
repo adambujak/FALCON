@@ -98,6 +98,7 @@ C_SOURCES = \
 	$(PROJ_ROOT)/src/motors.c \
 	$(PROJ_ROOT)/src/sensors.c \
 	$(PROJ_ROOT)/src/flight_control.c \
+	$(LIB_ROOT)/fast_fifo/fifo.c \
 	$(COMMON_ROOT)/logger/logger.c \
 	$(COMMON_ROOT)/system_time/system_time.c \
 	$(FALCON_PACKET_SOURCES) \
@@ -123,6 +124,7 @@ C_INCLUDES += \
 	-I$(HAL_ROOT)/Inc \
 	-I$(FLN_BSP_ROOT)/ \
 	-I$(LIB_ROOT)/frf/ \
+	-I$(LIB_ROOT)/fast_fifo/ \
 	-I$(FALCON_PACKET_ROOT) \
 	-I$(LIBCRC_ROOT)/include \
 	-I$(GRINBUF_ROOT)/ \
