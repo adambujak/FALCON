@@ -41,3 +41,28 @@ int fifo_pop(fifo_t *fifo, uint8_t *dest, uint32_t length)
   fifo->bytes_available -= length;
   return length;
 }
+
+int fifo_peek(fifo_t *fifo, uint8_t *dest, uint32_t length)
+{
+  if (length > fifo->bytes_available) {
+    return 0;
+  }
+  uint32_t read_index = fifo->read_index;
+
+  for (uint32_t i = 0; i < length; i++) {
+    dest[i] = fifo->buffer[read_index];
+    read_index = (read_index + 1) & (fifo->size - 1);
+  }
+  return length;
+}
+
+void fifo_drop(fifo_t *fifo, uint32_t length)
+{
+  fifo->read_index = (fifo->read_index + length) & (fifo->size - 1);
+  if (length > fifo->bytes_available) {
+    fifo->bytes_available = 0;
+  }
+  else {
+    fifo->bytes_available = fifo->bytes_available - length;
+  }
+}

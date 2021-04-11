@@ -35,4 +35,19 @@ void fifo_push(fifo_t *fifo, uint8_t *buffer, uint32_t length);
 */
 int fifo_pop(fifo_t *fifo, uint8_t *dest, uint32_t length);
 
+/** Read data out of fifo without removing data
+ * @param  fifo - pointer to fifo
+ * @param  dest - where to write data from fifo
+ * @param  length - number of bytes to read
+ * @retval number of bytes read
+*/
+int fifo_peek(fifo_t *fifo, uint8_t *dest, uint32_t length);
+
+/** Drop data from fifo
+ * @param  fifo - pointer to fifo
+ * @param  length - number of bytes to drop
+ * @retval None
+*/
+void fifo_drop(fifo_t *fifo, uint32_t length);
+
 #endif // FAST_FIFO_H
