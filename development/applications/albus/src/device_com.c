@@ -35,18 +35,7 @@ static void rf_enqueue_packet(uint8_t *data, uint8_t length);
 
 static void decoder_callback(uint8_t *data, fp_type_t packet_type)
 {
-  switch (packet_type) {
-    //case FPT_FLIGHT_CONTROL_COMMAND: {
-    //  fpc_flight_control_t control = {{0}};
-    //  fpc_flight_control_decode(data, &control);
-    //  LOG_DEBUG("received motor cmd\r\n");
-    //  LOG_DEBUG("MOTOR COMMAND: %f, %f, %f, %f\r\n", control.fcsControlCmd.yaw, control.fcsControlCmd.pitch,
-    //            control.fcsControlCmd.roll, control.fcsControlCmd.alt);
-    //}
-    default:
-      rf_enqueue_packet(data, fp_get_packet_length(packet_type));
-      break;
-  }
+  rf_enqueue_packet(data, fp_get_packet_length(packet_type));
 }
 
 static void decode_frame(uint8_t *data, uint32_t length)
@@ -114,6 +103,7 @@ static void rf_tx(void)
       memset(frame_buffer + frame_length, 0, FRF_PACKET_SIZE - frame_length);
       frame_length = FRF_PACKET_SIZE;
     }
+
     radio_data_send(frame_buffer, frame_length);
     radio_manager.last_tx_time = now;
   }
@@ -136,37 +126,12 @@ static void rf_process(void)
   }
 }
 
-void temp_send(void)
-{
-  static uint32_t time = 0;
-  static uint8_t buffer[MAX_FRAME_SIZE];
-
-  if (system_time_cmp_ms(time, system_time_get()) > 300) {
-
-    ff_encoder_t temp_encoder;
-    ff_encoder_init(&temp_encoder);
-    ff_encoder_set_buffer(&temp_encoder, buffer);
-
-    fpc_flight_control_t control = {{1.2, 1.4, 1.6, 1.8}};
-
-    if (ff_encoder_append_packet(&temp_encoder, &control, FPT_FLIGHT_CONTROL_COMMAND) == FLN_ERR) {
-      error_handler();
-    }
-
-    ff_encoder_append_footer(&temp_encoder);
-    decode_frame(buffer, MAX_FRAME_SIZE);
-    time = system_time_get();
-  }
-}
-
-
 void device_com_task(void *pvParameters)
 {
   LOG_DEBUG("Device com task started\r\n");
 
   while (1) {
     handle_uart();
-    temp_send();
     rf_process();
   }
 }
