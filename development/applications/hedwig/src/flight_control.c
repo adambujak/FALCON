@@ -67,7 +67,6 @@ static inline void unlock_output_data(void)
   xSemaphoreGive(outputDataMutex);
 }
 
-
 static inline void createSensorDataMutex(void)
 {
   sensorDataMutex = xSemaphoreCreateMutex();
