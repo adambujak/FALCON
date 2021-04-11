@@ -19,6 +19,8 @@ typedef struct {
 void ff_encoder_init(ff_encoder_t *encoder);
 void ff_encoder_set_buffer(ff_encoder_t *encoder, uint8_t *buffer);
 int ff_encoder_append_packet(ff_encoder_t *encoder, void *packet, fp_type_t packetType);
-void ff_encoder_append_footer(ff_encoder_t *encoder);
+int ff_encoder_append_data(ff_encoder_t *encoder, uint8_t *data, uint32_t length);
+int ff_encoder_append_footer(ff_encoder_t *encoder);
+uint32_t ff_encoder_get_remaining_bytes(ff_encoder_t *encoder);
 
 #endif // FP_ENCODER_H
