@@ -1,6 +1,7 @@
 #include "device_com.h"
 
 #include "radio.h"
+#include "radio_common.h"
 
 #include "falcon_packet.h"
 #include "ff_encoder.h"
@@ -86,7 +87,7 @@ void device_com_setup(void)
 {
   radio_init();
   radio_watchdog_timer = xTimerCreate("radio watchdog",
-                         RADIO_WATCHDOG_TIMEOUT,
+                         RADIO_WATCHDOG_PERIOD,
                          pdTRUE,
                          0,
                          radio_watchdog_timeout);
