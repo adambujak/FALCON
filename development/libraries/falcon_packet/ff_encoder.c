@@ -26,7 +26,7 @@ int ff_encoder_append_packet(ff_encoder_t *encoder, void *packet, fp_type_t pack
 {
   uint8_t packetLength = fp_get_packet_length(packetType) + PACKET_HEADER_SIZE;
 
-  if ((encoder->writeIndex + packetType) > MAX_FRAME_SIZE) {
+  if ((encoder->writeIndex + packetLength) > (MAX_FRAME_SIZE - FRAME_FOOTER_SIZE)) {
     return -1;
   }
 

@@ -27,6 +27,9 @@ void fp_decoder_decode(uint8_t *buffer, uint32_t length, fp_decoder_cb_t callbac
           index += PACKET_HEADER_SIZE;
           state = FP_DECODER_STATE_PACKET_PARSE_DATA;
         }
+        else {
+          index++;
+        }
       }
       break;
 
