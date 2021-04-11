@@ -25,7 +25,7 @@ void ff_encoder_set_buffer(ff_encoder_t *encoder, uint8_t *buffer)
 
 int ff_encoder_append_packet(ff_encoder_t *encoder, void *packet, fp_type_t packetType)
 {
-  uint8_t packetLength = fp_get_packet_length(packetType) + PACKET_HEADER_SIZE;
+  uint8_t packetLength = fp_get_packet_length(packetType);
 
   if ((encoder->writeIndex + packetLength) > (MAX_FRAME_SIZE - FRAME_FOOTER_SIZE)) {
     return -1;
