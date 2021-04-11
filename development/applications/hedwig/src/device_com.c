@@ -56,6 +56,7 @@ void decoder_callback(uint8_t *data, fp_type_t packetType)
     {
       fpc_flight_control_t controlInput = {};
       fpc_flight_control_decode(data, &controlInput);
+      flight_control_set_command_data(&controlInput);
       LOG_INFO("CONTROL INPUT: %f, %f, %f, %f\r\n",
                 controlInput.fcsControlCmd.yaw,
                 controlInput.fcsControlCmd.pitch,

@@ -91,8 +91,11 @@ static void sensors_task(void *pvParameters)
         fbaro_get_altitude(&alt_data);
         baro_delay_count = 0;
       }
+      baro_delay_count++;
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
+
+      rtos_delay_ms(1);
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");

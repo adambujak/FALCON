@@ -16,7 +16,7 @@
 #define PRIORITYGROUP          ((uint32_t)0x00000003)
 
 #define INCLUDE_LEDS           0
-#define INCLUDE_MOTORS         0
+#define INCLUDE_MOTORS         1
 #define INCLUDE_SENSORS        1
 #define INCLUDE_DEVICE_COM     1
 #define INCLUDE_FLIGHT_CONTROL 1
