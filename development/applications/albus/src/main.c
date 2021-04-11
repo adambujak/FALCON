@@ -16,14 +16,16 @@
 
 static bool os_started = false;
 
-void delay_us(uint32_t us) {
+void delay_us(uint32_t us)
+{
   uint32_t start_time = system_time_get();
-  while(system_time_cmp_us(start_time, system_time_get()) < us);
+  while (system_time_cmp_us(start_time, system_time_get()) < us);
 }
 
-void delay_ms(uint32_t ms) {
+void delay_ms(uint32_t ms)
+{
   uint32_t start_time = system_time_get();
-  while(system_time_cmp_ms(start_time, system_time_get()) < ms);
+  while (system_time_cmp_ms(start_time, system_time_get()) < ms);
 }
 
 void rtos_delay_ms(uint32_t ms)

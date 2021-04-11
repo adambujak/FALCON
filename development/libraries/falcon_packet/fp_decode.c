@@ -103,26 +103,26 @@ static inline void decode_ft_fcs_control_input(uint8_t *buffer, ft_fcs_control_i
 
 void fpc_mode_decode(uint8_t *buffer, fpc_mode_t *packet)
 {
-  decode_fe_falcon_mode(&buffer[0], &packet->mode);
+  decode_fe_falcon_mode(&buffer[3], &packet->mode);
 }
 
 void fpq_mode_decode(uint8_t *buffer, fpq_mode_t *packet)
 {
-  decode_fe_falcon_mode(&buffer[0], &packet->mode);
+  decode_fe_falcon_mode(&buffer[3], &packet->mode);
 }
 
 void fpr_mode_decode(uint8_t *buffer, fpr_mode_t *packet)
 {
-  decode_fe_falcon_mode(&buffer[0], &packet->mode);
+  decode_fe_falcon_mode(&buffer[3], &packet->mode);
 }
 
 void fpc_flight_control_decode(uint8_t *buffer, fpc_flight_control_t *packet)
 {
-  decode_ft_fcs_control_input(&buffer[0], &packet->fcsControlCmd);
+  decode_ft_fcs_control_input(&buffer[3], &packet->fcsControlCmd);
 }
 
 void fpr_status_decode(uint8_t *buffer, fpr_status_t *packet)
 {
-  decode_ft_status_data(&buffer[0], &packet->status);
+  decode_ft_status_data(&buffer[3], &packet->status);
 }
 

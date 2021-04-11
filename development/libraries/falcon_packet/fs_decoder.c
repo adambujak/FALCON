@@ -32,18 +32,18 @@ void fs_decoder_decode(fs_decoder_t *decoder, uint8_t *buffer, uint32_t length)
       case FS_DECODER_STATE_FRAME_PARSE_HEADER: {
         uint8_t frameHeader[FRAME_HEADER_SIZE] = { 0 };
         uint32_t bytesRead = grinbuf_peek(&decoder->ringbuf, frameHeader, FRAME_HEADER_SIZE);
-        
+
         if (bytesRead != FRAME_HEADER_SIZE) {
           /* Not enough data, try again when there's more */
           return;
         }
-        
+
         if (frameHeader[0] != FRAME_DELIMITER1) {
           /* This ain't it chief, pop it off and retry next time */
           grinbuf_pop(&decoder->ringbuf, 1);
           break;
         }
-        
+
         if (frameHeader[1] != FRAME_DELIMITER2) {
           /* This ain't it either chief, pop off first byte and retry next time */
           grinbuf_pop(&decoder->ringbuf, 1);
@@ -62,10 +62,10 @@ void fs_decoder_decode(fs_decoder_t *decoder, uint8_t *buffer, uint32_t length)
           reset_frame(decoder);
           break;
         }
-        
+
         uint32_t bytesAvailable = grinbuf_getBytesUsed(&decoder->ringbuf);
         uint32_t bytesToRead = decoder->currentFrameSize - FRAME_HEADER_SIZE;
-        
+
         if (bytesAvailable < bytesToRead) {
           /* Not enough data, try again when there's more */
           return;
@@ -75,9 +75,10 @@ void fs_decoder_decode(fs_decoder_t *decoder, uint8_t *buffer, uint32_t length)
         uint8_t frameDataSize = decoder->currentFrameSize - FRAME_HEADER_SIZE - FRAME_FOOTER_SIZE;
 
         uint32_t frameDataBytesRead = grinbuf_read(&decoder->ringbuf, frameData, frameDataSize);
-        
+
         if (frameDataBytesRead != frameDataSize) {
           /* This should never happen */
+          reset_frame(decoder);
           return;
         }
 
@@ -86,9 +87,10 @@ void fs_decoder_decode(fs_decoder_t *decoder, uint8_t *buffer, uint32_t length)
 
         if (frameFooterBytesRead != FRAME_FOOTER_SIZE) {
           /* This should never happen */
+          reset_frame(decoder);
           return;
         }
-        
+
         uint16_t decodedCRC = 0;
         decodedCRC |= (frameFooter[0] << 0);
         decodedCRC |= (frameFooter[1] << 8);
@@ -103,7 +105,7 @@ void fs_decoder_decode(fs_decoder_t *decoder, uint8_t *buffer, uint32_t length)
         reset_frame(decoder);
       }
       break;
-      
+
       default: {
         decoder->state = FS_DECODER_STATE_FRAME_PARSE_DATA;
       }

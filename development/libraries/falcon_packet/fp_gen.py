@@ -61,7 +61,7 @@ def python_get_packet_size_str():
     output += "\n"
 
     output += "def get_packet_size(packetType):"
-    output += "\n   return packet_size_lookup_dict[packetType]"
+    output += "\n   return packet_size_lookup_dict[packetType] + PACKET_HEADER_SIZE"
     output += "\n"
     output += "\n"
 
@@ -404,7 +404,7 @@ def get_packet_functions():
     output += "}\n\n"
     output += "uint8_t fp_get_packet_length(fp_type_t packetType)\n"
     output += "{\n"
-    output += "  return packet_size_lookup_table[packetType];\n"
+    output += "  return packet_size_lookup_table[packetType] + PACKET_HEADER_SIZE;\n"
     output += "}\n\n"
     return output
 
@@ -605,7 +605,7 @@ def get_packet_decode_function(packet):
     output = ""
     output += "{}\n".format(get_packet_decode_function_name(packet))
     output += "{\n"
-    count = 0
+    count = PACKET_HEADER_SIZE
     for field in packet.fields:
         output += "  {}(&buffer[{}], &packet->{});\n".format(get_type_decode_function_name(field.varType), count, field.name)
         count += field.varType.size

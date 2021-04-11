@@ -16,6 +16,6 @@ fp_type_t fp_get_packet_type(uint8_t packetID)
 
 uint8_t fp_get_packet_length(fp_type_t packetType)
 {
-  return packet_size_lookup_table[packetType];
+  return packet_size_lookup_table[packetType] + PACKET_HEADER_SIZE;
 }
 

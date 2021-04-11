@@ -28,7 +28,7 @@ packet_size_lookup_dict = {
 };
 
 def get_packet_size(packetType):
-   return packet_size_lookup_dict[packetType]
+   return packet_size_lookup_dict[packetType] + PACKET_HEADER_SIZE
 
 def encode_header(dest, packetType, offset):
     struct.pack_into('<B', dest, offset, PACKET_DELIMITER1)
