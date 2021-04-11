@@ -91,18 +91,11 @@ static void sensors_task(void *pvParameters)
         fbaro_get_altitude(&alt_data);
         baro_delay_count = 0;
       }
-
-      LOG_DEBUG("accel: %7.4f, %7.4f, %7.4f gyro: %7.4f, %7.4f, %7.4f alt: %7.4f\r\n",
-    		  accel_data[0],
-			  accel_data[1],
-			  accel_data[2],
-			  gyro_data[0],
-			  gyro_data[1],
-			  gyro_data[2],
-          	  alt_data);
-//      LOG_DEBUG("s\r\n");
+      baro_delay_count++;
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
+
+      rtos_delay_ms(1);
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");

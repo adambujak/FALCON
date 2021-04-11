@@ -336,7 +336,8 @@ static void flight_control_task(void *pvParameters)
             rtY_State_Estim.p,
             rtY_State_Estim.q,
             rtY_State_Estim.r);
-//        LOG_DEBUG("f\r\n");
+
+        rtos_delay_ms(1);
       }
       else {
         LOG_DEBUG("timer notif not received\r\n");

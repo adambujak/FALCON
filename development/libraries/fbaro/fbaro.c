@@ -97,5 +97,7 @@ int fbaro_calibrate(void)
 
   MPL3115A2_OutputSampleRate(barometer.sample_setting);
 
+  rtos_delay_ms(50);
+
   return FLN_OK;
 }
