@@ -5,5 +5,6 @@
 
 void device_com_setup(void);
 void device_com_start(void);
+void device_com_send_packet(uint8_t *data, uint8_t length);
 
 #endif // DEVICE_COM_H
