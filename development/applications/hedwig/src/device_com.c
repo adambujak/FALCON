@@ -17,17 +17,17 @@
 static fs_decoder_t decoder;
 
 static uint8_t decode_buffer[BUFFER_SIZE];
-static TimerHandle_t radio_reset_timer;
+static TimerHandle_t radio_watchdog_timer;
 
-static void radio_reset_timeout(TimerHandle_t xTimer)
+static void radio_watchdog_timeout(TimerHandle_t xTimer)
 {
   LOG_WARN("Radio RESET TIMEOUT!!\r\n");
   radio_reset();
 }
 
-static void radio_reset_timer_pet(void)
+static void radio_watchdog_pet(void)
 {
-  BaseType_t reset_status = xTimerReset(radio_reset_timer, 0);
+  BaseType_t reset_status = xTimerReset(radio_watchdog_timer, 0);
   if (reset_status != pdPASS) {
     LOG_DEBUG("radio reset timer reset failed\r\n");
   }
@@ -44,7 +44,7 @@ static inline void rf_process(void)
 
   byte_cnt = min(byte_cnt, BUFFER_SIZE);
 
-  radio_reset_timer_pet();
+  radio_watchdog_pet();
   radio_data_get(decode_buffer, byte_cnt);
   fs_decoder_decode(&decoder, decode_buffer, byte_cnt);
 }
@@ -85,7 +85,12 @@ static void device_com_task(void *pvParameters)
 void device_com_setup(void)
 {
   radio_init();
-  radio_reset_timer = xTimerCreate("reset timer", 1000, pdTRUE, 0, radio_reset_timeout);
+  radio_watchdog_timer = xTimerCreate("radio watchdog",
+                         RADIO_WATCHDOG_TIMEOUT,
+                         pdTRUE,
+                         0,
+                         radio_watchdog_timeout);
+
   /* Falcon Packet Decoder Init */
   fs_decoder_config_t decoder_config = {.callback = decoder_callback};
 
@@ -94,7 +99,7 @@ void device_com_setup(void)
 
 void device_com_start(void)
 {
-  BaseType_t timer_status = xTimerStart(radio_reset_timer, 0);
+  BaseType_t timer_status = xTimerStart(radio_watchdog_timer, 0);
   RTOS_ERR_CHECK(timer_status);
   BaseType_t task_status = xTaskCreate(device_com_task,
                            "device_com_task",
