@@ -109,7 +109,7 @@ static void rf_tx(void)
   }
 }
 
-static void rf_process(void)
+static void handle_rf(void)
 {
   radio_process();
   rf_tx();
@@ -122,7 +122,7 @@ static void rf_process(void)
   byte_cnt = min(byte_cnt, MAX_FRAME_SIZE);
 
   if (radio_data_get(rf_rx_buffer, byte_cnt)) {
-    fs_decoder_decode(&decoder, rf_rx_buffer, byte_cnt);
+    uart_write(rf_rx_buffer, byte_cnt);
   }
 }
 
@@ -132,7 +132,7 @@ void device_com_task(void *pvParameters)
 
   while (1) {
     handle_uart();
-    rf_process();
+    handle_rf();
   }
 }
 
