@@ -3,7 +3,6 @@
 #include "falcon_common.h"
 
 #include "radio.h"
-#include "frf.h"
 #include "system_time.h"
 #include "uart.h"
 #include "fifo.h"

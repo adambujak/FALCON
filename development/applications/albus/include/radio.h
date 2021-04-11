@@ -1,6 +1,9 @@
 #ifndef RADIO_H
 #define RADIO_H
 
+#include "frf.h"
+#include "radio_common.h"
+
 #include <stdint.h>
 
 typedef void (*exti_cb_t)(void);
