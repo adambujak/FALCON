@@ -2,7 +2,6 @@
 #define DEVICE_COM_H
 
 #include "falcon_common.h"
-// #include "falcon_packet.h"
 
 void device_com_setup(void);
 void device_com_start(void);
