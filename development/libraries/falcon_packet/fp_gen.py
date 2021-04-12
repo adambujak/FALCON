@@ -91,19 +91,17 @@ def python_encode_field_str(field, offset):
         output += "self.{}.encode(dest, offset + {})".format(field.name, offset)
     return output
 
-def python_class_str(className, fields, isPacket=False):
+def python_decode_field_str(field, offset):
     output = ""
-    output += "class {}:".format(className)
-    output += "\n    def __init__(self, encoded=None, offset=0, **kwargs):"
-    output += "\n        if encoded:"
-    output += "\n            self.decode(encoded, offset)"
-    output += "\n        else:"
-    for field in fields:
-        output += "\n            self.{} = kwargs.get(\"{}\", 0)".format(field.name, field.name)
+    if (field.varType.isPrimitive):
+        output += "self.{} = struct.unpack_from('{}', encoded, offset + {})[0]".format(field.name, python_struct_pack_str_dict[field.varType.nameStr], offset)
+    else:
+        output += "self.{} = {}(encoded, offset + {})".format(field.name, field.varType.nameStr, offset)
+    return output
 
-    output += "\n"
+def python_get_encode_method(className, fields, isPacket):
+    output = ""
     offset = 0
-
     if isPacket:
         output += "\n    def encode(self, offset=0):"
         output += "\n        dest = bytearray(get_packet_size(fp_type_t.{}) + {})\n".format(
@@ -120,7 +118,37 @@ def python_class_str(className, fields, isPacket=False):
 
     if isPacket:
         output += "\n        return dest"
+    return output
 
+def python_get_decode_method(className, fields, isPacket):
+    output = ""
+
+    offset = 0
+    if isPacket:
+        offset = PACKET_HEADER_SIZE
+
+    output += "\n    def decode(self, encoded, offset=0):"
+
+    for field in fields:
+        output += "\n        {}".format(python_decode_field_str(field, offset))
+        offset += field.varType.size
+
+    return output
+
+def python_class_str(className, fields, isPacket=False):
+    output = ""
+    output += "class {}:".format(className)
+    output += "\n    def __init__(self, encoded=None, offset=0, **kwargs):"
+    output += "\n        if encoded:"
+    output += "\n            self.decode(encoded, offset)"
+    output += "\n        else:"
+    for field in fields:
+        output += "\n            self.{} = kwargs.get(\"{}\", 0)".format(field.name, field.name)
+
+    output += "\n"
+    output += python_get_encode_method(className, fields, isPacket)
+    output += "\n"
+    output += python_get_decode_method(className, fields, isPacket)
     output += "\n"
     output += "\n"
     return output

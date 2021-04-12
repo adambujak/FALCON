@@ -61,6 +61,12 @@ class ft_motor_pwm_control_data_t:
         struct.pack_into('<H', dest, offset + 4, self.motor3)
         struct.pack_into('<H', dest, offset + 6, self.motor4)
 
+    def decode(self, encoded, offset=0):
+        self.motor1 = struct.unpack_from('<H', encoded, offset + 0)[0]
+        self.motor2 = struct.unpack_from('<H', encoded, offset + 2)[0]
+        self.motor3 = struct.unpack_from('<H', encoded, offset + 4)[0]
+        self.motor4 = struct.unpack_from('<H', encoded, offset + 6)[0]
+
 
 class ft_fcs_state_estimate_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -94,6 +100,20 @@ class ft_fcs_state_estimate_t:
         struct.pack_into('<f', dest, offset + 40, self.q)
         struct.pack_into('<f', dest, offset + 44, self.r)
 
+    def decode(self, encoded, offset=0):
+        self.x = struct.unpack_from('<f', encoded, offset + 0)[0]
+        self.y = struct.unpack_from('<f', encoded, offset + 4)[0]
+        self.z = struct.unpack_from('<f', encoded, offset + 8)[0]
+        self.dx = struct.unpack_from('<f', encoded, offset + 12)[0]
+        self.dy = struct.unpack_from('<f', encoded, offset + 16)[0]
+        self.dz = struct.unpack_from('<f', encoded, offset + 20)[0]
+        self.yaw = struct.unpack_from('<f', encoded, offset + 24)[0]
+        self.pitch = struct.unpack_from('<f', encoded, offset + 28)[0]
+        self.roll = struct.unpack_from('<f', encoded, offset + 32)[0]
+        self.p = struct.unpack_from('<f', encoded, offset + 36)[0]
+        self.q = struct.unpack_from('<f', encoded, offset + 40)[0]
+        self.r = struct.unpack_from('<f', encoded, offset + 44)[0]
+
 
 class ft_status_data_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -108,6 +128,11 @@ class ft_status_data_t:
         self.mode.encode(dest, offset + 0)
         self.motor.encode(dest, offset + 1)
         self.states.encode(dest, offset + 9)
+
+    def decode(self, encoded, offset=0):
+        self.mode = fe_falcon_mode_t(encoded, offset + 0)
+        self.motor = ft_motor_pwm_control_data_t(encoded, offset + 1)
+        self.states = ft_fcs_state_estimate_t(encoded, offset + 9)
 
 
 class ft_fcs_control_input_t:
@@ -126,6 +151,12 @@ class ft_fcs_control_input_t:
         struct.pack_into('<f', dest, offset + 8, self.roll)
         struct.pack_into('<f', dest, offset + 12, self.alt)
 
+    def decode(self, encoded, offset=0):
+        self.yaw = struct.unpack_from('<f', encoded, offset + 0)[0]
+        self.pitch = struct.unpack_from('<f', encoded, offset + 4)[0]
+        self.roll = struct.unpack_from('<f', encoded, offset + 8)[0]
+        self.alt = struct.unpack_from('<f', encoded, offset + 12)[0]
+
 
 class fpc_mode_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -140,6 +171,9 @@ class fpc_mode_t:
         encode_header(dest, fp_type_t.FPT_MODE_COMMAND, 0)
         self.mode.encode(dest, offset + 3)
         return dest
+
+    def decode(self, encoded, offset=0):
+        self.mode = fe_falcon_mode_t(encoded, offset + 3)
 
 
 class fpq_mode_t:
@@ -156,6 +190,9 @@ class fpq_mode_t:
         self.mode.encode(dest, offset + 3)
         return dest
 
+    def decode(self, encoded, offset=0):
+        self.mode = fe_falcon_mode_t(encoded, offset + 3)
+
 
 class fpr_mode_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -170,6 +207,9 @@ class fpr_mode_t:
         encode_header(dest, fp_type_t.FPT_MODE_RESPONSE, 0)
         self.mode.encode(dest, offset + 3)
         return dest
+
+    def decode(self, encoded, offset=0):
+        self.mode = fe_falcon_mode_t(encoded, offset + 3)
 
 
 class fpc_flight_control_t:
@@ -186,6 +226,9 @@ class fpc_flight_control_t:
         self.fcsControlCmd.encode(dest, offset + 3)
         return dest
 
+    def decode(self, encoded, offset=0):
+        self.fcsControlCmd = ft_fcs_control_input_t(encoded, offset + 3)
+
 
 class fpr_status_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -200,6 +243,9 @@ class fpr_status_t:
         encode_header(dest, fp_type_t.FPT_STATUS_RESPONSE, 0)
         self.status.encode(dest, offset + 3)
         return dest
+
+    def decode(self, encoded, offset=0):
+        self.status = ft_status_data_t(encoded, offset + 3)
 
 
 class fpq_test_t:
@@ -216,6 +262,9 @@ class fpq_test_t:
         struct.pack_into('<L', dest, offset + 3, self.cookie)
         return dest
 
+    def decode(self, encoded, offset=0):
+        self.cookie = struct.unpack_from('<L', encoded, offset + 3)[0]
+
 
 class fpr_test_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -230,5 +279,8 @@ class fpr_test_t:
         encode_header(dest, fp_type_t.FPT_TEST_RESPONSE, 0)
         struct.pack_into('<L', dest, offset + 3, self.cookie)
         return dest
+
+    def decode(self, encoded, offset=0):
+        self.cookie = struct.unpack_from('<L', encoded, offset + 3)[0]
 
 
