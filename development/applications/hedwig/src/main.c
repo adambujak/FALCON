@@ -142,8 +142,8 @@ void hedwig_sysTickHandler(void)
 }
 
 void error_handler(void)
-{
-  LOG_ERROR("Error Handler\r\n");
+{  
   motors_emergency_stop();
+  LOG_ERROR("Error Handler\r\n");
   while (1);
 }
