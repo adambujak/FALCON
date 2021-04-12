@@ -157,6 +157,22 @@ uint8_t fpr_status_encode(uint8_t *buffer, fpr_status_t *packet)
   return size;
 }
 
+uint8_t fpq_test_encode(uint8_t *buffer, fpq_test_t *packet)
+{
+  uint8_t size = sizeof(*packet) + PACKET_HEADER_SIZE;
+  encode_header(buffer, FPT_TEST_QUERY);
+  encode_uint32(&buffer[3], &packet->cookie);
+  return size;
+}
+
+uint8_t fpr_test_encode(uint8_t *buffer, fpr_test_t *packet)
+{
+  uint8_t size = sizeof(*packet) + PACKET_HEADER_SIZE;
+  encode_header(buffer, FPT_TEST_RESPONSE);
+  encode_uint32(&buffer[3], &packet->cookie);
+  return size;
+}
+
 uint8_t fp_encode_packet(uint8_t *buffer, void *packet, fp_type_t packetType)
 {
   switch(packetType) {
@@ -174,6 +190,12 @@ uint8_t fp_encode_packet(uint8_t *buffer, void *packet, fp_type_t packetType)
 
     case FPT_STATUS_RESPONSE:
       return fpr_status_encode(buffer, (fpr_status_t *) packet);
+
+    case FPT_TEST_QUERY:
+      return fpq_test_encode(buffer, (fpq_test_t *) packet);
+
+    case FPT_TEST_RESPONSE:
+      return fpr_test_encode(buffer, (fpr_test_t *) packet);
 
     default:
        return 0;

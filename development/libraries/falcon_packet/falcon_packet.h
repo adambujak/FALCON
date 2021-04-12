@@ -21,7 +21,9 @@ typedef enum {
   FPT_MODE_RESPONSE = 2,
   FPT_FLIGHT_CONTROL_COMMAND = 3,
   FPT_STATUS_RESPONSE = 4,
-  FPT_CNT = 5
+  FPT_TEST_QUERY = 5,
+  FPT_TEST_RESPONSE = 6,
+  FPT_CNT = 7
 } fp_type_t;
 
 typedef enum {
@@ -87,6 +89,14 @@ typedef struct {
 typedef struct {
   ft_status_data_t status;
 } fpr_status_t;
+
+typedef struct {
+  uint32_t cookie;
+} fpq_test_t;
+
+typedef struct {
+  uint32_t cookie;
+} fpr_test_t;
 
 
 /* Functions */
