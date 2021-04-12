@@ -22,12 +22,10 @@ class Albus(SerialDevice):
 
     def read_callback(self, byteData):
         global global_gui_instance
-        string = byteData.decode('utf-8')
         try:
             global_gui_instance.serial_monitor_append(string)
         except:
-            print("gui not started")
-            print(string, end='')
+            print(byteData)
 
     def write_packet(self, packet):
         frame = self.encoder.pack_packets_into_frame([packet])
@@ -46,6 +44,12 @@ class Albus(SerialDevice):
         kwargs = {'fcsControlCmd': fcsControlInput}
         fcsControlPacket = fpc_flight_control_t(**kwargs)
         self.write_packet(fcsControlPacket)
+
+    def send_test_query(self, cookie):
+        kwargs = {'cookie': cookie}
+        test_query = fpq_test_t(**kwargs)
+        self.write_packet(test_query)
+
 
 class Cornelius(App):
     def __init__(self, *args):
@@ -123,10 +127,11 @@ def main():
     albus = Albus(serialPort, 115200)
     albus.init_frame_encoder()
 
-    start(Cornelius)
+#    start(Cornelius)
     while(1):
         time.sleep(1)
-        albus.send_control(1.2, 1.5, 1.6, 1.8)
+        albus.send_test_query(214)
+
 
 main()
 
