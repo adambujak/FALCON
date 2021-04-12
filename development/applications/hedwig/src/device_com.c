@@ -2,8 +2,9 @@
 
 #include "falcon_packet.h"
 #include "ff_encoder.h"
-#include "fp_decode.h"
 #include "fs_decoder.h"
+#include "fp_decode.h"
+#include "fp_encode.h"
 
 #include "radio.h"
 #include "fifo.h"
@@ -64,6 +65,15 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
       fpc_mode_decode(data, &mode);
       LOG_INFO("MODE COMMAND: %d\r\n", mode.mode);
     } break;
+    case FPT_TEST_QUERY: {
+      LOG_INFO("TEST QUERY RECEIVED\r\n");
+      fpq_test_t query;
+      fpq_test_decode(data, &query);
+      fpr_test_t response = {query.cookie};
+      uint8_t buffer[MAX_PACKET_SIZE];
+      uint8_t length = fpr_test_encode(buffer, &response);
+      device_com_send_packet(buffer, length);
+    } break;
     default:
       break;
   }
@@ -92,8 +102,10 @@ static void rf_tx(void)
     memset(packet_buffer, 0, MAX_PACKET_SIZE);
 
     ff_encoder_set_buffer(&encoder, frame_buffer);
+    uint32_t packet_cnt = 0;
 
     while (fifo_peek(&radio_manager.packet_fifo, &length, 1) == 1) {
+      packet_cnt++;
       // If not enough room in frame, finish up
       if (length > ff_encoder_get_remaining_bytes(&encoder)) {
         break;
@@ -109,6 +121,11 @@ static void rf_tx(void)
         LOG_ERROR("Error appending data to frame\r\n");
         error_handler();
       }
+    }
+
+    // Don't send empty frame from hedwig to albus
+    if (packet_cnt == 0) {
+      return;
     }
 
     uint8_t frame_length = ff_encoder_append_footer(&encoder);
