@@ -7,6 +7,8 @@ static uint8_t packet_size_lookup_table[FPT_CNT] = {
   [FPT_MODE_RESPONSE] = 1,
   [FPT_FLIGHT_CONTROL_COMMAND] = 16,
   [FPT_STATUS_RESPONSE] = 57,
+  [FPT_TEST_QUERY] = 4,
+  [FPT_TEST_RESPONSE] = 4,
 };
 
 fp_type_t fp_get_packet_type(uint8_t packetID)

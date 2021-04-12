@@ -126,3 +126,13 @@ void fpr_status_decode(uint8_t *buffer, fpr_status_t *packet)
   decode_ft_status_data(&buffer[3], &packet->status);
 }
 
+void fpq_test_decode(uint8_t *buffer, fpq_test_t *packet)
+{
+  decode_uint32(&buffer[3], &packet->cookie);
+}
+
+void fpr_test_decode(uint8_t *buffer, fpr_test_t *packet)
+{
+  decode_uint32(&buffer[3], &packet->cookie);
+}
+

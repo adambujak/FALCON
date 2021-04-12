@@ -17,7 +17,9 @@ class fp_type_t(IntEnum):
     FPT_MODE_RESPONSE = 2
     FPT_FLIGHT_CONTROL_COMMAND = 3
     FPT_STATUS_RESPONSE = 4
-    FPT_CNT = 5
+    FPT_TEST_QUERY = 5
+    FPT_TEST_RESPONSE = 6
+    FPT_CNT = 7
 
 packet_size_lookup_dict = {
     fp_type_t.FPT_MODE_COMMAND: 1,
@@ -25,6 +27,8 @@ packet_size_lookup_dict = {
     fp_type_t.FPT_MODE_RESPONSE: 1,
     fp_type_t.FPT_FLIGHT_CONTROL_COMMAND: 16,
     fp_type_t.FPT_STATUS_RESPONSE: 57,
+    fp_type_t.FPT_TEST_QUERY: 4,
+    fp_type_t.FPT_TEST_RESPONSE: 4,
 };
 
 def get_packet_size(packetType):
@@ -195,6 +199,36 @@ class fpr_status_t:
 
         encode_header(dest, fp_type_t.FPT_STATUS_RESPONSE, 0)
         self.status.encode(dest, offset + 3)
+        return dest
+
+
+class fpq_test_t:
+    def __init__(self, encoded=None, offset=0, **kwargs):
+        if encoded:
+            self.decode(encoded, offset)
+        else:
+            self.cookie = kwargs.get("cookie", 0)
+
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_TEST_QUERY) + 3)
+
+        encode_header(dest, fp_type_t.FPT_TEST_QUERY, 0)
+        struct.pack_into('<L', dest, offset + 3, self.cookie)
+        return dest
+
+
+class fpr_test_t:
+    def __init__(self, encoded=None, offset=0, **kwargs):
+        if encoded:
+            self.decode(encoded, offset)
+        else:
+            self.cookie = kwargs.get("cookie", 0)
+
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_TEST_RESPONSE) + 3)
+
+        encode_header(dest, fp_type_t.FPT_TEST_RESPONSE, 0)
+        struct.pack_into('<L', dest, offset + 3, self.cookie)
         return dest
 
 

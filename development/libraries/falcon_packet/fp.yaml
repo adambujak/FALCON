@@ -82,3 +82,10 @@ packets:
     response: true
     fields:
       - {name: status, type: statusData}
+
+  - name: test
+    command: false
+    query: true
+    response: true
+    fields:
+      - {name: cookie, type: u32}
