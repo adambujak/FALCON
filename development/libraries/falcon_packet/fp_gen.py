@@ -96,7 +96,7 @@ def python_decode_field_str(field, offset):
     if (field.varType.isPrimitive):
         output += "self.{} = struct.unpack_from('{}', encoded, offset + {})[0]".format(field.name, python_struct_pack_str_dict[field.varType.nameStr], offset)
     else:
-        output += "self.{} = self.{}.decode(encoded, offset + {})".format(field.name, field.name, offset)
+        output += "self.{} = {}(encoded, offset + {})".format(field.name, field.varType.nameStr, offset)
     return output
 
 def python_get_encode_method(className, fields, isPacket):
@@ -122,7 +122,10 @@ def python_get_encode_method(className, fields, isPacket):
 
 def python_get_decode_method(className, fields, isPacket):
     output = ""
-    offset = PACKET_HEADER_SIZE
+
+    offset = 0
+    if isPacket:
+        offset = PACKET_HEADER_SIZE
 
     output += "\n    def decode(self, encoded, offset=0):"
 
