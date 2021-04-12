@@ -238,10 +238,7 @@ void flight_control_set_mode(fe_falcon_mode_t new_mode)
     case FE_FLIGHT_MODE_FCS_READY:
       if (flight_control_mode == FE_FLIGHT_MODE_FLY) {
         if (lock_output_data() == pdTRUE) {
-          motors_set_motor_us(MOTOR_1, 0U);
-          motors_set_motor_us(MOTOR_2, 0U);
-          motors_set_motor_us(MOTOR_3, 0U);
-          motors_set_motor_us(MOTOR_4, 0U);
+          motors_off();
           unlock_output_data();
         }
         flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
