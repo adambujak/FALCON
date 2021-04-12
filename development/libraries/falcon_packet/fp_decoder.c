@@ -1,7 +1,8 @@
 #include "fp_decoder.h"
 
 void fp_decoder_decode(uint8_t *buffer, uint32_t length, fp_decoder_cb_t callback)
-{  fp_type_t packetType = FPT_CNT;
+{
+  fp_type_t packetType = FPT_CNT;
   uint8_t index = 0;
 
   while(true) {

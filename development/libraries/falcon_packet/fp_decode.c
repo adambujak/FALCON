@@ -108,7 +108,6 @@ void fpc_mode_decode(uint8_t *buffer, fpc_mode_t *packet)
 
 void fpq_mode_decode(uint8_t *buffer, fpq_mode_t *packet)
 {
-  decode_fe_falcon_mode(&buffer[3], &packet->mode);
 }
 
 void fpr_mode_decode(uint8_t *buffer, fpr_mode_t *packet)
@@ -128,7 +127,6 @@ void fpr_status_decode(uint8_t *buffer, fpr_status_t *packet)
 
 void fpq_test_decode(uint8_t *buffer, fpq_test_t *packet)
 {
-  decode_uint32(&buffer[3], &packet->cookie);
 }
 
 void fpr_test_decode(uint8_t *buffer, fpr_test_t *packet)

@@ -69,9 +69,7 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
     } break;
     case FPT_TEST_QUERY: {
       LOG_INFO("TEST QUERY RECEIVED\r\n");
-      fpq_test_t query;
-      fpq_test_decode(data, &query);
-      fpr_test_t response = {query.cookie};
+      fpr_test_t response = {128};
       uint8_t buffer[MAX_PACKET_SIZE];
       uint8_t length = fpr_test_encode(buffer, &response);
       device_com_send_packet(buffer, length);

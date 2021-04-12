@@ -129,7 +129,6 @@ uint8_t fpq_mode_encode(uint8_t *buffer, fpq_mode_t *packet)
 {
   uint8_t size = sizeof(*packet) + PACKET_HEADER_SIZE;
   encode_header(buffer, FPT_MODE_QUERY);
-  encode_fe_falcon_mode(&buffer[3], &packet->mode);
   return size;
 }
 
@@ -161,7 +160,6 @@ uint8_t fpq_test_encode(uint8_t *buffer, fpq_test_t *packet)
 {
   uint8_t size = sizeof(*packet) + PACKET_HEADER_SIZE;
   encode_header(buffer, FPT_TEST_QUERY);
-  encode_uint32(&buffer[3], &packet->cookie);
   return size;
 }
 

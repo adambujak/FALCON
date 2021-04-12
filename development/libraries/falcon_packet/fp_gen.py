@@ -133,6 +133,9 @@ def python_get_decode_method(className, fields, isPacket):
         output += "\n        {}".format(python_decode_field_str(field, offset))
         offset += field.varType.size
 
+    if len(fields) == 0:
+        output += "\n        pass"
+
     return output
 
 def python_class_str(className, fields, isPacket=False):
@@ -144,6 +147,8 @@ def python_class_str(className, fields, isPacket=False):
     output += "\n        else:"
     for field in fields:
         output += "\n            self.{} = kwargs.get(\"{}\", 0)".format(field.name, field.name)
+    if len(fields) == 0:
+        output += "\n            pass"
 
     output += "\n"
     output += python_get_encode_method(className, fields, isPacket)
@@ -327,10 +332,11 @@ def build_packet(packet, packetPrefix, packetType):
     fields = []
     size = 0
 
-    for field in packet["fields"]:
-        varType = typesDict[field["type"]]
-        fields += [Field(varType, field["name"])]
-        size += varType.size
+    if packetType != "query":
+        for field in packet["fields"]:
+            varType = typesDict[field["type"]]
+            fields += [Field(varType, field["name"])]
+            size += varType.size
 
     newPacketName = "{}_{}_t".format(packetPrefix, convert_camel_case_to_lower_underscore(packet["name"]))
     newPacket = Packet(newPacketName, size, packetType, fields)
