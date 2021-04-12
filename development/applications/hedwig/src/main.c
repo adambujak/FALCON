@@ -140,3 +140,10 @@ void hedwig_sysTickHandler(void)
     OSSysTickHandler();
   }
 }
+
+void error_handler(void)
+{
+  LOG_ERROR("Error Handler\r\n");
+  motors_emergency_stop();
+  while (1);
+}

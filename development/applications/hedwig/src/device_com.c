@@ -35,6 +35,8 @@ static ff_encoder_t encoder;
 static void radio_watchdog_timeout(TimerHandle_t xTimer)
 {
   LOG_WARN("Radio RESET TIMEOUT!!\r\n");
+  // TODO remove later
+  error_handler();
   radio_reset();
 }
 
