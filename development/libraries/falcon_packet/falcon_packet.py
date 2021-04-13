@@ -23,11 +23,11 @@ class fp_type_t(IntEnum):
 
 packet_size_lookup_dict = {
     fp_type_t.FPT_MODE_COMMAND: 1,
-    fp_type_t.FPT_MODE_QUERY: 1,
+    fp_type_t.FPT_MODE_QUERY: 0,
     fp_type_t.FPT_MODE_RESPONSE: 1,
     fp_type_t.FPT_FLIGHT_CONTROL_COMMAND: 16,
     fp_type_t.FPT_STATUS_RESPONSE: 57,
-    fp_type_t.FPT_TEST_QUERY: 4,
+    fp_type_t.FPT_TEST_QUERY: 0,
     fp_type_t.FPT_TEST_RESPONSE: 4,
 };
 
@@ -181,17 +181,16 @@ class fpq_mode_t:
         if encoded:
             self.decode(encoded, offset)
         else:
-            self.mode = kwargs.get("mode", 0)
+            pass
 
     def encode(self, offset=0):
         dest = bytearray(get_packet_size(fp_type_t.FPT_MODE_QUERY) + 3)
 
         encode_header(dest, fp_type_t.FPT_MODE_QUERY, 0)
-        self.mode.encode(dest, offset + 3)
         return dest
 
     def decode(self, encoded, offset=0):
-        self.mode = fe_falcon_mode_t(encoded, offset + 3)
+        pass
 
 
 class fpr_mode_t:
@@ -253,17 +252,16 @@ class fpq_test_t:
         if encoded:
             self.decode(encoded, offset)
         else:
-            self.cookie = kwargs.get("cookie", 0)
+            pass
 
     def encode(self, offset=0):
         dest = bytearray(get_packet_size(fp_type_t.FPT_TEST_QUERY) + 3)
 
         encode_header(dest, fp_type_t.FPT_TEST_QUERY, 0)
-        struct.pack_into('<L', dest, offset + 3, self.cookie)
         return dest
 
     def decode(self, encoded, offset=0):
-        self.cookie = struct.unpack_from('<L', encoded, offset + 3)[0]
+        pass
 
 
 class fpr_test_t:

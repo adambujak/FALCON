@@ -75,7 +75,6 @@ typedef struct {
 } fpc_mode_t;
 
 typedef struct {
-  fe_falcon_mode_t mode;
 } fpq_mode_t;
 
 typedef struct {
@@ -91,7 +90,6 @@ typedef struct {
 } fpr_status_t;
 
 typedef struct {
-  uint32_t cookie;
 } fpq_test_t;
 
 typedef struct {
