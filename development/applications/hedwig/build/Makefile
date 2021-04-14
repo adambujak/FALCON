@@ -1,4 +1,4 @@
-TARGET = FALCON
+TARGET = HEDWIG
 DEBUG = 1
 BUILD_DIR = _build
 BUILD_CONFIG ?= DEBUG
@@ -276,18 +276,25 @@ $(BUILD_DIR):
 #######################################
 # clean up
 #######################################
-FLASH_SCRIPT = $(realpath $(DEV_ROOT))/scripts/falcon_flash.py
+FLASH_SCRIPT = $(realpath $(PROJ_ROOT))/build/flash_hedwig.jlink
 TARGET_PATH  = $(realpath $(BUILD_DIR)/$(TARGET).bin)
 
 clean:
 	-rm -fR $(BUILD_DIR)
 
-flash: all
+flash_v1: all
+	JLinkExe -device STM32F412RE -CommandFile $(FLASH_SCRIPT)
+
+flash_disco: all
 	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 	st-flash reset
 
-pyflash: all
-	@python3 $(FLASH_SCRIPT) $(TARGET_PATH) 0x8000000
+ifeq ($(BOARD_VERSION), DISCO)
+flash: flash_disco
+else
+flash: flash_v1
+endif
+
 
 #######################################
 # dependencies

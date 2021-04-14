@@ -1,0 +1,6 @@
+si 1
+speed 4000
+r
+h
+loadbin _build/HEDWIG.hex,0x08000000
+q
