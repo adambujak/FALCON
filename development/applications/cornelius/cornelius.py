@@ -94,7 +94,7 @@ class Albus(SerialDevice):
     def decoder_callback(self, encoded, packet_type):
         if (packet_type == fp_type_t.FPT_TEST_RESPONSE):
             test_response = fpr_test_t(encoded)
-            print("recieved test response with cookie: ", test_response.cookie)
+            print("received: fpr_test_t ", test_response.to_dict())
         else:
             print("decoder callback:", packet_type)
 
@@ -126,7 +126,6 @@ class Albus(SerialDevice):
 
 def quit():
     global albus
-    print("\nexit\n")
     albus.stop_read()
     del albus
     exit(0)
@@ -157,7 +156,13 @@ def main():
     albus.init_frame_encoder()
 
     while(1):
-        time.sleep(1)
-        albus.send_test_query(214)
+        print("enter command:")
+        user_input = input()
+        if user_input == "s":
+            print("sending test query")
+            albus.send_test_query(214)
+        elif user_input == "q":
+            print("quit")
+            quit()
 
 main()
