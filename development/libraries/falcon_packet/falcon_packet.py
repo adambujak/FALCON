@@ -67,6 +67,13 @@ class ft_motor_pwm_control_data_t:
         self.motor3 = struct.unpack_from('<H', encoded, offset + 4)[0]
         self.motor4 = struct.unpack_from('<H', encoded, offset + 6)[0]
 
+    def to_dict(self):
+        output = {}
+        output["motor1"] = self.motor1
+        output["motor2"] = self.motor2
+        output["motor3"] = self.motor3
+        output["motor4"] = self.motor4
+        return output
 
 class ft_fcs_state_estimate_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -114,6 +121,21 @@ class ft_fcs_state_estimate_t:
         self.q = struct.unpack_from('<f', encoded, offset + 40)[0]
         self.r = struct.unpack_from('<f', encoded, offset + 44)[0]
 
+    def to_dict(self):
+        output = {}
+        output["x"] = self.x
+        output["y"] = self.y
+        output["z"] = self.z
+        output["dx"] = self.dx
+        output["dy"] = self.dy
+        output["dz"] = self.dz
+        output["yaw"] = self.yaw
+        output["pitch"] = self.pitch
+        output["roll"] = self.roll
+        output["p"] = self.p
+        output["q"] = self.q
+        output["r"] = self.r
+        return output
 
 class ft_status_data_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -134,6 +156,12 @@ class ft_status_data_t:
         self.motor = ft_motor_pwm_control_data_t(encoded, offset + 1)
         self.states = ft_fcs_state_estimate_t(encoded, offset + 9)
 
+    def to_dict(self):
+        output = {}
+        output["mode"] = self.mode.to_dict()
+        output["motor"] = self.motor.to_dict()
+        output["states"] = self.states.to_dict()
+        return output
 
 class ft_fcs_control_input_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -157,6 +185,13 @@ class ft_fcs_control_input_t:
         self.roll = struct.unpack_from('<f', encoded, offset + 8)[0]
         self.alt = struct.unpack_from('<f', encoded, offset + 12)[0]
 
+    def to_dict(self):
+        output = {}
+        output["yaw"] = self.yaw
+        output["pitch"] = self.pitch
+        output["roll"] = self.roll
+        output["alt"] = self.alt
+        return output
 
 class fpc_mode_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -175,6 +210,10 @@ class fpc_mode_t:
     def decode(self, encoded, offset=0):
         self.mode = fe_falcon_mode_t(encoded, offset + 3)
 
+    def to_dict(self):
+        output = {}
+        output["mode"] = self.mode.to_dict()
+        return output
 
 class fpq_mode_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -192,6 +231,9 @@ class fpq_mode_t:
     def decode(self, encoded, offset=0):
         pass
 
+    def to_dict(self):
+        output = {}
+        return output
 
 class fpr_mode_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -210,6 +252,10 @@ class fpr_mode_t:
     def decode(self, encoded, offset=0):
         self.mode = fe_falcon_mode_t(encoded, offset + 3)
 
+    def to_dict(self):
+        output = {}
+        output["mode"] = self.mode.to_dict()
+        return output
 
 class fpc_flight_control_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -228,6 +274,10 @@ class fpc_flight_control_t:
     def decode(self, encoded, offset=0):
         self.fcsControlCmd = ft_fcs_control_input_t(encoded, offset + 3)
 
+    def to_dict(self):
+        output = {}
+        output["fcsControlCmd"] = self.fcsControlCmd.to_dict()
+        return output
 
 class fpr_status_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -246,6 +296,10 @@ class fpr_status_t:
     def decode(self, encoded, offset=0):
         self.status = ft_status_data_t(encoded, offset + 3)
 
+    def to_dict(self):
+        output = {}
+        output["status"] = self.status.to_dict()
+        return output
 
 class fpq_test_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -263,6 +317,9 @@ class fpq_test_t:
     def decode(self, encoded, offset=0):
         pass
 
+    def to_dict(self):
+        output = {}
+        return output
 
 class fpr_test_t:
     def __init__(self, encoded=None, offset=0, **kwargs):
@@ -281,4 +338,8 @@ class fpr_test_t:
     def decode(self, encoded, offset=0):
         self.cookie = struct.unpack_from('<L', encoded, offset + 3)[0]
 
+    def to_dict(self):
+        output = {}
+        output["cookie"] = self.cookie
+        return output
 
