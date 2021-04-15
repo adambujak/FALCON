@@ -6,7 +6,7 @@ import serial
 import serial.tools.list_ports
 from threading import Thread, Lock, Event
 
-sys.path.append(os.path.abspath("/Users/adambujak/Workspace/FALCON/development/libraries/falcon_packet"))
+sys.path.append(os.path.abspath("../../libraries/falcon_packet"))
 from falcon_packet import *
 from ff_encoder import *
 from fs_decoder import *
