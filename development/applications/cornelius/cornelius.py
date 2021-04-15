@@ -7,25 +7,102 @@ import remi.gui as gui
 from remi.gui import *
 from remi import start, App
 
-from udevice import *
+# from udevice import *
 
-sys.path.append(os.path.abspath("../../libraries/falcon_packet"))
+sys.path.append(os.path.abspath("/Users/dbell44/Workspace/FALCON/development/libraries/falcon_packet"))
 from falcon_packet import *
 from ff_encoder import *
 
 global_gui_instance = None
 albus = None
+import os
+import time
+import serial
+from threading import Thread, Lock, Event
+
+class SerialDevice:
+    def __init__(self, serialPort, baudRate=115200, readSleepTimeMs=1):
+        self.serialMutex = Lock()
+        self.readSleepTime = readSleepTimeMs / 1000;
+        self.serialInstance = serial.Serial(serialPort, baudRate, timeout=0.5)
+        self.stopReadEvent = Event()
+        self.stopReadEvent.clear()
+        self.readThreadInstance = Thread(target=self.read_thread, args=[])
+        self.readThreadInstance.start()
+
+    def __del__(self):
+        try:
+            self.readThreadInstance.join()
+        except:
+            pass
+        try:
+            self.stop_read()
+        except:
+            pass
+
+    def stop_read(self):
+        self.stopReadEvent.set()
+
+    def read_stopped(self):
+        return self.stopReadEvent.is_set()
+
+    def read_thread(self):
+        while 1:
+            if self.read_stopped():
+                break
+            buffer = bytes()
+            while 1:
+                readData = self.read_raw_char()
+                if readData == bytes(): #empty bytes
+                    self.read_callback(buffer)                    
+                    break
+                buffer += readData
+            time.sleep(self.readSleepTime)
+
+    def write_bytes(self, byteData):
+        self.serialMutex.acquire()
+        self.serialInstance.write(byteData)
+        self.serialMutex.release()
+
+    def write_string(self, string):
+        self.write_bytes(string.encode('ascii'))
+
+    def read_line(self):
+        self.serialMutex.acquire()
+        retval = None
+        try:
+            retval = self.serialInstance.readline().decode('ascii')
+        except UnicodeDecodeError:
+            pass
+        self.serialMutex.release()
+        return retval
+
+    def read_raw_line(self):
+        self.serialMutex.acquire()
+        retval = self.serialInstance.readline()
+        self.serialMutex.release()
+        return retval
+
+    def read_raw_char(self):
+        self.serialMutex.acquire()
+        readval = self.serialInstance.read(1)
+        self.serialMutex.release()
+        return readval
+
+    def read_callback(self):
+        # User should overwrite this in their own class
+        pass
 
 class Albus(SerialDevice):
     def init_frame_encoder(self):
         self.encoder = FF_Encoder()
 
     def read_callback(self, byteData):
-        global global_gui_instance
-        try:
-            global_gui_instance.serial_monitor_append(string)
-        except:
-            print(byteData)
+        # global global_gui_instance
+        # try:
+        #     # global_gui_instance.serial_monitor_append(string)
+        # except:
+        print(byteData)
 
     def write_packet(self, packet):
         frame = self.encoder.pack_packets_into_frame([packet])
@@ -49,49 +126,6 @@ class Albus(SerialDevice):
         kwargs = {'cookie': cookie}
         test_query = fpq_test_t(**kwargs)
         self.write_packet(test_query)
-
-
-class Cornelius(App):
-    def __init__(self, *args):
-        super(Cornelius, self).__init__(*args)
-
-    def main(self):
-        global global_gui_instance
-        global_gui_instance = self
-
-        self.main_container = Container(width=706, height=445, margin='0px auto', style="position: relative")
-
-        self.serial_monitor_container = VBox(width=630, height=277, style='position: absolute; left: 40px; top: 150px; background-color: #b6b6b6')
-        self.serial_monitor = TextInput(single_line=False, width=630, height=277)
-        self.serial_monitor_container.append(self.serial_monitor, 'Serial Monitor')
-
-        self.send_command_button = gui.Button('Send Command', width=200, height=30)
-        self.send_command_button.onclick.do(self.on_send_button_pressed)
-
-        self.main_container.append(self.serial_monitor_container,'Serial Monitor Container')
-        self.main_container.append(self.send_command_button,'Send Command Button')
-
-        return self.main_container
-
-    def serial_monitor_append(self, text):
-        if len(text) == 0:
-            return
-        try:
-            all_text = self.serial_monitor.get_text() + text
-            self.serial_monitor.set_text(all_text)
-            if (text == '\n'):
-                js_cmd = "document.getElementById('{}').scrollTop={}".format(self.serial_monitor.identifier, 9999)
-                self.execute_javascript(js_cmd);
-        except Exception as e:
-            print('no serial', e)
-
-    def on_send_button_pressed(self, widget):
-        global albus
-        albus.send_control(1.2, 1.8, 1.9, 4.5)
-
-    def on_close(self):
-        super(Cornelius, self).on_close()
-        quit()
 
 def quit():
     global albus
@@ -124,13 +158,14 @@ def main():
     serialPort = ports[selectedPort].device
 
     global albus
-    albus = Albus(serialPort, 115200)
+    albus = Albus(serialPort, 115200, 1)
     albus.init_frame_encoder()
 
 #    start(Cornelius)
     while(1):
-        time.sleep(1)
+        time.sleep(0.001)
         albus.send_test_query(214)
+        print("adams gay")
 
 
 main()
