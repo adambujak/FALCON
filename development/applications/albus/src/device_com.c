@@ -102,11 +102,7 @@ static void rf_tx(void)
       memset(frame_buffer + frame_length, 0, FRF_PACKET_SIZE - frame_length);
       frame_length = FRF_PACKET_SIZE;
     }
-    LOG_DEBUG("FRAME:\r\n");
-    for (int i = 0; i < MAX_FRAME_SIZE; i++) {
-      LOG_DEBUG("0x%x, ", frame_buffer[i]);
-    }
-    LOG_DEBUG("\r\n");
+
     radio_data_send(frame_buffer, frame_length);
     radio_manager.last_tx_time = now;
   }
