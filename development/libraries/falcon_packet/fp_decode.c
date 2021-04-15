@@ -134,3 +134,12 @@ void fpr_test_decode(uint8_t *buffer, fpr_test_t *packet)
   decode_uint32(&buffer[3], &packet->cookie);
 }
 
+void fpq_radio_stats_decode(uint8_t *buffer, fpq_radio_stats_t *packet)
+{
+}
+
+void fpr_radio_stats_decode(uint8_t *buffer, fpr_radio_stats_t *packet)
+{
+  decode_uint32(&buffer[3], &packet->txFailCount);
+}
+

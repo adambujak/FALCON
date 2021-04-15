@@ -19,7 +19,9 @@ class fp_type_t(IntEnum):
     FPT_STATUS_RESPONSE = 4
     FPT_TEST_QUERY = 5
     FPT_TEST_RESPONSE = 6
-    FPT_CNT = 7
+    FPT_RADIO_STATS_QUERY = 7
+    FPT_RADIO_STATS_RESPONSE = 8
+    FPT_CNT = 9
 
 packet_size_lookup_dict = {
     fp_type_t.FPT_MODE_COMMAND: 1,
@@ -29,6 +31,8 @@ packet_size_lookup_dict = {
     fp_type_t.FPT_STATUS_RESPONSE: 57,
     fp_type_t.FPT_TEST_QUERY: 0,
     fp_type_t.FPT_TEST_RESPONSE: 4,
+    fp_type_t.FPT_RADIO_STATS_QUERY: 0,
+    fp_type_t.FPT_RADIO_STATS_RESPONSE: 4,
 };
 
 def get_packet_size(packetType):
@@ -341,5 +345,47 @@ class fpr_test_t:
     def to_dict(self):
         output = {}
         output["cookie"] = self.cookie
+        return output
+
+class fpq_radio_stats_t:
+    def __init__(self, encoded=None, offset=0, **kwargs):
+        if encoded:
+            self.decode(encoded, offset)
+        else:
+            pass
+
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_RADIO_STATS_QUERY) + 3)
+
+        encode_header(dest, fp_type_t.FPT_RADIO_STATS_QUERY, 0)
+        return dest
+
+    def decode(self, encoded, offset=0):
+        pass
+
+    def to_dict(self):
+        output = {}
+        return output
+
+class fpr_radio_stats_t:
+    def __init__(self, encoded=None, offset=0, **kwargs):
+        if encoded:
+            self.decode(encoded, offset)
+        else:
+            self.txFailCount = kwargs.get("txFailCount", 0)
+
+    def encode(self, offset=0):
+        dest = bytearray(get_packet_size(fp_type_t.FPT_RADIO_STATS_RESPONSE) + 3)
+
+        encode_header(dest, fp_type_t.FPT_RADIO_STATS_RESPONSE, 0)
+        struct.pack_into('<L', dest, offset + 3, self.txFailCount)
+        return dest
+
+    def decode(self, encoded, offset=0):
+        self.txFailCount = struct.unpack_from('<L', encoded, offset + 3)[0]
+
+    def to_dict(self):
+        output = {}
+        output["txFailCount"] = self.txFailCount
         return output
 
