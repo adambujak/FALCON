@@ -1,24 +1,17 @@
 import sys
 import os
+import time
 import signal
+import serial
 import serial.tools.list_ports
-
-import remi.gui as gui
-from remi.gui import *
-from remi import start, App
-
-# from udevice import *
+from threading import Thread, Lock, Event
 
 sys.path.append(os.path.abspath("/Users/adambujak/Workspace/FALCON/development/libraries/falcon_packet"))
 from falcon_packet import *
 from ff_encoder import *
+from fs_decoder import *
 
-global_gui_instance = None
 albus = None
-import os
-import time
-import serial
-from threading import Thread, Lock, Event
 
 class SerialDevice:
     def __init__(self, serialPort, baudRate=115200, readSleepTimeMs=1):
@@ -96,13 +89,17 @@ class SerialDevice:
 class Albus(SerialDevice):
     def init_frame_encoder(self):
         self.encoder = FF_Encoder()
+        self.decoder = FS_Decoder(self.decoder_callback)
+
+    def decoder_callback(self, encoded, packet_type):
+        if (packet_type == fp_type_t.FPT_TEST_RESPONSE):
+            test_response = fpr_test_t(encoded)
+            print("recieved test response with cookie: ", test_response.cookie)
+        else:
+            print("decoder callback:", packet_type)
 
     def read_callback(self, byteData):
-        # global global_gui_instance
-        # try:
-        #     # global_gui_instance.serial_monitor_append(string)
-        # except:
-        print(byteData)
+        self.decoder.decode(byteData)
 
     def write_packet(self, packet):
         frame = self.encoder.pack_packets_into_frame([packet])
@@ -129,11 +126,9 @@ class Albus(SerialDevice):
 
 def quit():
     global albus
-    global global_gui_instance
     print("\nexit\n")
     albus.stop_read()
     del albus
-    del global_gui_instance
     exit(0)
 
 def main():
@@ -161,11 +156,8 @@ def main():
     albus = Albus(serialPort, 115200, 1)
     albus.init_frame_encoder()
 
-#    start(Cornelius)
     while(1):
         time.sleep(1)
         albus.send_test_query(214)
 
 main()
-
-
