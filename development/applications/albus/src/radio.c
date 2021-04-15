@@ -26,6 +26,8 @@ static fifo_t tx_fifo;
 static uint8_t hedwig_address[RADIO_ADDRESS_LENGTH];
 static uint8_t albus_address[RADIO_ADDRESS_LENGTH];
 
+static uint32_t tx_fail_cnt = 0;
+
 static inline void rf_spi_transfer(void *context,
                                    uint8_t *tx_buf, uint16_t tx_len,
                                    uint8_t *rx_buf, uint16_t rx_len)
@@ -44,6 +46,7 @@ static void rf_event_callback(frf_event_t event)
   switch (event) {
   case FRF_EVENT_TX_FAILED:
     LOG_WARN("RF TX FAILED\r\n");
+    tx_fail_cnt++;
     break;
   case FRF_EVENT_TX_SUCCESS:
     LOG_DEBUG("RF TX SUCCESS\r\n");
@@ -56,6 +59,11 @@ static void rf_event_callback(frf_event_t event)
     break;
   }
   }
+}
+
+uint32_t radio_get_tx_fail_cnt(void)
+{
+  return tx_fail_cnt;
 }
 
 uint32_t radio_data_send(uint8_t *source, uint32_t length)

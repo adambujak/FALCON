@@ -33,6 +33,8 @@ static uint8_t decode_buffer[RX_BUFFER_SIZE];
 static fs_decoder_t decoder;
 static ff_encoder_t encoder;
 
+static int cnt = 0;
+
 static void radio_watchdog_timeout(TimerHandle_t xTimer)
 {
   LOG_WARN("Radio RESET TIMEOUT!!\r\n");
@@ -69,7 +71,7 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
     } break;
     case FPT_TEST_QUERY: {
       LOG_INFO("TEST QUERY RECEIVED\r\n");
-      fpr_test_t response = {128};
+      fpr_test_t response = {cnt++};
       uint8_t buffer[MAX_PACKET_SIZE];
       uint8_t length = fpr_test_encode(buffer, &response);
       device_com_send_packet(buffer, length);

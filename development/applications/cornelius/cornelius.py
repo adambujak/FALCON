@@ -95,6 +95,9 @@ class Albus(SerialDevice):
         if (packet_type == fp_type_t.FPT_TEST_RESPONSE):
             test_response = fpr_test_t(encoded)
             print("received: fpr_test_t ", test_response.to_dict())
+        elif (packet_type == fp_type_t.FPT_RADIO_STATS_RESPONSE):
+            radio_stats = fpr_radio_stats_t(encoded)
+            print("received: radio stats ", radio_stats.to_dict())
         else:
             print("decoder callback:", packet_type)
 
@@ -119,10 +122,16 @@ class Albus(SerialDevice):
         fcsControlPacket = fpc_flight_control_t(**kwargs)
         self.write_packet(fcsControlPacket)
 
-    def send_test_query(self, cookie):
-        kwargs = {'cookie': cookie}
+    def send_test_query(self):
+        kwargs = {}
         test_query = fpq_test_t(**kwargs)
         self.write_packet(test_query)
+
+    def send_radio_stats_query(self):
+        kwargs = {}
+        radio_query = fpq_radio_stats_t(**kwargs)
+        self.write_packet(radio_query)
+
 
 def quit():
     global albus
@@ -160,7 +169,10 @@ def main():
         user_input = input()
         if user_input == "s":
             print("sending test query")
-            albus.send_test_query(214)
+            albus.send_test_query()
+        elif user_input == "r":
+            print("sending radio stats query")
+            albus.send_radio_stats_query()
         elif user_input == "q":
             print("quit")
             quit()
