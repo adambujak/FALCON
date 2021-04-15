@@ -9,7 +9,7 @@ from remi import start, App
 
 # from udevice import *
 
-sys.path.append(os.path.abspath("/Users/dbell44/Workspace/FALCON/development/libraries/falcon_packet"))
+sys.path.append(os.path.abspath("/Users/adambujak/Workspace/FALCON/development/libraries/falcon_packet"))
 from falcon_packet import *
 from ff_encoder import *
 
@@ -54,7 +54,7 @@ class SerialDevice:
             while 1:
                 readData = self.read_raw_char()
                 if readData == bytes(): #empty bytes
-                    self.read_callback(buffer)                    
+                    self.read_callback(buffer)
                     break
                 buffer += readData
             time.sleep(self.readSleepTime)
@@ -163,10 +163,8 @@ def main():
 
 #    start(Cornelius)
     while(1):
-        time.sleep(0.001)
+        time.sleep(1)
         albus.send_test_query(214)
-        print("adams gay")
-
 
 main()
 
