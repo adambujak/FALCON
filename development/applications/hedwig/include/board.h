@@ -22,11 +22,11 @@
 #define FLN_LED_PORT                          GPIOA
 #endif
 
-#define FLN_LED_AF                            GPIO_AF2_TIM2
-#define FLN_LED_TIMER                         TIM2
-#define FLN_LED_TIMER_IRQ                     TIM2_IRQn
-#define FLN_LED_TIMER_IRQ_Handler             TIM2_IRQHandler
-#define FLN_LED_TIMER_CLK_ENABLE()            __HAL_RCC_TIM2_CLK_ENABLE()
+#define FLN_LED_AF                            GPIO_AF2_TIM3
+#define FLN_LED_TIMER                         TIM3
+#define FLN_LED_TIMER_IRQ                     TIM3_IRQn
+#define FLN_LED_TIMER_IRQ_Handler             TIM3_IRQHandler
+#define FLN_LED_TIMER_CLK_ENABLE()            __HAL_RCC_TIM3_CLK_ENABLE()
 
 /* UART */
 #define UART                                  USART2

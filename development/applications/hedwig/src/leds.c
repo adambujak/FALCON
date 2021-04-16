@@ -88,7 +88,7 @@ void leds_task(void *pvParameters)
   while (1) {
     LOG_DEBUG("LED Task\r\n");
     leds_toggle();
-    vTaskDelay(1500);
+    rtos_delay_ms(1500);
   }
 }
 

@@ -116,7 +116,7 @@ int main(void)
 #endif
 
 #if INCLUDE_LEDS
-  leds_task_tart();
+  leds_task_start();
 #endif
 #if INCLUDE_DEVICE_COM
   device_com_start();
