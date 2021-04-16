@@ -54,6 +54,12 @@ class SerialDevice:
 
     def write_bytes(self, byteData):
         self.serialMutex.acquire()
+        maxsize = 31
+        while len(byteData) > maxsize:
+            self.serialInstance.write(byteData[0:maxsize])
+            byteData = byteData[maxsize:]
+            time.sleep(0.001)
+
         self.serialInstance.write(byteData)
         self.serialMutex.release()
 

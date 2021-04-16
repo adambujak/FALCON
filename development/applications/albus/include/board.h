@@ -30,6 +30,7 @@
 #define SYSTEM_TIME_CLK_EN()          LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2)
 
 /* UART */
+#if defined(BOARD_DISCO)
 #define UART                          USART2
 #define UART_IRQn                     USART2_IRQn
 #define UART_IRQHandler               USART2_IRQHandler
@@ -43,6 +44,22 @@
 
 #define UART_CLK_EN()                 LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2)
 #define GPIO_UART_CLK_EN()            LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA)
+
+#elif defined(BOARD_NUCLEO)
+#define UART                          USART3
+#define UART_IRQn                     USART3_IRQn
+#define UART_IRQHandler               USART3_IRQHandler
+
+#define UART_RX_PIN                   LL_GPIO_PIN_8
+#define UART_TX_PIN                   LL_GPIO_PIN_9
+#define UART_GPIO_PORT                GPIOD
+#define UART_GPIO_AF                  LL_GPIO_AF_7
+
+#define UART_BAUDRATE                 115200
+
+#define UART_CLK_EN()                 LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART3)
+#define GPIO_UART_CLK_EN()            LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOD)
+#endif
 
 /* RF */
 #define RF_SPI                        SPI2
