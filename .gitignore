@@ -41,3 +41,6 @@ development/system/msp_sdk/docs
 
 # VSCode
 **/.vscode
+
+# STM32 Cube IDE
+**/stm32cubeide
