@@ -142,8 +142,9 @@ void hedwig_sysTickHandler(void)
 }
 
 void error_handler(void)
-{  
+{
   motors_emergency_stop();
   LOG_ERROR("Error Handler\r\n");
+  vTaskSuspendAll();
   while (1);
 }

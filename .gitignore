@@ -38,3 +38,6 @@ development/system/msp_sdk/docs
 **/.cproject
 **/.project
 **/.settings
+
+# VSCode
+**/.vscode

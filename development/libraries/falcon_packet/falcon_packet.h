@@ -23,7 +23,9 @@ typedef enum {
   FPT_STATUS_RESPONSE = 4,
   FPT_TEST_QUERY = 5,
   FPT_TEST_RESPONSE = 6,
-  FPT_CNT = 7
+  FPT_RADIO_STATS_QUERY = 7,
+  FPT_RADIO_STATS_RESPONSE = 8,
+  FPT_CNT = 9
 } fp_type_t;
 
 typedef enum {
@@ -95,6 +97,13 @@ typedef struct {
 typedef struct {
   uint32_t cookie;
 } fpr_test_t;
+
+typedef struct {
+} fpq_radio_stats_t;
+
+typedef struct {
+  uint32_t txFailCount;
+} fpr_radio_stats_t;
 
 
 /* Functions */

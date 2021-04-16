@@ -99,6 +99,14 @@ def python_decode_field_str(field, offset):
         output += "self.{} = {}(encoded, offset + {})".format(field.name, field.varType.nameStr, offset)
     return output
 
+def python_dict_field_str(field):
+    output = ""
+    if (field.varType.isPrimitive):
+        output += "output[\"{}\"] = self.{}".format(field.name, field.name)
+    else:
+        output += "output[\"{}\"] = self.{}.to_dict()".format(field.name, field.name)
+    return output
+
 def python_get_encode_method(className, fields, isPacket):
     output = ""
     offset = 0
@@ -138,6 +146,18 @@ def python_get_decode_method(className, fields, isPacket):
 
     return output
 
+def python_get_dict_method(className, fields, isPacket):
+    output = ""
+
+    output += "\n    def to_dict(self):"
+    output += "\n        output = {}"
+
+    for field in fields:
+        output += "\n        {}".format(python_dict_field_str(field))
+
+    output += "\n        return output"
+    return output
+
 def python_class_str(className, fields, isPacket=False):
     output = ""
     output += "class {}:".format(className)
@@ -155,6 +175,7 @@ def python_class_str(className, fields, isPacket=False):
     output += "\n"
     output += python_get_decode_method(className, fields, isPacket)
     output += "\n"
+    output += python_get_dict_method(className, fields, isPacket)
     output += "\n"
     return output
 

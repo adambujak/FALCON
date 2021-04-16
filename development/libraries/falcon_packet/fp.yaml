@@ -89,3 +89,10 @@ packets:
     response: true
     fields:
       - {name: cookie, type: u32}
+
+  - name: radioStats
+    command: false
+    query: true
+    response: true
+    fields:
+      - {name: txFailCount, type: u32}

@@ -34,7 +34,24 @@ static void rf_enqueue_packet(uint8_t *data, uint8_t length);
 
 static void decoder_callback(uint8_t *data, fp_type_t packet_type)
 {
-  rf_enqueue_packet(data, fp_get_packet_length(packet_type));
+  switch (packet_type) {
+    case FPT_RADIO_STATS_QUERY: {
+      uint32_t tx_fail_cnt = radio_get_tx_fail_cnt();
+      fpr_radio_stats_t stats = {tx_fail_cnt};
+
+      uint8_t packet_buffer[MAX_PACKET_SIZE];
+      uint8_t length = fpr_radio_stats_encode(packet_buffer, &stats);
+
+      uint8_t frame_buffer[MAX_FRAME_SIZE];
+      ff_encoder_set_buffer(&encoder, frame_buffer);
+      ff_encoder_append_data(&encoder, packet_buffer, length);
+      ff_encoder_append_footer(&encoder);
+
+      uart_write(frame_buffer, MAX_FRAME_SIZE);
+    }  break;
+    default:
+      rf_enqueue_packet(data, fp_get_packet_length(packet_type));
+  }
 }
 
 static void decode_frame(uint8_t *data, uint32_t length)

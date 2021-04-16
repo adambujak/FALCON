@@ -171,6 +171,21 @@ uint8_t fpr_test_encode(uint8_t *buffer, fpr_test_t *packet)
   return size;
 }
 
+uint8_t fpq_radio_stats_encode(uint8_t *buffer, fpq_radio_stats_t *packet)
+{
+  uint8_t size = sizeof(*packet) + PACKET_HEADER_SIZE;
+  encode_header(buffer, FPT_RADIO_STATS_QUERY);
+  return size;
+}
+
+uint8_t fpr_radio_stats_encode(uint8_t *buffer, fpr_radio_stats_t *packet)
+{
+  uint8_t size = sizeof(*packet) + PACKET_HEADER_SIZE;
+  encode_header(buffer, FPT_RADIO_STATS_RESPONSE);
+  encode_uint32(&buffer[3], &packet->txFailCount);
+  return size;
+}
+
 uint8_t fp_encode_packet(uint8_t *buffer, void *packet, fp_type_t packetType)
 {
   switch(packetType) {
@@ -194,6 +209,12 @@ uint8_t fp_encode_packet(uint8_t *buffer, void *packet, fp_type_t packetType)
 
     case FPT_TEST_RESPONSE:
       return fpr_test_encode(buffer, (fpr_test_t *) packet);
+
+    case FPT_RADIO_STATS_QUERY:
+      return fpq_radio_stats_encode(buffer, (fpq_radio_stats_t *) packet);
+
+    case FPT_RADIO_STATS_RESPONSE:
+      return fpr_radio_stats_encode(buffer, (fpr_radio_stats_t *) packet);
 
     default:
        return 0;
