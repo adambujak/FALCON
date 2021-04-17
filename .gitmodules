@@ -4,3 +4,9 @@
 [submodule "development/libraries/falcon_packet"]
 	path = development/libraries/falcon_packet
 	url = https://github.com/adambujak/falcon_packet
+[submodule "development/libraries/libcrc"]
+	path = development/libraries/libcrc
+	url = https://github.com/lammertb/libcrc
+[submodule "development/libraries/c-ringbuf"]
+	path = development/libraries/c-ringbuf
+	url = https://github.com/dhess/c-ringbuf
