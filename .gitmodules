@@ -1,5 +1,5 @@
-[submodule "development/development/test/Unity"]
-	path = development/development/test/Unity
+[submodule "development/test/Unity"]
+	path = development/test/Unity
 	url = https://github.com/ThrowTheSwitch/Unity.git
 [submodule "development/libraries/falcon_packet"]
 	path = development/libraries/falcon_packet
