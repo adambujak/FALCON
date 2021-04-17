@@ -128,6 +128,13 @@ class Albus(SerialDevice):
         fcsControlPacket = fpc_flight_control_t(**kwargs)
         self.write_packet(fcsControlPacket)
 
+    def send_mode(self, mode):
+        # fcsModeInput = fe_falcon_mode_t(mode)
+
+        kwargs = {'mode' : mode}
+        fcsModePacket = fpc_fcs_mode_t(**kwargs)
+        self.write_packet(fcsModePacket)
+
     def send_test_query(self):
         kwargs = {}
         test_query = fpq_test_t(**kwargs)
@@ -171,16 +178,19 @@ def main():
     albus.init_frame_encoder()
 
     while(1):
-        print("enter command:")
-        user_input = input()
+        user_input = input("enter command: ")
         if user_input == "s":
             print("sending test query")
             albus.send_test_query()
         elif user_input == "r":
             print("sending radio stats query")
             albus.send_radio_stats_query()
+        elif user_input == "m":            
+            mode_input = fe_flight_mode_t(int(input("enter mode: ")))
+            albus.send_mode(mode_input)
         elif user_input == "q":
             print("quit")
             quit()
+
 
 main()

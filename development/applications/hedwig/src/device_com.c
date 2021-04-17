@@ -64,10 +64,11 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
                 controlInput.fcsControlCmd.roll,
                 controlInput.fcsControlCmd.alt);
     } break;
-    case FPT_MODE_COMMAND: {
-      fpc_mode_t mode = {};
-      fpc_mode_decode(data, &mode);
-      LOG_INFO("MODE COMMAND: %d\r\n", mode.mode);
+    case FPT_FCS_MODE_COMMAND: {
+      fpc_fcs_mode_t fcsMode = {};
+      fpc_fcs_mode_decode(data, &fcsMode);
+      flight_control_set_mode(fcsMode.mode);
+      LOG_INFO("MODE COMMAND: %d\r\n", fcsMode.mode);
     } break;
     case FPT_TEST_QUERY: {
       LOG_INFO("TEST QUERY RECEIVED\r\n");

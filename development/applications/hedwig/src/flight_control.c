@@ -35,7 +35,7 @@ static SemaphoreHandle_t sensorDataMutex;
 static SemaphoreHandle_t commandDataMutex;
 static SemaphoreHandle_t outputDataMutex;
 
-static fe_falcon_mode_t flight_control_mode = FE_FLIGHT_MODE_IDLE;
+static fe_flight_mode_t flight_control_mode = FE_FLIGHT_MODE_IDLE;
 
 static inline BaseType_t lock_sensor_data(void)
 {
@@ -222,7 +222,7 @@ void flight_control_get_outputs(fpr_status_t *status_response)
   }
 }
 
-void flight_control_set_mode(fe_falcon_mode_t new_mode)
+void flight_control_set_mode(fe_flight_mode_t new_mode)
 {
   switch (new_mode) {
     case FE_FLIGHT_MODE_IDLE:
@@ -300,10 +300,6 @@ static void flight_control_reset(void)
 
 static void flight_control_task(void *pvParameters)
 {
-  vTaskDelay(3000);
-//  while(flight_control_mode < FE_FLIGHT_MODE_FCS_READY) {
-//    vTaskDelay(10);
-//  }
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
@@ -312,7 +308,7 @@ static void flight_control_task(void *pvParameters)
 
   while(1)
   { 
-    if (flight_control_mode >= 0) {
+    if (flight_control_mode >= FE_FLIGHT_MODE_FCS_READY) {
       /* Wait to be notified of an interrupt. */
       flightTimerNotification = xTaskNotifyWait(pdFALSE,
                                            0xFFFFFFFF,
@@ -339,6 +335,9 @@ static void flight_control_task(void *pvParameters)
         LOG_DEBUG("timer notif not received\r\n");
         error_handler();
       }
+    }
+    else {
+      rtos_delay_ms(1);
     }
   }
 }
