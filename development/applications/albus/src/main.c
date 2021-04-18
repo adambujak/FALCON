@@ -114,7 +114,6 @@ void error_handler(void)
 {
   LOG_ERROR("Error Handler\r\n");
   while (1) {
-    led_toggle();
     for (uint32_t i = 0; i < 1000000; i++);
   }
 }
