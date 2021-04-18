@@ -67,25 +67,6 @@ void sysclk_init(void)
   LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);
 }
 
-static void led_pin_init(void)
-{
-//  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
-//  LL_GPIO_InitTypeDef gpio_config = {0};
-//
-//  LL_GPIO_ResetOutputPin(ERROR_LED_PORT, ERROR_LED_PIN);
-//  gpio_config.Pin = ERROR_LED_PIN;
-//  gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
-//  gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
-//  gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-//  gpio_config.Pull = LL_GPIO_PULL_UP;
-//  LL_GPIO_Init(ERROR_LED_PORT, &gpio_config);
-}
-
-static void led_toggle(void)
-{
-//  LL_GPIO_TogglePin(ERROR_LED_PORT, ERROR_LED_PIN);
-}
-
 static void board_bringup(void)
 {
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
@@ -110,8 +91,6 @@ static void os_start(void)
 int main(void)
 {
   board_bringup();
-
-  led_pin_init();
 
   device_com_setup();
   device_com_start();
