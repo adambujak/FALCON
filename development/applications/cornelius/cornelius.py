@@ -22,6 +22,7 @@ class SerialDevice:
         self.stopReadEvent.clear()
         self.readThreadInstance = Thread(target=self.read_thread, args=[])
         self.readThreadInstance.start()
+        self.bufferFlushCount = 32        
 
     def __del__(self):
         try:
@@ -43,13 +44,16 @@ class SerialDevice:
         while 1:
             if self.read_stopped():
                 break
-            buffer = bytes()
+            buffer = bytes()            
             while 1:
                 readData = self.read_raw_char()
                 if readData == bytes(): #empty bytes
                     self.read_callback(buffer)
                     break
                 buffer += readData
+                if len(buffer) > self.bufferFlushCount:
+                    self.read_callback(buffer[0:self.bufferFlushCount])
+                    buffer = buffer[self.bufferFlushCount:]
             time.sleep(self.readSleepTime)
 
     def write_bytes(self, byteData):
@@ -110,6 +114,9 @@ class Albus(SerialDevice):
                 print("Sensors Calibrating")
             else:
                 print("Calibration Canceled, Check Mode")
+        elif (packet_type == fp_type_t.FPT_STATUS_RESPONSE):
+            status = fpr_status_t(encoded)
+            print(status.to_dict())
         else:
             print("decoder callback:", packet_type)
 
@@ -186,6 +193,11 @@ def main():
     albus = Albus(serialPort, 115200, 1)
     albus.init_frame_encoder()
 
+    yaw = -1.5707963268
+    pitch = 0
+    roll = 0
+    alt = 0
+
     while(1):
         user_input = input("enter command: ")
         if user_input == "s":
@@ -199,6 +211,9 @@ def main():
             albus.send_fcs_mode(mode_input)
         elif user_input == "c":
             albus.send_calibration_command();
+        elif user_input == "i":
+            yaw, pitch, roll, alt = [float(i) for i in input("enter fcs input: ").split()]
+            albus.send_control(yaw, pitch, roll, alt)
         elif user_input == "q":
             print("quit")
             quit()

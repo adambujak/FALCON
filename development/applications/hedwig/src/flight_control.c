@@ -37,6 +37,7 @@ static TaskHandle_t flight_control_task_handle = NULL;
 static SemaphoreHandle_t sensorDataMutex;
 static SemaphoreHandle_t commandDataMutex;
 static SemaphoreHandle_t outputDataMutex;
+static SemaphoreHandle_t modeMutex;
 
 static fe_flight_mode_t flight_control_mode = FE_FLIGHT_MODE_IDLE;
 static bool calibration_required = false;
@@ -71,6 +72,16 @@ static inline void unlock_output_data(void)
   xSemaphoreGive(outputDataMutex);
 }
 
+static inline BaseType_t lock_mode(void)
+{
+  return xSemaphoreTake(modeMutex, RTOS_TIMEOUT_TICKS);
+}
+
+static inline void unlock_mode(void)
+{
+  xSemaphoreGive(modeMutex);
+}
+
 static inline void createSensorDataMutex(void)
 {
   sensorDataMutex = xSemaphoreCreateMutex();
@@ -91,6 +102,14 @@ static inline void createOutputDataMutex(void)
 {
   outputDataMutex = xSemaphoreCreateMutex();
   if (outputDataMutex == NULL) {
+    error_handler();
+  }
+}
+
+static inline void createModeMutex(void)
+{
+  modeMutex = xSemaphoreCreateMutex();
+  if (modeMutex == NULL) {
     error_handler();
   }
 }
@@ -131,19 +150,19 @@ void rt_OneStep(RT_MODEL *const rtM)
         unlock_output_data();
       }
       else {
-        LOG_DEBUG("outputDataMutex take failed\r\n");
+        LOG_WARN("outputDataMutex take failed\r\n");
         error_handler();
       }
       unlock_command_data();
     }
     else {
-      LOG_DEBUG("commandDataMutex take failed\r\n");
+      LOG_WARN("commandDataMutex take failed\r\n");
       error_handler();
     }
     unlock_sensor_data();
   }
   else {
-    LOG_DEBUG("sensorDataMutex take failed\r\n");
+    LOG_WARN("sensorDataMutex take failed\r\n");
     error_handler();
   }
 
@@ -199,14 +218,20 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input)
     unlock_command_data();
   }
   else {
-    LOG_DEBUG("commandDataMutex take failed\r\n");
+    LOG_WARN("commandDataMutex take failed\r\n");
   }
 }
 
 void flight_control_get_outputs(fpr_status_t *status_response)
 {
-  if(lock_output_data() == pdTRUE) {
+  if (lock_mode() == pdTRUE) {
     status_response->status.mode = flight_control_mode;
+    unlock_mode();
+  }
+  else {
+    LOG_WARN("modeMutex take failed\r\n");
+  }
+  if(lock_output_data() == pdTRUE) {
     status_response->status.motor.motor1 = rtY_Throttle[0];
     status_response->status.motor.motor1 = rtY_Throttle[1];
     status_response->status.motor.motor1 = rtY_Throttle[2];
@@ -222,7 +247,7 @@ void flight_control_get_outputs(fpr_status_t *status_response)
     unlock_output_data();
   }
   else {
-    LOG_DEBUG("commandDataMutex take failed\r\n");
+    LOG_WARN("commandDataMutex take failed\r\n");
   }
 }
 
@@ -231,10 +256,7 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
   switch (new_mode) {
     case FE_FLIGHT_MODE_IDLE:
       if (flight_control_mode != FE_FLIGHT_MODE_CALIBRATING) {
-        if (lock_output_data() == pdTRUE) {
-          motors_off();
-          unlock_output_data();
-        }
+        motors_off();   
         flight_control_mode = FE_FLIGHT_MODE_IDLE;
         return FLN_OK;
       }
@@ -247,10 +269,7 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
       break;
     case FE_FLIGHT_MODE_FCS_READY:
       if (flight_control_mode == FE_FLIGHT_MODE_FLY) {
-        if (lock_output_data() == pdTRUE) {
-          motors_off();
-          unlock_output_data();
-        }
+        motors_off();
         flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
         return FLN_OK;
       }
@@ -269,6 +288,16 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
   return FLN_ERR;
 }
 
+fe_flight_mode_t flight_control_get_mode(void)
+{ 
+  fe_flight_mode_t mode;
+  if (lock_mode() == pdTRUE) {
+    mode = flight_control_mode;
+    unlock_mode();
+  }
+  return mode;    
+}
+
 static void flight_control_reset(void)
 {
   if (flight_control_mode != FE_FLIGHT_MODE_FLY) {
@@ -279,19 +308,19 @@ static void flight_control_reset(void)
           unlock_output_data();
         }
         else {
-          LOG_DEBUG("outputDataMutex take failed\r\n");
+          LOG_WARN("outputDataMutex take failed\r\n");
           error_handler();
         }
         unlock_command_data();
       }
       else {
-        LOG_DEBUG("commandDataMutex take failed\r\n");
+        LOG_WARN("commandDataMutex take failed\r\n");
         error_handler();
       }
       unlock_sensor_data();
     }
     else {
-      LOG_DEBUG("sensorDataMutex take failed\r\n");
+      LOG_WARN("sensorDataMutex take failed\r\n");
       error_handler();
     }
   }
@@ -383,6 +412,7 @@ void flight_control_setup(void)
   createSensorDataMutex();
   createCommandDataMutex();
   createOutputDataMutex();
+  createModeMutex();
 }
 
 void flight_control_task_start(void)

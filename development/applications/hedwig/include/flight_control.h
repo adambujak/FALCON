@@ -10,6 +10,7 @@ void flight_control_set_sensor_data(float *gyro_data, float *accel_data, float *
 void flight_control_set_command_data(fpc_flight_control_t *control_input);
 void flight_control_get_outputs(fpr_status_t *status_response);
 int flight_control_set_mode(fe_flight_mode_t new_mode);
+fe_flight_mode_t flight_control_get_mode(void);
 void flight_control_calibrate_sensors(void);
 
 

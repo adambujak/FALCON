@@ -86,6 +86,18 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
   }
 }
 
+static void status_response_get(void)
+{
+  uint8_t length;  
+  uint8_t packet_buffer[MAX_PACKET_SIZE];
+  if (flight_control_get_mode() >= FE_FLIGHT_MODE_FCS_READY) {
+    fpr_status_t status_response;
+    flight_control_get_outputs(&status_response);
+    length = fpr_status_encode(packet_buffer, &status_response);
+    device_com_send_packet(packet_buffer, length);
+  }
+}
+
 static void decoder_init()
 {
   fs_decoder_config_t decoder_config = {.callback = decoder_callback};
@@ -101,6 +113,10 @@ static void rf_tx(void)
 {
   uint32_t now = system_time_get();
   if (system_time_cmp_ms(radio_manager.last_tx_time, now) > RF_TX_INTERVAL_MS) {
+
+    // Appending FCS status to packet queue
+    status_response_get();
+
     uint8_t length;
     uint8_t frame_buffer[MAX_FRAME_SIZE];
     uint8_t packet_buffer[MAX_PACKET_SIZE];
