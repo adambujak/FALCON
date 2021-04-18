@@ -12,7 +12,7 @@
 
 fln_i2c_handle_t i2cHandle;
 
-static bool sensors_calibrating = false;
+static bool calibration_required = false;
 
 #define IMU_SAMPLE_RATE  (100.f)
 #define BARO_SAMPLE_RATE (100.f)
@@ -59,7 +59,7 @@ void IMU_data_ready_cb(void)
 
 void sensors_calibrate(void)
 {
-  sensors_calibrating = true;
+  calibration_required = true;
 }
 
 static void calibrate(void)
@@ -68,7 +68,7 @@ static void calibrate(void)
 
   FLN_ERR_CHECK(fbaro_calibrate());
 
-  sensors_calibrating = false;
+  calibration_required = false;
 }
 
 static void sensors_task(void *pvParameters)
@@ -87,7 +87,7 @@ static void sensors_task(void *pvParameters)
   BaseType_t sensorNotification;
 
   while (1) {
-    if (sensors_calibrating) {
+    if (calibration_required) {
       calibrate();
     }
     /* Wait to be notified of an interrupt. */

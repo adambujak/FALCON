@@ -39,7 +39,7 @@ static SemaphoreHandle_t commandDataMutex;
 static SemaphoreHandle_t outputDataMutex;
 
 static fe_flight_mode_t flight_control_mode = FE_FLIGHT_MODE_IDLE;
-static bool sensors_calibrate_cmd = false;
+static bool calibration_required = false;
 
 static inline BaseType_t lock_sensor_data(void)
 {
@@ -236,13 +236,13 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
           unlock_output_data();
         }
         flight_control_mode = FE_FLIGHT_MODE_IDLE;
-        return 1;
+        return FLN_OK;
       }
       break;
     case FE_FLIGHT_MODE_CALIBRATING:
       if (flight_control_mode <= FE_FLIGHT_MODE_FCS_READY) {
         flight_control_mode = FE_FLIGHT_MODE_CALIBRATING;
-        return 1;
+        return FLN_OK;
       }
       break;
     case FE_FLIGHT_MODE_FCS_READY:
@@ -252,21 +252,21 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
           unlock_output_data();
         }
         flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
-        return 1;
+        return FLN_OK;
       }
       else {
         flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
-        return 1;
+        return FLN_OK;
       }
       break;
     case FE_FLIGHT_MODE_FLY:
       if (flight_control_mode == FE_FLIGHT_MODE_FCS_READY) {
         flight_control_mode = FE_FLIGHT_MODE_FLY;
-        return 1;
+        return FLN_OK;
       }
       break;
   }
-  return 0;
+  return FLN_ERR;
 }
 
 static void flight_control_reset(void)
@@ -302,22 +302,20 @@ static void flight_control_reset(void)
 
 void flight_control_calibrate_sensors(void)
 {
-  sensors_calibrate_cmd = true;
+  calibration_required = true;
 }
 
-static uint8_t calibrate_sensors(void)
+static fe_calib_request_t calibrate_sensors(void)
 {
   fe_flight_mode_t prevMode = flight_control_mode;
-  if (flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING)) {
+  if (flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING) == FLN_OK) {
     sensors_calibrate();
     rtos_delay_ms(3000);
     flight_control_set_mode(prevMode);
     flight_control_reset();
-    return 1;
+    return FE_CALIBRATE;
   }
-  else {
-    return 0;
-  }
+  return FE_CALIBRATE_FAILED;
 }
 
 static void flight_control_task(void *pvParameters)
@@ -330,12 +328,12 @@ static void flight_control_task(void *pvParameters)
 
   while(1)
   { 
-    if (sensors_calibrate_cmd) {
+    if (calibration_required) {
       fpr_calibrate_t response = {calibrate_sensors()};
       uint8_t buffer[MAX_PACKET_SIZE];
       uint8_t length = fpr_calibrate_encode(buffer, &response);
       device_com_send_packet(buffer, length);
-      sensors_calibrate_cmd = false;
+      calibration_required = false;
     }
 
     if (flight_control_mode >= FE_FLIGHT_MODE_FCS_READY) {

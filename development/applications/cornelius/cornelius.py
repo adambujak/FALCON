@@ -106,7 +106,7 @@ class Albus(SerialDevice):
             print("received: radio stats ", radio_stats.to_dict())
         elif (packet_type == fp_type_t.FPT_CALIBRATE_RESPONSE):
             calib_response = fpr_calibrate_t(encoded)
-            if (calib_response.calib):
+            if (calib_response.calib == fe_calib_request_t.FE_CALIBRATE):
                 print("Sensors Calibrating")
             else:
                 print("Calibration Canceled, Check Mode")
@@ -134,13 +134,13 @@ class Albus(SerialDevice):
         fcsControlPacket = fpc_flight_control_t(**kwargs)
         self.write_packet(fcsControlPacket)
 
-    def send_mode(self, mode):
+    def send_fcs_mode(self, mode):
         kwargs = {'mode' : mode}
         fcsModePacket = fpc_fcs_mode_t(**kwargs)
         self.write_packet(fcsModePacket)
 
     def send_calibration_command(self):
-        kwargs = {'calib' : 1}
+        kwargs = {'calib' : fe_calib_request_t.FE_CALIBRATE}
         sensCalibCmd = fpc_calibrate_t(**kwargs)
         self.write_packet(sensCalibCmd)
 
@@ -196,7 +196,7 @@ def main():
             albus.send_radio_stats_query()
         elif user_input == "m":            
             mode_input = fe_flight_mode_t(int(input("enter mode: ")))
-            albus.send_mode(mode_input)
+            albus.send_fcs_mode(mode_input)
         elif user_input == "c":
             albus.send_calibration_command();
         elif user_input == "q":
