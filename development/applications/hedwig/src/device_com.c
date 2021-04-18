@@ -77,6 +77,10 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
       uint8_t length = fpr_test_encode(buffer, &response);
       device_com_send_packet(buffer, length);
     } break;
+    case FPT_CALIBRATE_COMMAND: {
+      LOG_INFO("CALIBRATION COMMAND\r\n");
+      flight_control_calibrate_sensors();
+    }
     default:
       break;
   }

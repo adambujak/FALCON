@@ -5,11 +5,14 @@
 #include "fimu.h"
 #include "fbaro.h"
 #include "flight_control.h"
+#include <stdbool.h>
 
 #include "flightController.h"
 #include "rtwtypes.h"
 
 fln_i2c_handle_t i2cHandle;
+
+static bool sensors_calibrating = false;
 
 #define IMU_SAMPLE_RATE  (100.f)
 #define BARO_SAMPLE_RATE (100.f)
@@ -54,26 +57,39 @@ void IMU_data_ready_cb(void)
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-// static void sensors_calibrate(void)
-// {
-//   FLN_ERR_CHECK(fimu_calibrate_DMP());
+void sensors_calibrate(void)
+{
+  sensors_calibrating = true;
+}
 
-//   // FLN_ERR_CHECK(fimu_calibrate_offset());
+static void calibrate(void)
+{
+  fimu_calibrate(gyro_bias, accel_bias, quat_bias);
 
-//   fimu_calibrate(gyro_bias, accel_bias, quat_bias);
-// }
+  FLN_ERR_CHECK(fbaro_calibrate());
+
+  sensors_calibrating = false;
+}
 
 static void sensors_task(void *pvParameters)
 {
   LOG_DEBUG("SENSORS TASK STARTED\r\n");
 
+  flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING);
+
   FLN_ERR_CHECK(fbaro_calibrate());
   FLN_ERR_CHECK(fimu_start(IMU_config));
-  fimu_calibrate(gyro_bias, accel_bias, quat_bias);
+
+  flight_control_set_mode(FE_FLIGHT_MODE_IDLE);
+
+  rtos_delay_ms(200);
 
   BaseType_t sensorNotification;
 
   while (1) {
+    if (sensors_calibrating) {
+      calibrate();
+    }
     /* Wait to be notified of an interrupt. */
     sensorNotification = xTaskNotifyWait(pdFALSE,
                                          0xFFFFFFFF,
