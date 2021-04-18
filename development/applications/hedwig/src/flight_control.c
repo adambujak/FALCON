@@ -297,7 +297,7 @@ static void flight_control_reset(void)
   }
   else {
     LOG_DEBUG("Cannot reset while flying");
-  }  
+  }
 }
 
 void flight_control_calibrate_sensors(void)
@@ -327,7 +327,7 @@ static void flight_control_task(void *pvParameters)
   BaseType_t flightTimerNotification;
 
   while(1)
-  { 
+  {
     if (calibration_required) {
       fpr_calibrate_t response = {calibrate_sensors()};
       uint8_t buffer[MAX_PACKET_SIZE];

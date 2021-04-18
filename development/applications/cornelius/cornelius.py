@@ -194,7 +194,7 @@ def main():
         elif user_input == "r":
             print("sending radio stats query")
             albus.send_radio_stats_query()
-        elif user_input == "m":            
+        elif user_input == "m":
             mode_input = fe_flight_mode_t(int(input("enter mode: ")))
             albus.send_fcs_mode(mode_input)
         elif user_input == "c":
