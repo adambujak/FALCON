@@ -3,6 +3,9 @@
 #include "falcon_common.h"
 #include "motors.h"
 #include "falcon_packet.h"
+#include "sensors.h"
+#include "device_com.h"
+#include <stdbool.h>
 
 #include "flightController.h"
 #include "rtwtypes.h"
@@ -35,7 +38,8 @@ static SemaphoreHandle_t sensorDataMutex;
 static SemaphoreHandle_t commandDataMutex;
 static SemaphoreHandle_t outputDataMutex;
 
-static fe_falcon_mode_t flight_control_mode = FE_FLIGHT_MODE_IDLE;
+static fe_flight_mode_t flight_control_mode = FE_FLIGHT_MODE_IDLE;
+static bool calibration_required = false;
 
 static inline BaseType_t lock_sensor_data(void)
 {
@@ -222,17 +226,23 @@ void flight_control_get_outputs(fpr_status_t *status_response)
   }
 }
 
-void flight_control_set_mode(fe_falcon_mode_t new_mode)
+int flight_control_set_mode(fe_flight_mode_t new_mode)
 {
   switch (new_mode) {
     case FE_FLIGHT_MODE_IDLE:
-      if (flight_control_mode == FE_FLIGHT_MODE_FCS_READY) {
+      if (flight_control_mode != FE_FLIGHT_MODE_CALIBRATING) {
+        if (lock_output_data() == pdTRUE) {
+          motors_off();
+          unlock_output_data();
+        }
         flight_control_mode = FE_FLIGHT_MODE_IDLE;
+        return FLN_OK;
       }
       break;
     case FE_FLIGHT_MODE_CALIBRATING:
       if (flight_control_mode <= FE_FLIGHT_MODE_FCS_READY) {
         flight_control_mode = FE_FLIGHT_MODE_CALIBRATING;
+        return FLN_OK;
       }
       break;
     case FE_FLIGHT_MODE_FCS_READY:
@@ -242,30 +252,22 @@ void flight_control_set_mode(fe_falcon_mode_t new_mode)
           unlock_output_data();
         }
         flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
+        return FLN_OK;
       }
       else {
         flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
+        return FLN_OK;
       }
       break;
     case FE_FLIGHT_MODE_FLY:
       if (flight_control_mode == FE_FLIGHT_MODE_FCS_READY) {
         flight_control_mode = FE_FLIGHT_MODE_FLY;
+        return FLN_OK;
       }
       break;
   }
+  return FLN_ERR;
 }
-
-// void flight_control_mode_rx(uint8_t *data)
-// {
-//   fpc_mode_t mode_cmd = {};
-//   fpc_mode_decode(data, &mode_cmd);
-//   flight_control_set_mode(mode_cmd.mode);
-
-//   fpr_mode_t mode_res = {
-//     .mode = flight_control_mode
-//   };
-//   device_com_send_packet(&mode, FPT_MODE_RESPONSE);
-// }
 
 static void flight_control_reset(void)
 {
@@ -298,12 +300,26 @@ static void flight_control_reset(void)
   }  
 }
 
+void flight_control_calibrate_sensors(void)
+{
+  calibration_required = true;
+}
+
+static fe_calib_request_t calibrate_sensors(void)
+{
+  fe_flight_mode_t prevMode = flight_control_mode;
+  if (flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING) == FLN_OK) {
+    sensors_calibrate();
+    rtos_delay_ms(3000);
+    flight_control_set_mode(prevMode);
+    flight_control_reset();
+    return FE_CALIBRATE_SUCCESS;
+  }
+  return FE_CALIBRATE_FAILED;
+}
+
 static void flight_control_task(void *pvParameters)
 {
-  vTaskDelay(3000);
-//  while(flight_control_mode < FE_FLIGHT_MODE_FCS_READY) {
-//    vTaskDelay(10);
-//  }
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
@@ -312,7 +328,15 @@ static void flight_control_task(void *pvParameters)
 
   while(1)
   { 
-    if (flight_control_mode >= 0) {
+    if (calibration_required) {
+      fpr_calibrate_t response = {calibrate_sensors()};
+      uint8_t buffer[MAX_PACKET_SIZE];
+      uint8_t length = fpr_calibrate_encode(buffer, &response);
+      device_com_send_packet(buffer, length);
+      calibration_required = false;
+    }
+
+    if (flight_control_mode >= FE_FLIGHT_MODE_FCS_READY) {
       /* Wait to be notified of an interrupt. */
       flightTimerNotification = xTaskNotifyWait(pdFALSE,
                                            0xFFFFFFFF,
@@ -339,6 +363,9 @@ static void flight_control_task(void *pvParameters)
         LOG_DEBUG("timer notif not received\r\n");
         error_handler();
       }
+    }
+    else {
+      rtos_delay_ms(1);
     }
   }
 }

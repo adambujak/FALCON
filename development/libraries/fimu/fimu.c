@@ -375,11 +375,9 @@ void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
   float test_accel[3];
   float test_quat[4];
 
-  float gyro_samples[3];
-  float accel_samples[3];
-  float quat_samples[4];
-
-  rtos_delay_ms(200);
+  float gyro_samples[3] = {0.0F, 0.0F, 0.0F};
+  float accel_samples[3] = {0.0F, 0.0F, 0.0F};
+  float quat_samples[4] = {0.0F, 0.0F, 0.0F, 0.0F};
 
   for (int i = 0; i < samples; i++) {
     fimu_fifo_handler(test_gyro, test_accel, test_quat);

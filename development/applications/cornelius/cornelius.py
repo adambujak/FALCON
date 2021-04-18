@@ -104,6 +104,12 @@ class Albus(SerialDevice):
         elif (packet_type == fp_type_t.FPT_RADIO_STATS_RESPONSE):
             radio_stats = fpr_radio_stats_t(encoded)
             print("received: radio stats ", radio_stats.to_dict())
+        elif (packet_type == fp_type_t.FPT_CALIBRATE_RESPONSE):
+            calib_response = fpr_calibrate_t(encoded)
+            if (calib_response.calib == fe_calib_request_t.FE_CALIBRATE_SUCCESS):
+                print("Sensors Calibrating")
+            else:
+                print("Calibration Canceled, Check Mode")
         else:
             print("decoder callback:", packet_type)
 
@@ -127,6 +133,16 @@ class Albus(SerialDevice):
         kwargs = {'fcsControlCmd': fcsControlInput}
         fcsControlPacket = fpc_flight_control_t(**kwargs)
         self.write_packet(fcsControlPacket)
+
+    def send_fcs_mode(self, mode):
+        kwargs = {'mode' : mode}
+        fcsModePacket = fpc_fcs_mode_t(**kwargs)
+        self.write_packet(fcsModePacket)
+
+    def send_calibration_command(self):
+        kwargs = {'calib' : fe_calib_request_t.FE_CALIBRATE_SUCCESS}
+        sensCalibCmd = fpc_calibrate_t(**kwargs)
+        self.write_packet(sensCalibCmd)
 
     def send_test_query(self):
         kwargs = {}
@@ -171,14 +187,18 @@ def main():
     albus.init_frame_encoder()
 
     while(1):
-        print("enter command:")
-        user_input = input()
+        user_input = input("enter command: ")
         if user_input == "s":
             print("sending test query")
             albus.send_test_query()
         elif user_input == "r":
             print("sending radio stats query")
             albus.send_radio_stats_query()
+        elif user_input == "m":            
+            mode_input = fe_flight_mode_t(int(input("enter mode: ")))
+            albus.send_fcs_mode(mode_input)
+        elif user_input == "c":
+            albus.send_calibration_command();
         elif user_input == "q":
             print("quit")
             quit()
