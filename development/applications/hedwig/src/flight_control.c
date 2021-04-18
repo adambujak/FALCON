@@ -313,7 +313,7 @@ static fe_calib_request_t calibrate_sensors(void)
     rtos_delay_ms(3000);
     flight_control_set_mode(prevMode);
     flight_control_reset();
-    return FE_CALIBRATE;
+    return FE_CALIBRATE_SUCCESS;
   }
   return FE_CALIBRATE_FAILED;
 }
