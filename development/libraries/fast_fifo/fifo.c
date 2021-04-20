@@ -66,3 +66,8 @@ void fifo_drop(fifo_t *fifo, uint32_t length)
     fifo->bytes_available = fifo->bytes_available - length;
   }
 }
+
+uint32_t fifo_available(fifo_t *fifo)
+{
+  return fifo->bytes_available;
+}

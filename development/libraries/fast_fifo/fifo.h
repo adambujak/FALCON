@@ -50,4 +50,10 @@ int fifo_peek(fifo_t *fifo, uint8_t *dest, uint32_t length);
 */
 void fifo_drop(fifo_t *fifo, uint32_t length);
 
+/** Get bytes available in fifo
+ * @param  fifo - pointer to fifo
+ * @retval number of bytes in fifo
+*/
+uint32_t fifo_available(fifo_t *fifo);
+
 #endif // FAST_FIFO_H
