@@ -256,7 +256,7 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
   switch (new_mode) {
     case FE_FLIGHT_MODE_IDLE:
       if (flight_control_mode != FE_FLIGHT_MODE_CALIBRATING) {
-        motors_off();   
+        motors_off();
         flight_control_mode = FE_FLIGHT_MODE_IDLE;
         return FLN_OK;
       }
@@ -289,13 +289,13 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
 }
 
 fe_flight_mode_t flight_control_get_mode(void)
-{ 
+{
   fe_flight_mode_t mode;
   if (lock_mode() == pdTRUE) {
     mode = flight_control_mode;
     unlock_mode();
   }
-  return mode;    
+  return mode;
 }
 
 static void flight_control_reset(void)
