@@ -233,9 +233,9 @@ void flight_control_get_outputs(fpr_status_t *status_response)
   }
   if(lock_output_data() == pdTRUE) {
     status_response->status.motor.motor1 = rtY_Throttle[0];
-    status_response->status.motor.motor1 = rtY_Throttle[1];
-    status_response->status.motor.motor1 = rtY_Throttle[2];
-    status_response->status.motor.motor1 = rtY_Throttle[3];
+    status_response->status.motor.motor2 = rtY_Throttle[1];
+    status_response->status.motor.motor3 = rtY_Throttle[2];
+    status_response->status.motor.motor4 = rtY_Throttle[3];
     status_response->status.states.z = rtY_State_Estim.z;
     status_response->status.states.dz = rtY_State_Estim.dz;
     status_response->status.states.yaw = rtY_State_Estim.yaw;
