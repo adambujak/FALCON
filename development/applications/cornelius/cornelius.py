@@ -22,7 +22,7 @@ class SerialDevice:
         self.stopReadEvent.clear()
         self.readThreadInstance = Thread(target=self.read_thread, args=[])
         self.readThreadInstance.start()
-        self.bufferFlushCount = 32        
+        self.bufferFlushCount = 96
 
     def __del__(self):
         try:
@@ -44,16 +44,18 @@ class SerialDevice:
         while 1:
             if self.read_stopped():
                 break
-            buffer = bytes()            
+            data_buffer = bytes()
             while 1:
                 readData = self.read_raw_char()
                 if readData == bytes(): #empty bytes
-                    self.read_callback(buffer)
+                    # only send if not empty
+                    if data_buffer != bytes():
+                        self.read_callback(data_buffer)
                     break
-                buffer += readData
-                if len(buffer) > self.bufferFlushCount:
-                    self.read_callback(buffer[0:self.bufferFlushCount])
-                    buffer = buffer[self.bufferFlushCount:]
+                data_buffer += readData
+                if len(data_buffer) > self.bufferFlushCount:
+                    self.read_callback(data_buffer[0:self.bufferFlushCount])
+                    data_buffer = data_buffer[self.bufferFlushCount:]
             time.sleep(self.readSleepTime)
 
     def write_bytes(self, byteData):
