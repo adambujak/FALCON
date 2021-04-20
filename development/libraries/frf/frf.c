@@ -106,7 +106,7 @@ void frf_start(frf_t *instance, uint8_t channel, uint8_t payload_len, uint8_t rx
 
   nRF24L01_set_output_power(&instance->rfInstance, NRF24L01_0DBM);
 
-  nRF24L01_set_datarate(&instance->rfInstance, NRF24L01_1MBPS);
+  nRF24L01_set_datarate(&instance->rfInstance, NRF24L01_2MBPS);
 
   nRF24L01_set_crc_mode(&instance->rfInstance, NRF24L01_CRC_8BIT);
 
