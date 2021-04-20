@@ -40,6 +40,7 @@ static void radio_watchdog_timeout(TimerHandle_t xTimer)
   LOG_WARN("Radio RESET TIMEOUT!!\r\n");
   // TODO remove later
   error_handler();
+  LOG_WARN("radio status: %d\r\n", radio_status_get());
   radio_reset();
 }
 

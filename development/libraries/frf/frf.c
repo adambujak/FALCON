@@ -199,3 +199,10 @@ void frf_powerUp(frf_t *instance)
     powerUpTx(instance);
   }
 }
+
+uint8_t frf_getStatus(frf_t *instance)
+{
+  return nRF24L01_nop(&instance->rfInstance);
+}
+
+

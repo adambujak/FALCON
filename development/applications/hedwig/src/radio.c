@@ -50,6 +50,11 @@ static void rf_event_callback(frf_event_t event)
   }
 }
 
+uint32_t radio_status_get(void)
+{
+  return frf_getStatus(&radio);
+}
+
 uint32_t radio_data_send(uint8_t *source, uint32_t length)
 {
   if (length > RF_TX_BUFFER_SIZE) {
