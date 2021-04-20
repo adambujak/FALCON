@@ -18,7 +18,8 @@
 #define RTOS_TIMEOUT_TICKS 25
 #define PACKET_BUFFER_SIZE 256
 #define RX_BUFFER_SIZE     128
-#define RF_TX_INTERVAL_MS  200
+#define RF_TX_INTERVAL_MS  300
+#define STATUS_INTERVAL_MS 800
 
 typedef struct {
   fifo_t packet_fifo;
@@ -26,6 +27,8 @@ typedef struct {
   uint32_t last_tx_time;
   TimerHandle_t watchdog_timer;
 } radio_manager_t;
+
+static uint32_t last_status_process_time;
 
 static radio_manager_t radio_manager;
 static uint8_t decode_buffer[RX_BUFFER_SIZE];
@@ -40,6 +43,7 @@ static void radio_watchdog_timeout(TimerHandle_t xTimer)
   LOG_WARN("Radio RESET TIMEOUT!!\r\n");
   // TODO remove later
   error_handler();
+  LOG_WARN("radio status: %d\r\n", radio_status_get());
   radio_reset();
 }
 
@@ -86,6 +90,24 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
   }
 }
 
+static void status_process(void)
+{
+  uint32_t now = system_time_get();
+  if (system_time_cmp_ms(last_status_process_time, now) < STATUS_INTERVAL_MS) {
+    return;
+  }
+
+  last_status_process_time = now;
+  uint8_t length;
+  uint8_t packet_buffer[MAX_PACKET_SIZE];
+  if (flight_control_get_mode() >= FE_FLIGHT_MODE_FCS_READY) {
+    fpr_status_t status_response;
+    flight_control_get_outputs(&status_response);
+    length = fpr_status_encode(packet_buffer, &status_response);
+    device_com_send_packet(packet_buffer, length);
+  }
+}
+
 static void decoder_init()
 {
   fs_decoder_config_t decoder_config = {.callback = decoder_callback};
@@ -100,56 +122,61 @@ static void encoder_init(void)
 static void rf_tx(void)
 {
   uint32_t now = system_time_get();
-  if (system_time_cmp_ms(radio_manager.last_tx_time, now) > RF_TX_INTERVAL_MS) {
-    uint8_t length;
-    uint8_t frame_buffer[MAX_FRAME_SIZE];
-    uint8_t packet_buffer[MAX_PACKET_SIZE];
+  if (system_time_cmp_ms(radio_manager.last_tx_time, now) < RF_TX_INTERVAL_MS) {
+    return;
+  }
 
-    memset(frame_buffer, 0, MAX_FRAME_SIZE);
-    memset(packet_buffer, 0, MAX_PACKET_SIZE);
+  uint8_t length;
+  uint8_t frame_buffer[MAX_FRAME_SIZE];
+  uint8_t packet_buffer[MAX_PACKET_SIZE];
 
-    ff_encoder_set_buffer(&encoder, frame_buffer);
-    uint32_t packet_cnt = 0;
+  memset(frame_buffer, 0, MAX_FRAME_SIZE);
+  memset(packet_buffer, 0, MAX_PACKET_SIZE);
 
-    while (fifo_peek(&radio_manager.packet_fifo, &length, 1) == 1) {
-      packet_cnt++;
-      // If not enough room in frame, finish up
-      if (length > ff_encoder_get_remaining_bytes(&encoder)) {
-        break;
-      }
-      fifo_drop(&radio_manager.packet_fifo, 1);
+  ff_encoder_set_buffer(&encoder, frame_buffer);
+  uint32_t packet_cnt = 0;
 
-      if (fifo_pop(&radio_manager.packet_fifo, packet_buffer, length) == -1) {
-        LOG_ERROR("Less data than length byte\r\n");
-        return;
-      }
-
-      if (ff_encoder_append_data(&encoder, packet_buffer, length) == FLN_ERR) {
-        LOG_ERROR("Error appending data to frame\r\n");
-        error_handler();
-      }
+  while (fifo_peek(&radio_manager.packet_fifo, &length, 1) == 1) {
+    packet_cnt++;
+    // If not enough room in frame, finish up
+    if (length > ff_encoder_get_remaining_bytes(&encoder)) {
+      break;
     }
+    fifo_drop(&radio_manager.packet_fifo, 1);
 
-    // Don't send empty frame from hedwig to albus
-    if (packet_cnt == 0) {
+    if (fifo_pop(&radio_manager.packet_fifo, packet_buffer, length) == -1) {
+      LOG_ERROR("Less data than length byte\r\n");
       return;
     }
 
-    uint8_t frame_length = ff_encoder_append_footer(&encoder);
-    if (frame_length < FRF_PACKET_SIZE) {
-      memset(frame_buffer + frame_length, 0, FRF_PACKET_SIZE - frame_length);
-      frame_length = FRF_PACKET_SIZE;
+    if (ff_encoder_append_data(&encoder, packet_buffer, length) == FLN_ERR) {
+      LOG_ERROR("Error appending data to frame\r\n");
+      error_handler();
     }
-
-    radio_data_send(frame_buffer, frame_length);
-    radio_manager.last_tx_time = now;
   }
+
+  // Don't send empty frame from hedwig to albus
+  if (packet_cnt == 0) {
+    return;
+  }
+
+  uint8_t frame_length = ff_encoder_append_footer(&encoder);
+  uint8_t mod = frame_length % FRF_PACKET_SIZE;
+
+  if (mod != 0) {
+    memset(frame_buffer + frame_length, 0, FRF_PACKET_SIZE - mod);
+    frame_length += (FRF_PACKET_SIZE - mod);
+  }
+
+  radio_data_send(frame_buffer, frame_length);
+  radio_manager.last_tx_time = now;
 }
 
 static inline void rf_process(void)
 {
   radio_process();
   rf_tx();
+
   uint32_t byte_cnt = radio_rx_cnt_get();
 
   if (byte_cnt == 0) {
@@ -168,6 +195,7 @@ static void device_com_task(void *pvParameters)
   LOG_DEBUG("Device com task started\r\n");
 
   while (1) {
+    status_process();
     rf_process();
     rtos_delay_ms(1);
   }
@@ -191,6 +219,7 @@ void device_com_setup(void)
   decoder_init();
   encoder_init();
   radio_manager.last_tx_time = 0;
+  last_status_process_time = 0;
   ASSERT(fifo_init(&radio_manager.packet_fifo, radio_manager.packet_buffer, PACKET_BUFFER_SIZE) == 0);
 }
 

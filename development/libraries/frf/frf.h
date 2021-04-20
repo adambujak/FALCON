@@ -95,5 +95,6 @@ void frf_finishSending(frf_t *instance);
 void frf_powerUp(frf_t *instance);
 void frf_standby(frf_t *instance);
 void frf_powerDown(frf_t *instance);
+uint8_t frf_getStatus(frf_t *instance);
 
 #endif // FRF_H

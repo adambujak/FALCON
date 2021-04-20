@@ -15,7 +15,7 @@
 
 #define min(a, b)          (((a) > (b)) ? b : a)
 #define RF_TX_SIZE         512
-#define RF_TX_INTERVAL_MS  200
+#define RF_TX_INTERVAL_MS  100
 
 typedef struct {
   uint32_t last_tx_time;
