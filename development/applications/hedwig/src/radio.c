@@ -7,7 +7,7 @@
 #include "radio_common.h"
 
 #define RF_RX_BUFFER_SIZE 512
-#define RF_TX_BUFFER_SIZE 512
+#define RF_TX_BUFFER_SIZE 2048
 
 static uint8_t rx_buffer[RF_RX_BUFFER_SIZE];
 static uint8_t tx_buffer[RF_TX_BUFFER_SIZE];
