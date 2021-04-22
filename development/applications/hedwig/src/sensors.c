@@ -100,7 +100,8 @@ static void sensors_task(void *pvParameters)
       fimu_fifo_handler(gyro_data, accel_data, quat_data);
       for (int i = 0; i < 3; i++) {
         accel_data[i] -= accel_bias[i];
-        gyro_data[i] -= gyro_bias[i];
+        // TODO figure out why calibrate is weird for gyro
+        // gyro_data[i] -= gyro_bias[i];
       }
 
       if (baro_delay_count == BARO_DELAY_COUNT) {
