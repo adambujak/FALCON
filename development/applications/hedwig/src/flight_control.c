@@ -146,7 +146,15 @@ void rt_OneStep(RT_MODEL *const rtM)
   if (lock_sensor_data() == pdTRUE ) {
     if (lock_command_data() == pdTRUE) {
       if (lock_output_data() == pdTRUE) {
+
         flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+        if(flight_control_mode == FE_FLIGHT_MODE_FLY) {
+          motors_set_motor_us(MOTOR_1, rtY_Throttle[0]);
+          motors_set_motor_us(MOTOR_2, rtY_Throttle[1]);
+          motors_set_motor_us(MOTOR_3, rtY_Throttle[2]);
+          motors_set_motor_us(MOTOR_4, rtY_Throttle[3]);
+        }
+        
         unlock_output_data();
       }
       else {
@@ -164,14 +172,6 @@ void rt_OneStep(RT_MODEL *const rtM)
   else {
     LOG_WARN("sensorDataMutex take failed\r\n");
     error_handler();
-  }
-
-  /* Get model outputs here */
-  if(flight_control_mode == FE_FLIGHT_MODE_FLY) {
-    motors_set_motor_us(MOTOR_1, rtY_Throttle[0]);
-    motors_set_motor_us(MOTOR_2, rtY_Throttle[1]);
-    motors_set_motor_us(MOTOR_3, rtY_Throttle[2]);
-    motors_set_motor_us(MOTOR_4, rtY_Throttle[3]);
   }
 
   /* Indicate task complete */

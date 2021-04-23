@@ -616,6 +616,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   /* Sum: '<S6>/Sum' incorporates:
    *  Gain: '<S6>/Gain2'
    */
+  pressureFilter_IIR_tmp = 0; //WARN TODO FIX THIS AFTER STAND TESTING
   rtb_preprocessing_alt_ned -= -pressureFilter_IIR_tmp;
 
   /* Sum: '<S6>/Sum2' incorporates:
