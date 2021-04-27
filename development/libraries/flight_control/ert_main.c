@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'flightController'.
  *
- * Model version                  : 1.113
+ * Model version                  : 1.122
  * Simulink Coder version         : 9.4 (R2020b) 29-Jul-2020
- * C/C++ source code generated on : Sun Mar 14 11:45:49 2021
+ * C/C++ source code generated on : Fri Apr 23 19:30:45 2021
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -30,6 +30,9 @@ static DW rtDW;                        /* Observable states */
 
 /* '<Root>/Commands' */
 static FCS_command_t rtU_Commands;
+
+/* '<Root>/Bias' */
+static sensor_bias_t rtU_Bias;
 
 /* '<Root>/Sensors' */
 static sensor_data_t rtU_Sensors;
@@ -70,8 +73,8 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Set model inputs here */
 
   /* Step the model */
-  flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim,
-                        rtY_Throttle);
+  flightController_step(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors,
+                        &rtY_State_Estim, rtY_Throttle);
 
   /* Get model outputs here */
 
@@ -101,8 +104,8 @@ int_T main(int_T argc, const char *argv[])
   rtM->dwork = &rtDW;
 
   /* Initialize model */
-  flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim,
-    rtY_Throttle);
+  flightController_initialize(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors,
+    &rtY_State_Estim, rtY_Throttle);
 
   /* Attach rt_OneStep to a timer or interrupt service routine with
    * period 0.01 seconds (the model's base sample time) here.  The

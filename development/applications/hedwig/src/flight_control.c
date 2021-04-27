@@ -23,6 +23,9 @@ static FCS_command_t rtU_Commands;
 /* '<Root>/Sensors' */
 static sensor_data_t rtU_Sensors;
 
+/* '<Root>/Bias' */
+static sensor_bias_t rtU_Bias;
+
 /* '<Root>/State_Estim' */
 static states_estimate_t rtY_State_Estim;
 
@@ -147,7 +150,7 @@ void rt_OneStep(RT_MODEL *const rtM)
     if (lock_command_data() == pdTRUE) {
       if (lock_output_data() == pdTRUE) {
 
-        flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+        flightController_step(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
         if(flight_control_mode == FE_FLIGHT_MODE_FLY) {
           motors_set_motor_us(MOTOR_1, rtY_Throttle[0]);
           motors_set_motor_us(MOTOR_2, rtY_Throttle[1]);
@@ -304,7 +307,7 @@ static void flight_control_reset(void)
     if (lock_sensor_data() == pdTRUE ) {
       if (lock_command_data() == pdTRUE) {
         if (lock_output_data() == pdTRUE) {
-          flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+          flightController_initialize(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
           unlock_output_data();
         }
         else {
@@ -340,8 +343,9 @@ static fe_calib_request_t calibrate_sensors(void)
   if (flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING) == FLN_OK) {
     sensors_calibrate();
     rtos_delay_ms(3000);
-    flight_control_set_mode(prevMode);
     flight_control_reset();
+    sensors_get_bias(&rtU_Bias);
+    flight_control_set_mode(prevMode);
     return FE_CALIBRATE_SUCCESS;
   }
   return FE_CALIBRATE_FAILED;
@@ -376,7 +380,7 @@ static void flight_control_task(void *pvParameters)
 
         rt_OneStep(rtM);
 
-        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
+        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u\r\n",
             rtY_State_Estim.z,
             rtY_State_Estim.dz,
             rtY_State_Estim.yaw,
@@ -384,7 +388,11 @@ static void flight_control_task(void *pvParameters)
             rtY_State_Estim.roll,
             rtY_State_Estim.p,
             rtY_State_Estim.q,
-            rtY_State_Estim.r);
+            rtY_State_Estim.r,
+            rtY_Throttle[0],
+            rtY_Throttle[1],
+            rtY_Throttle[2],
+            rtY_Throttle[3]);
 
         rtos_delay_ms(1);
       }
@@ -405,7 +413,7 @@ void flight_control_setup(void)
   rtM->dwork = &rtDW;
 
   /* Initialize model */
-  flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+  flightController_initialize(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
 
   flight_control_timer = xTimerCreate("flight_control_timer", FC_PERIOD_TICKS, pdTRUE, 0, flight_control_callback);
 

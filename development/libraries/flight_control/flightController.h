@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'flightController'.
  *
- * Model version                  : 1.113
+ * Model version                  : 1.122
  * Simulink Coder version         : 9.4 (R2020b) 29-Jul-2020
- * C/C++ source code generated on : Sun Mar 14 11:45:49 2021
+ * C/C++ source code generated on : Fri Apr 23 19:30:45 2021
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -78,6 +78,18 @@ typedef struct {
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_sensor_bias_t_
+#define DEFINED_TYPEDEF_FOR_sensor_bias_t_
+
+typedef struct {
+  real32_T gyro_bias[3];
+  real32_T accel_bias[3];
+  real32_T quat_bias[4];
+  real32_T alt_bias;
+} sensor_bias_t;
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_sensor_data_t_
 #define DEFINED_TYPEDEF_FOR_sensor_data_t_
 
@@ -94,9 +106,9 @@ typedef struct {
 typedef struct {
   real_T Filter_DSTATE;                /* '<S88>/Filter' */
   real32_T FIR_IMUaccel_states[15];    /* '<S212>/FIR_IMUaccel' */
-  real32_T pressureFilter_IIR_states[3];/* '<S212>/pressureFilter_IIR' */
   real32_T FIR_IMUgyro_states[10];     /* '<S212>/FIR_IMUgyro' */
   real32_T IIR_IMUgyro_r_states[5];    /* '<S212>/IIR_IMUgyro_r' */
+  real32_T pressureFilter_IIR_states[3];/* '<S212>/pressureFilter_IIR' */
   real32_T altitude_delay0_DSTATE;     /* '<S210>/altitude_delay0' */
   real32_T UD_DSTATE;                  /* '<S213>/UD' */
   real32_T altitude_delay_DSTATE;      /* '<S210>/altitude_delay' */
@@ -140,6 +152,7 @@ struct tag_RTM {
 /* External data declarations for dependent source files */
 extern const states_estimate_t flightController_rtZstates_estimate_t;/* states_estimate_t ground */
 extern const FCS_command_t flightController_rtZFCS_command;/* FCS_command_t ground */
+extern const sensor_bias_t flightController_rtZsensor_bias;/* sensor_bias_t ground */
 extern const sensor_data_t flightController_rtZsensor_data;/* sensor_data_t ground */
 
 /* Constant parameters (default storage) */
@@ -147,11 +160,11 @@ extern const ConstP rtConstP;
 
 /* Model entry point functions */
 extern void flightController_initialize(RT_MODEL *const rtM, FCS_command_t
-  *rtU_Commands, sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim,
-  uint16_T rtY_Throttle[4]);
+  *rtU_Commands, sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors,
+  states_estimate_t *rtY_State_Estim, uint16_T rtY_Throttle[4]);
 extern void flightController_step(RT_MODEL *const rtM, FCS_command_t
-  *rtU_Commands, sensor_data_t *rtU_Sensors, states_estimate_t *rtY_State_Estim,
-  uint16_T rtY_Throttle[4]);
+  *rtU_Commands, sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors,
+  states_estimate_t *rtY_State_Estim, uint16_T rtY_Throttle[4]);
 
 /*-
  * These blocks were eliminated from the model due to optimizations:
@@ -412,6 +425,25 @@ extern void flightController_step(RT_MODEL *const rtM, FCS_command_t
  * '<S234>' : 'flightController/StatesEstimator/OrientationEstimator/orientation_quat2RPY/Angle Calculation/Protect asincos input/If Action Subsystem2'
  * '<S235>' : 'flightController/StatesEstimator/OrientationEstimator/orientation_quat2RPY/Quaternion Normalize/Quaternion Modulus'
  * '<S236>' : 'flightController/StatesEstimator/OrientationEstimator/orientation_quat2RPY/Quaternion Normalize/Quaternion Modulus/Quaternion Norm'
+ * '<S237>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_RPY2quat'
+ * '<S238>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias'
+ * '<S239>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens'
+ * '<S240>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias/Angle Calculation'
+ * '<S241>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias/Quaternion Normalize'
+ * '<S242>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias/Angle Calculation/Protect asincos input'
+ * '<S243>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias/Angle Calculation/Protect asincos input/If Action Subsystem'
+ * '<S244>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias/Angle Calculation/Protect asincos input/If Action Subsystem1'
+ * '<S245>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias/Angle Calculation/Protect asincos input/If Action Subsystem2'
+ * '<S246>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias/Quaternion Normalize/Quaternion Modulus'
+ * '<S247>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYbias/Quaternion Normalize/Quaternion Modulus/Quaternion Norm'
+ * '<S248>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens/Angle Calculation'
+ * '<S249>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens/Quaternion Normalize'
+ * '<S250>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens/Angle Calculation/Protect asincos input'
+ * '<S251>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens/Angle Calculation/Protect asincos input/If Action Subsystem'
+ * '<S252>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens/Angle Calculation/Protect asincos input/If Action Subsystem1'
+ * '<S253>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens/Angle Calculation/Protect asincos input/If Action Subsystem2'
+ * '<S254>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens/Quaternion Normalize/Quaternion Modulus'
+ * '<S255>' : 'flightController/StatesEstimator/SensorPreprocessing/preprocessing_quat2RPYsens/Quaternion Normalize/Quaternion Modulus/Quaternion Norm'
  */
 #endif                                 /* RTW_HEADER_flightController_h_ */
 

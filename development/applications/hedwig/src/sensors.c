@@ -15,7 +15,7 @@ fln_i2c_handle_t i2cHandle;
 static bool calibration_required = false;
 
 #define IMU_SAMPLE_RATE  (100.f)
-#define BARO_SAMPLE_RATE (100.f)
+#define BARO_SAMPLE_RATE (10.f)
 
 #define BARO_DELAY_COUNT (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)
 
@@ -23,7 +23,7 @@ int baro_delay_count = BARO_DELAY_COUNT;
 
 static float gyro_bias[3] = {0.0F, 0.0F, 0.0F};
 static float accel_bias[3] = {0.0F, 0.0F, 0.0F};
-static float quat_bias[4] = {0.0F, 0.0F, 0.0F, 0.0F};
+static float quat_bias[4] = {1.0F, 0.0F, 0.0F, 0.0F};
 
 static float gyro_data[3] = {0.0F, 0.0F, 0.0F};
 static float accel_data[3] = {0.0F, 0.0F, 0.0F};
@@ -62,6 +62,14 @@ void sensors_calibrate(void)
   calibration_required = true;
 }
 
+void sensors_get_bias(sensor_bias_t *bias)
+{
+  memcpy(bias->gyro_bias, gyro_bias, sizeof(bias->gyro_bias));
+  memcpy(bias->accel_bias, accel_bias, sizeof(bias->accel_bias));
+  memcpy(bias->quat_bias, quat_bias, sizeof(bias->quat_bias)); 
+  // bias->alt_bias = 0;
+}
+
 static void calibrate(void)
 {
   fimu_calibrate(gyro_bias, accel_bias, quat_bias);
@@ -98,10 +106,6 @@ static void sensors_task(void *pvParameters)
 
     if (sensorNotification == pdPASS) {
       fimu_fifo_handler(gyro_data, accel_data, quat_data);
-      for (int i = 0; i < 3; i++) {
-        accel_data[i] -= accel_bias[i];
-        // gyro_data[i] -= gyro_bias[i];
-      }
 
       if (baro_delay_count == BARO_DELAY_COUNT) {
         fbaro_get_altitude(&alt_data);
