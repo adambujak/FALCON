@@ -29,28 +29,28 @@ int fbaro_init(fbaro_config_t *config)
   float sample_delay_ms = (1000/config->sample_rate);
 
   if (sample_delay_ms < 10) {
-    barometer.sample_setting = SR1;
+    barometer.sample_setting = SR1 >> 3;
   }
   else if (sample_delay_ms >= 10 && sample_delay_ms < 18) {
-    barometer.sample_setting = SR2;
+    barometer.sample_setting = SR2 >> 3;
   }
   else if (sample_delay_ms >= 18 && sample_delay_ms < 34) {
-    barometer.sample_setting = SR3;
+    barometer.sample_setting = SR3 >> 3;
   }
   else if (sample_delay_ms >= 34 && sample_delay_ms < 66) {
-    barometer.sample_setting = SR4;
+    barometer.sample_setting = SR4 >> 3;
   }
   else if (sample_delay_ms >= 66 && sample_delay_ms < 130) {
-    barometer.sample_setting = SR5;
+    barometer.sample_setting = SR5 >> 3;
   }
   else if (sample_delay_ms >= 130 && sample_delay_ms < 258) {
-    barometer.sample_setting = SR6;
+    barometer.sample_setting = SR6 >> 3;
   }
   else if (sample_delay_ms >= 258 && sample_delay_ms < 512) {
-    barometer.sample_setting = SR7;
+    barometer.sample_setting = SR7 >> 3;
   }
   else {
-    barometer.sample_setting = SR8;
+    barometer.sample_setting = SR8 >> 3;
   }
 
   MPL3115A2_OutputSampleRate(barometer.sample_setting);
@@ -71,11 +71,11 @@ int fbaro_calibrate(void)
 
   LOG_DEBUG("Starting Altitude Cal\r\n");
 
-  MPL3115A2_OutputSampleRate(SR3);
+  MPL3115A2_OutputSampleRate(SR5>>3);
 
   rtos_delay_ms(50);
 
-  int samples = 25;
+  int samples = 10;
 
   float test_data = 0;
 
@@ -90,7 +90,7 @@ int fbaro_calibrate(void)
     else {
       i--;
     }
-    rtos_delay_ms(20);
+    rtos_delay_ms(100);
   }
 
   barometer.start_alt = test_data/samples;
