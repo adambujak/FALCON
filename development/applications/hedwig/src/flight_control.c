@@ -3,6 +3,7 @@
 #include "falcon_common.h"
 #include "motors.h"
 #include "falcon_packet.h"
+#include "fp_encode.h"
 #include "sensors.h"
 #include "device_com.h"
 #include <stdbool.h>
@@ -353,6 +354,11 @@ static fe_calib_request_t calibrate_sensors(void)
 
 static void flight_control_task(void *pvParameters)
 {
+
+  PID_pitch_P = 400;
+  PID_pitch_I = 0;//0.100771897F;
+  PID_pitch_D = 400;//.0599954486F;
+  PID_pitch_N = 0;//200;
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);

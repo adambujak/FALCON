@@ -66,7 +66,7 @@ void sensors_get_bias(sensor_bias_t *bias)
 {
   memcpy(bias->gyro_bias, gyro_bias, sizeof(bias->gyro_bias));
   memcpy(bias->accel_bias, accel_bias, sizeof(bias->accel_bias));
-  memcpy(bias->quat_bias, quat_bias, sizeof(bias->quat_bias)); 
+  // memcpy(bias->quat_bias, quat_bias, sizeof(bias->quat_bias));
   // bias->alt_bias = 0;
 }
 
@@ -106,6 +106,10 @@ static void sensors_task(void *pvParameters)
 
     if (sensorNotification == pdPASS) {
       fimu_fifo_handler(gyro_data, accel_data, quat_data);
+
+      gyro_data[0] = 0;
+      gyro_data[1] = 0;
+      gyro_data[2] = 0;
 
       if (baro_delay_count == BARO_DELAY_COUNT) {
         fbaro_get_altitude(&alt_data);
