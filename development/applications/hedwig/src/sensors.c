@@ -107,10 +107,6 @@ static void sensors_task(void *pvParameters)
     if (sensorNotification == pdPASS) {
       fimu_fifo_handler(gyro_data, accel_data, quat_data);
 
-      gyro_data[0] = 0;
-      gyro_data[1] = 0;
-      gyro_data[2] = 0;
-
       if (baro_delay_count == BARO_DELAY_COUNT) {
         fbaro_get_altitude(&alt_data);
         baro_delay_count = 0;
