@@ -14,7 +14,7 @@ fln_i2c_handle_t i2cHandle;
 
 static bool calibration_required = false;
 
-#define IMU_SAMPLE_RATE  (100.f)
+#define IMU_SAMPLE_RATE  (200.f)
 #define BARO_SAMPLE_RATE (10.f)
 
 #define BARO_DELAY_COUNT (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)

@@ -355,15 +355,15 @@ static fe_calib_request_t calibrate_sensors(void)
 static void flight_control_task(void *pvParameters)
 {
 
-PID_alt_P = 0;//0.64F;
-PID_alt_D = 0;//0.24F;
+  PID_alt_P = 0;//0.64F;
+  PID_alt_D = 0;//0.24F;
 
-PID_pitch_P = 2;
-PID_pitch_roll_I = 0.03F;
-PID_pitch_D = 0.1;
+  PID_pitch_P = 4;
+  PID_pitch_roll_I = 0.06F;
+  PID_pitch_D = 0.2;
 
-PID_yaw_P = 0;//0.1F;
-PID_yaw_D = 0;//0.14F;
+  PID_yaw_P = 0;//0.1F;
+  PID_yaw_D = 0;//0.14F;
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
