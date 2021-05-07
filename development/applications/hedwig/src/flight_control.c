@@ -226,6 +226,23 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input)
   }
 }
 
+void flight_control_set_controller_params(fpc_controller_params_t *controller_input)
+{
+  if(lock_command_data() == pdTRUE) {
+    PID_alt_P = controller_input->fcsPID.PID_alt_P;
+    PID_alt_D = controller_input->fcsPID.PID_alt_D;
+    PID_pitch_P = controller_input->fcsPID.PID_pitch_P;
+    PID_pitch_roll_I = controller_input->fcsPID.PID_pitch_roll_I;
+    PID_pitch_D = controller_input->fcsPID.PID_pitch_D;
+    PID_yaw_P = controller_input->fcsPID.PID_yaw_P;
+    PID_yaw_D = controller_input->fcsPID.PID_yaw_D;
+    unlock_command_data();
+  }
+  else {
+    LOG_WARN("commandDataMutex take failed\r\n");
+  }
+}
+
 void flight_control_get_outputs(fpr_status_t *status_response)
 {
   if (lock_mode() == pdTRUE) {
@@ -358,9 +375,9 @@ static void flight_control_task(void *pvParameters)
   PID_alt_P = 0;//0.64F;
   PID_alt_D = 0;//0.24F;
 
-  PID_pitch_P = 4;
-  PID_pitch_roll_I = 0.06F;
-  PID_pitch_D = 0.2;
+  PID_pitch_P = 3.7;
+  PID_pitch_roll_I = 0.1;
+  PID_pitch_D = 0.25;
 
   PID_yaw_P = 0;//0.1F;
   PID_yaw_D = 0;//0.14F;
@@ -391,7 +408,7 @@ static void flight_control_task(void *pvParameters)
 
         rt_OneStep(rtM);
 
-        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u\r\n",
+        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u Z_PD: %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n",
             rtY_State_Estim.z,
             rtY_State_Estim.dz,
             rtY_State_Estim.yaw,
@@ -403,7 +420,14 @@ static void flight_control_task(void *pvParameters)
             rtY_Throttle[0],
             rtY_Throttle[1],
             rtY_Throttle[2],
-            rtY_Throttle[3]);
+            rtY_Throttle[3],
+            PID_alt_P,
+            PID_alt_D,
+            PID_pitch_P,
+            PID_pitch_roll_I,
+            PID_pitch_D,
+            PID_yaw_P,
+            PID_yaw_D);
 
         rtos_delay_ms(1);
       }
