@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'flightController'.
  *
- * Model version                  : 1.139
+ * Model version                  : 1.143
  * Simulink Coder version         : 9.4 (R2020b) 29-Jul-2020
- * C/C++ source code generated on : Wed Apr 28 16:02:10 2021
+ * C/C++ source code generated on : Mon May 17 19:59:13 2021
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -162,6 +162,9 @@ extern const ConstP rtConstP;
  * these parameters and exports their symbols.
  *
  */
+extern real32_T Alt_Hover_Const;       /* Variable: Alt_Hover_Const
+                                        * Referenced by: '<S6>/Constant'
+                                        */
 extern real32_T PID_alt_D;             /* Variable: PID_alt_D
                                         * Referenced by: '<S6>/Alt_D_Gain'
                                         */
