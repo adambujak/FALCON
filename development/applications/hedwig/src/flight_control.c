@@ -33,6 +33,9 @@ static states_estimate_t rtY_State_Estim;
 /* '<Root>/Throttle' */
 static uint16_T rtY_Throttle[4];
 
+static bool spin_up_flag = false;
+static int spin_up_counter = 0;
+
 static TimerHandle_t flight_control_timer;
 static BaseType_t FC_timerStatus;
 
@@ -153,6 +156,14 @@ void rt_OneStep(RT_MODEL *const rtM)
 
         flightController_step(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
         if(flight_control_mode == FE_FLIGHT_MODE_FLY) {
+
+          if (spin_up_flag) {
+            for (int i=0; i<=3; i++) {
+              if (rtY_Throttle[i] > (spin_up_counter*10)) {
+                rtY_Throttle[i] = spin_up_counter*10;
+              }
+            }
+          }          
           motors_set_motor_us(MOTOR_1, rtY_Throttle[0]);
           motors_set_motor_us(MOTOR_2, rtY_Throttle[1]);
           motors_set_motor_us(MOTOR_3, rtY_Throttle[2]);
@@ -272,53 +283,6 @@ void flight_control_get_outputs(fpr_status_t *status_response)
   }
 }
 
-int flight_control_set_mode(fe_flight_mode_t new_mode)
-{
-  switch (new_mode) {
-    case FE_FLIGHT_MODE_IDLE:
-      if (flight_control_mode != FE_FLIGHT_MODE_CALIBRATING) {
-        motors_off();
-        flight_control_mode = FE_FLIGHT_MODE_IDLE;
-        return FLN_OK;
-      }
-      break;
-    case FE_FLIGHT_MODE_CALIBRATING:
-      if (flight_control_mode <= FE_FLIGHT_MODE_FCS_READY) {
-        flight_control_mode = FE_FLIGHT_MODE_CALIBRATING;
-        return FLN_OK;
-      }
-      break;
-    case FE_FLIGHT_MODE_FCS_READY:
-      if (flight_control_mode == FE_FLIGHT_MODE_FLY) {
-        motors_off();
-        flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
-        return FLN_OK;
-      }
-      else {
-        flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
-        return FLN_OK;
-      }
-      break;
-    case FE_FLIGHT_MODE_FLY:
-      if (flight_control_mode == FE_FLIGHT_MODE_FCS_READY) {
-        flight_control_mode = FE_FLIGHT_MODE_FLY;
-        return FLN_OK;
-      }
-      break;
-  }
-  return FLN_ERR;
-}
-
-fe_flight_mode_t flight_control_get_mode(void)
-{
-  fe_flight_mode_t mode;
-  if (lock_mode() == pdTRUE) {
-    mode = flight_control_mode;
-    unlock_mode();
-  }
-  return mode;
-}
-
 static void flight_control_reset(void)
 {
   if (flight_control_mode != FE_FLIGHT_MODE_FLY) {
@@ -350,6 +314,55 @@ static void flight_control_reset(void)
   }
 }
 
+int flight_control_set_mode(fe_flight_mode_t new_mode)
+{
+  switch (new_mode) {
+    case FE_FLIGHT_MODE_IDLE:
+      if (flight_control_mode != FE_FLIGHT_MODE_CALIBRATING) {
+        motors_off();
+        flight_control_mode = FE_FLIGHT_MODE_IDLE;
+        return FLN_OK;
+      }
+      break;
+    case FE_FLIGHT_MODE_CALIBRATING:
+      if (flight_control_mode <= FE_FLIGHT_MODE_FCS_READY) {
+        flight_control_mode = FE_FLIGHT_MODE_CALIBRATING;
+        return FLN_OK;
+      }
+      break;
+    case FE_FLIGHT_MODE_FCS_READY:
+      if (flight_control_mode == FE_FLIGHT_MODE_FLY) {
+        motors_off();
+        flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
+        return FLN_OK;
+      }
+      else {
+        flight_control_mode = FE_FLIGHT_MODE_FCS_READY;
+        return FLN_OK;
+      }
+      break;
+    case FE_FLIGHT_MODE_FLY:
+      if (flight_control_mode == FE_FLIGHT_MODE_FCS_READY) {
+        flight_control_reset();
+        flight_control_mode = FE_FLIGHT_MODE_FLY;        
+        spin_up_flag = true;
+        return FLN_OK;
+      }
+      break;
+  }
+  return FLN_ERR;
+}
+
+fe_flight_mode_t flight_control_get_mode(void)
+{
+  fe_flight_mode_t mode;
+  if (lock_mode() == pdTRUE) {
+    mode = flight_control_mode;
+    unlock_mode();
+  }
+  return mode;
+}
+
 void flight_control_calibrate_sensors(void)
 {
   calibration_required = true;
@@ -375,12 +388,14 @@ static void flight_control_task(void *pvParameters)
   PID_alt_P = 0;//0.64F;
   PID_alt_D = 0;//0.24F;
 
-  PID_pitch_P = 3.7;
-  PID_pitch_roll_I = 0.1;
-  PID_pitch_D = 0.25;
+  PID_pitch_P = 3.6;
+  PID_pitch_roll_I = 0.2;
+  PID_pitch_D = 0.18;
 
   PID_yaw_P = 0;//0.1F;
   PID_yaw_D = 0;//0.14F;
+
+  // Alt_Hover_Const *= 1.03;
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
@@ -407,6 +422,16 @@ static void flight_control_task(void *pvParameters)
       if (flightTimerNotification == pdPASS) {
 
         rt_OneStep(rtM);
+
+        if (spin_up_flag == true) {
+          if (spin_up_counter <= 100) {
+            spin_up_counter++;
+          }
+          else {
+            spin_up_counter = 0;
+            spin_up_flag = false;
+          }
+        }
 
         LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u Z_PD: %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n",
             rtY_State_Estim.z,
