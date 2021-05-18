@@ -163,11 +163,11 @@ int fimu_start(fimu_config_t config)
   // result |= inv_set_accel_fullscale(config.accel_fsr);
   result |= inv_enable_sensor(ANDROID_SENSOR_GYROSCOPE, 1);
   result |= inv_enable_sensor(ANDROID_SENSOR_LINEAR_ACCELERATION, 1);
-  result |= inv_enable_sensor(ANDROID_SENSOR_ROTATION_VECTOR, 1);
+  result |= inv_enable_sensor(ANDROID_SENSOR_GAME_ROTATION_VECTOR, 1);
   unsigned short data_output_delay_ms = (unsigned short)(1125 / config.output_data_rate);
   result |= inv_set_odr(ANDROID_SENSOR_GYROSCOPE, data_output_delay_ms);
   result |= inv_set_odr(ANDROID_SENSOR_LINEAR_ACCELERATION, data_output_delay_ms);
-  result |= inv_set_odr(ANDROID_SENSOR_ROTATION_VECTOR, data_output_delay_ms);
+  result |= inv_set_odr(ANDROID_SENSOR_GAME_ROTATION_VECTOR, data_output_delay_ms);
 
   uint8_t gyro_config_1;
   uint8_t accel_config_1;
@@ -267,6 +267,12 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
           linAccFloat[0] = inv_q16_to_float(linAccQ16[0]);
           linAccFloat[1] = inv_q16_to_float(linAccQ16[1]);
           linAccFloat[2] = inv_q16_to_float(linAccQ16[2]);
+
+          inv_convert_rotation_vector(long_quat, rv_float);
+          quat_float[0] = rv_float[0];
+          quat_float[1] = -rv_float[3];
+          quat_float[2] = rv_float[2];
+          quat_float[3] = -rv_float[1];
         }  // header & QUAT6_SET
 
         if (header & QUAT9_SET) {
