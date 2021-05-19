@@ -184,31 +184,38 @@ def quit():
     exit(0)
 
 def main():
-    ports = serial.tools.list_ports.comports()
-    # Delete bluetooth port
-    for i in range(len(ports)):
-        if "Bluetooth" in ports[i].name:
-            ports.pop(i)
-            break
-
-    if len(ports) == 1:
-        selectedPort = 0
-        print("Using port: {}".format(ports[0].name))
-
-    else:
-        for i in range(len(ports)):
-            print("{}: {}".format(i+1, ports[i].name))
-
-        print("Which serial port do you want to use?")
-        selectedPort = int(input()) - 1
-
-    serialPort = ports[selectedPort].device
 
     global albus
-    albus = Albus(serialPort, 115200, 1)
+
+    try:
+        albus = Albus("/dev/cu.usbmodem1463303", 115200, 1)
+        print("Connected to Albus")
+    except:
+        ports = serial.tools.list_ports.comports()
+        # Delete bluetooth port
+        for i in range(len(ports)):
+            if "Bluetooth" in ports[i].name:
+                ports.pop(i)
+                break
+
+        if len(ports) == 1:
+            selectedPort = 0
+            print("Using port: {}".format(ports[0].name))
+
+        else:
+            for i in range(len(ports)):
+                print("{}: {}".format(i+1, ports[i].name))
+
+            print("Which serial port do you want to use?")
+            selectedPort = int(input()) - 1
+
+        serialPort = ports[selectedPort].device
+
+        albus = Albus(serialPort, 115200, 1)
+
     albus.init_frame_encoder()
 
-    yaw = -1.5707963268
+    yaw = 0
     pitch = 0
     roll = 0
     alt = 0
