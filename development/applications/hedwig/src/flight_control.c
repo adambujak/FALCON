@@ -4,6 +4,7 @@
 #include "motors.h"
 #include "falcon_packet.h"
 #include "fp_encode.h"
+#include "fp_decode.h"
 #include "sensors.h"
 #include "device_com.h"
 #include <stdbool.h>
@@ -237,16 +238,33 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input)
   }
 }
 
-void flight_control_set_controller_params(fpc_controller_params_t *controller_input)
+void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType)
 {
   if(lock_command_data() == pdTRUE) {
-    PID_alt_P = controller_input->fcsPID.PID_alt_P;
-    PID_alt_D = controller_input->fcsPID.PID_alt_D;
-    PID_pitch_P = controller_input->fcsPID.PID_pitch_P;
-    PID_pitch_roll_I = controller_input->fcsPID.PID_pitch_roll_I;
-    PID_pitch_D = controller_input->fcsPID.PID_pitch_D;
-    PID_yaw_P = controller_input->fcsPID.PID_yaw_P;
-    PID_yaw_D = controller_input->fcsPID.PID_yaw_D;
+    switch (packetType) {
+      case FPT_ATTITUDE_PARAMS_COMMAND: {
+        fpc_attitude_params_t attParams = {};
+        fpc_attitude_params_decode(data, &attParams);
+        PID_pitch_P = attParams.fcsAttParams.PID_pitch_P;
+        PID_pitch_roll_I = attParams.fcsAttParams.PID_pitch_roll_I;
+        PID_pitch_D = attParams.fcsAttParams.PID_pitch_D;
+      } break;
+      case FPT_YAW_PARAMS_COMMAND: {
+        fpc_yaw_params_t yawParams = {};
+        fpc_yaw_params_decode(data, &yawParams);
+        PID_yaw_P = yawParams.fcsYawParams.PID_yaw_P;
+        PID_yaw_D = yawParams.fcsYawParams.PID_yaw_D;
+      } break;
+      case FPT_ALT_PARAMS_COMMAND: {
+        fpc_alt_params_t altParams = {};
+        fpc_alt_params_decode(data, &altParams);
+        PID_alt_P = altParams.fcsAltParams.PID_alt_P;
+        PID_alt_D = altParams.fcsAltParams.PID_alt_D;
+        Alt_Hover_Const = altParams.fcsAltParams.Alt_Hover_Const;
+      } break;
+    default:
+      break;
+  }
     unlock_command_data();
   }
   else {

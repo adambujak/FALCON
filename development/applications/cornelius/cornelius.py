@@ -144,20 +144,16 @@ class Albus(SerialDevice):
         fcsControlPacket = fpc_flight_control_t(**kwargs)
         self.write_packet(fcsControlPacket)
 
-    def send_params(self, alt_Kp, alt_Kd, att_Kp, att_Ki, att_Kd, yaw_Kp, yaw_Kd):
+    def send_att_params(self, att_Kp, att_Ki, att_Kd):
         kwargs = {
-            'PID_alt_P' : alt_Kp,
-            'PID_alt_D' : alt_Kd,
             'PID_pitch_P' : att_Kp,
             'PID_pitch_roll_I' : att_Ki,
             'PID_pitch_D' : att_Kd,
-            'PID_yaw_P' : yaw_Kp,
-            'PID_yaw_D' : yaw_Kd
         }
-        fcsParamInput = ft_fcs_controller_params_t(**kwargs)
+        fcsParamInput = ft_fcs_att_control_params_t(**kwargs)
 
-        kwargs = {'fcsPID': fcsParamInput}
-        fcsParamPacket = fpc_controller_params_t(**kwargs)
+        kwargs = {'fcsAttParams': fcsParamInput}
+        fcsParamPacket = fpc_attitude_params_t(**kwargs)
         self.write_packet(fcsParamPacket)
 
     def send_fcs_mode(self, mode):
@@ -234,10 +230,8 @@ def main():
             yaw, pitch, roll, alt = [float(i) for i in input("enter fcs input: ").split()]
             albus.send_control(yaw, pitch, roll, alt)
         elif user_input == "p":
-            # alt_Kp, alt_Kd, att_Kp, att_Ki, att_Kd, yaw_Kp, yaw_Kd = [float(i) for i in input("enter controller params: ").split()]
-            # albus.send_params(alt_Kp, alt_Kd, att_Kp, att_Ki, att_Kd, yaw_Kp, yaw_Kd)
             att_Kp, att_Ki, att_Kd = [float(i) for i in input("enter controller params: ").split()]
-            albus.send_params(0, 0, att_Kp, att_Ki, att_Kd, 0, 0)
+            albus.send_att_params(att_Kp, att_Ki, att_Kd)
         elif user_input == "q":
             print("quit")
             quit()

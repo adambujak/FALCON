@@ -68,18 +68,11 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
                 controlInput.fcsControlCmd.roll,
                 controlInput.fcsControlCmd.alt);
     } break;
-    case FPT_CONTROLLER_PARAMS_COMMAND: {
-      fpc_controller_params_t controllerParams = {};
-      fpc_controller_params_decode(data, &controllerParams);
-      flight_control_set_controller_params(&controllerParams);
-      LOG_INFO("CONTROLLER PARAMS: %f, %f, %f, %f, %f, %f, %f\r\n",
-                controllerParams.fcsPID.PID_alt_P,
-                controllerParams.fcsPID.PID_alt_D,
-                controllerParams.fcsPID.PID_pitch_P,
-                controllerParams.fcsPID.PID_pitch_roll_I,
-                controllerParams.fcsPID.PID_pitch_D,
-                controllerParams.fcsPID.PID_yaw_P,
-                controllerParams.fcsPID.PID_yaw_D);
+    case FPT_ATTITUDE_PARAMS_COMMAND:
+    case FPT_YAW_PARAMS_COMMAND: 
+    case FPT_ALT_PARAMS_COMMAND: {
+      LOG_INFO("PARAMETER UPDATE COMMAND\r\n");
+      flight_control_set_controller_params(data, packetType);
     } break;
     case FPT_FCS_MODE_COMMAND: {
       fpc_fcs_mode_t fcsMode = {};
