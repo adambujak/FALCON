@@ -187,11 +187,17 @@ def main():
 
     global albus
 
-    try:
-        albus = Albus("/dev/cu.usbmodem1463303", 115200, 1)
-        print("Connected to Albus")
-    except:
-        ports = serial.tools.list_ports.comports()
+    connected = False
+    ports = serial.tools.list_ports.comports()
+
+    for i in range(len(ports)):
+        if ports[i].product == "STM32 STLink":
+            albus = Albus(ports[i].device, 115200, 1)
+            connected = True
+            print("Connected to Albus")
+            break
+
+    if connected == False:
         # Delete bluetooth port
         for i in range(len(ports)):
             if "Bluetooth" in ports[i].name:
