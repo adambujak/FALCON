@@ -157,7 +157,8 @@ class Albus(SerialDevice):
         self.write_packet(fcsParamPacket)
 
     def send_fcs_mode(self, mode):
-        kwargs = {'mode' : mode}
+        _mode = fe_flight_mode_t(mode)
+        kwargs = {'mode' : _mode}
         fcsModePacket = fpc_fcs_mode_t(**kwargs)
         self.write_packet(fcsModePacket)
 
@@ -220,33 +221,3 @@ def main():
         albus = Albus(serialPort, 115200, 1)
 
     albus.init_frame_encoder()
-
-    yaw = 0
-    pitch = 0
-    roll = 0
-    alt = 0
-
-    while(1):
-        user_input = input("enter command: ")
-        if user_input == "s":
-            print("sending test query")
-            albus.send_test_query()
-        elif user_input == "r":
-            print("sending radio stats query")
-            albus.send_radio_stats_query()
-        elif user_input == "m":
-            mode_input = fe_flight_mode_t(int(input("enter mode: ")))
-            albus.send_fcs_mode(mode_input)
-        elif user_input == "c":
-            albus.send_calibration_command();
-        elif user_input == "i":
-            yaw, pitch, roll, alt = [float(i) for i in input("enter fcs input: ").split()]
-            albus.send_control(yaw, pitch, roll, alt)
-        elif user_input == "p":
-            att_Kp, att_Ki, att_Kd = [float(i) for i in input("enter controller params: ").split()]
-            albus.send_att_params(att_Kp, att_Ki, att_Kd)
-        elif user_input == "q":
-            print("quit")
-            quit()
-
-main()
