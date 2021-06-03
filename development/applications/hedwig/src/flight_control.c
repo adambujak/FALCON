@@ -34,6 +34,8 @@ static states_estimate_t rtY_State_Estim;
 /* '<Root>/Throttle' */
 static uint16_T rtY_Throttle[4];
 
+static float Alt_Hover_Const_Base;
+
 static bool spin_up_flag = false;
 static int spin_up_counter = 0;
 
@@ -260,7 +262,7 @@ void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType)
         fpc_alt_params_decode(data, &altParams);
         PID_alt_P = altParams.fcsAltParams.PID_alt_P;
         PID_alt_D = altParams.fcsAltParams.PID_alt_D;
-        Alt_Hover_Const = altParams.fcsAltParams.Alt_Hover_Const;
+        Alt_Hover_Const = Alt_Hover_Const_Base * altParams.fcsAltParams.Alt_Hover_Const;
       } break;
     default:
       break;
@@ -413,7 +415,7 @@ static void flight_control_task(void *pvParameters)
   PID_yaw_P = 0;//0.1F;
   PID_yaw_D = 0;//0.14F;
 
-  // Alt_Hover_Const *= 1.03;
+  Alt_Hover_Const_Base = Alt_Hover_Const;
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
@@ -451,7 +453,7 @@ static void flight_control_task(void *pvParameters)
           }
         }
 
-        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u Z_PD: %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n",
+        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u ALT_PD: %7.4f, %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n",
             rtY_State_Estim.z,
             rtY_State_Estim.dz,
             rtY_State_Estim.yaw,
@@ -466,6 +468,7 @@ static void flight_control_task(void *pvParameters)
             rtY_Throttle[3],
             PID_alt_P,
             PID_alt_D,
+            Alt_Hover_Const,
             PID_pitch_P,
             PID_pitch_roll_I,
             PID_pitch_D,

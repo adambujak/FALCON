@@ -156,6 +156,18 @@ class Albus(SerialDevice):
         fcsParamPacket = fpc_attitude_params_t(**kwargs)
         self.write_packet(fcsParamPacket)
 
+    def send_alt_params(self, alt_Kp, alt_Kd, alt_Hover):
+        kwargs = {
+            'PID_alt_P' : alt_Kp,
+            'PID_alt_D' : alt_Kd,
+            'Alt_Hover_Const' : alt_Hover,
+        }
+        fcsParamInput = ft_fcs_alt_control_params_t(**kwargs)
+
+        kwargs = {'fcsAltParams': fcsParamInput}
+        fcsParamPacket = fpc_alt_params_t(**kwargs)
+        self.write_packet(fcsParamPacket)
+
     def send_fcs_mode(self, mode):
         _mode = fe_flight_mode_t(mode)
         kwargs = {'mode' : _mode}
