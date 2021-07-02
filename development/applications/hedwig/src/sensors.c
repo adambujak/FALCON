@@ -9,6 +9,7 @@
 
 #include "flightController.h"
 #include "rtwtypes.h"
+#include "MahonyAHRS.h"
 
 fln_i2c_handle_t i2cHandle;
 
@@ -32,8 +33,8 @@ static float alt_data = 0.0F;
 
 static fimu_config_t IMU_config = {
   .i2cHandle = &i2cHandle,
-  .gyro_fsr = MPU_FS_2000dps,
-  .accel_fsr = MPU_FS_16G,
+  .gyro_fsr = MPU_FS_500dps,
+  .accel_fsr = MPU_FS_4G,
   .output_data_rate = IMU_SAMPLE_RATE
 };
 
@@ -70,13 +71,25 @@ void sensors_get_bias(sensor_bias_t *bias)
   // bias->alt_bias = 0;
 }
 
+static float RPY[3] = {0};
+volatile float q0, q1, q2, q3;
+
 static void calibrate(void)
 {
-  fimu_calibrate(gyro_bias, accel_bias, quat_bias);
 
-  FLN_ERR_CHECK(fbaro_calibrate());
+  // fimu_calibrate(gyro_bias, accel_bias, quat_bias);
+  fimu_calibrate_offset();
+
+  FLN_ERR_CHECK(fbaro_calibrate());  
 
   calibration_required = false;
+}
+
+static void quat2ypr(float quat[4], float *RPY)
+{
+  RPY[0]  = atan2(2.0 * (quat[3] * quat[2] + quat[0] * quat[1]) , 1.0 - 2.0 * (quat[1] * quat[1] + quat[2] * quat[2]));
+  RPY[1] = asin(2.0 * (quat[2] * quat[0] - quat[3] * quat[1]));
+  RPY[2]   = atan2(2.0 * (quat[3] * quat[0] + quat[1] * quat[2]) , - 1.0 + 2.0 * (quat[0] * quat[0] + quat[1] * quat[1]));
 }
 
 static void sensors_task(void *pvParameters)
@@ -112,6 +125,26 @@ static void sensors_task(void *pvParameters)
         baro_delay_count = 0;
       }
       baro_delay_count++;
+      
+      MahonyAHRSupdateIMU(gyro_data[0], -gyro_data[1], -gyro_data[2], accel_data[0], -accel_data[1], -accel_data[2]);
+      quat_data[0] = q0;
+      quat_data[1] = q1;
+      quat_data[2] = q2;
+      quat_data[3] = q3;
+      // quat2ypr(quat_data, RPY);
+
+
+      // LOG_DEBUG("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
+      //       RPY[0],
+      //       RPY[1],
+      //       RPY[2],            
+      //       gyro_data[0],
+      //       gyro_data[1],
+      //       gyro_data[2],
+      //       accel_data[0],
+      //       accel_data[1],
+      //       accel_data[2],
+      //       alt_data);      
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
 

@@ -159,24 +159,24 @@ int fimu_start(fimu_config_t config)
 
   // result |= inv_set_gyro_divider(1U);   // Initial sampling rate 1125Hz/10+1 = 102Hz.
   // result |= inv_set_accel_divider(1U);  // Initial sampling rate 1125Hz/10+1 = 102Hz.
-  // result |= inv_set_gyro_fullscale(config.gyro_fsr);
-  // result |= inv_set_accel_fullscale(config.accel_fsr);
+  result |= inv_set_gyro_fullscale(config.gyro_fsr);
+  result |= inv_set_accel_fullscale(config.accel_fsr);
   result |= inv_enable_sensor(ANDROID_SENSOR_GYROSCOPE, 1);
-  result |= inv_enable_sensor(ANDROID_SENSOR_LINEAR_ACCELERATION, 1);
+  result |= inv_enable_sensor(ANDROID_SENSOR_ACCELEROMETER, 1);
   result |= inv_enable_sensor(ANDROID_SENSOR_GAME_ROTATION_VECTOR, 1);
   unsigned short data_output_delay_ms = (unsigned short)(1125 / config.output_data_rate);
   result |= inv_set_odr(ANDROID_SENSOR_GYROSCOPE, data_output_delay_ms);
-  result |= inv_set_odr(ANDROID_SENSOR_LINEAR_ACCELERATION, data_output_delay_ms);
+  result |= inv_set_odr(ANDROID_SENSOR_ACCELEROMETER, data_output_delay_ms);
   result |= inv_set_odr(ANDROID_SENSOR_GAME_ROTATION_VECTOR, data_output_delay_ms);
 
   uint8_t gyro_config_1;
   uint8_t accel_config_1;
   inv_read_mems_reg_core(REG_GYRO_CONFIG_1, 1, &gyro_config_1);
   inv_read_mems_reg_core(REG_ACCEL_CONFIG, 1, &accel_config_1);
-  gyro_config_1 |= (6 << 3) | 1;
-  accel_config_1 |= (0 << 3) | 1;
+  gyro_config_1 |= (6 << 3) | 0;
+  accel_config_1 |= (0 << 3) | 0;
   inv_write_single_mems_reg_core(REG_GYRO_CONFIG_1, gyro_config_1);
-  // inv_write_single_mems_reg_core(REG_ACCEL_CONFIG, accel_config_1);
+  inv_write_single_mems_reg_core(REG_ACCEL_CONFIG, accel_config_1);
 
   result |= inv_reset_dmp_odr_counters();
   result |= dmp_reset_fifo();
@@ -184,7 +184,7 @@ int fimu_start(fimu_config_t config)
   return result;
 }
 
-void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
+void fimu_fifo_handler(float *gyro_float, float *accel_float, float *quat_float)
 {
   short int_read_back = 0;
   unsigned short header = 0, header2 = 0;
@@ -194,7 +194,7 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
   signed long long_quat[3] = {0};
   unsigned short sample_cnt_array[GENERAL_SENSORS_MAX] = {0};
 
-  float accel_float[3], rv_float[4];
+  float rv_float[4];
 
   // Process Incoming INT and Get/Pack FIFO Data
   inv_identify_interrupt(&int_read_back);
@@ -251,22 +251,22 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
         if (header & QUAT6_SET) {
           dmp_get_6quaternion(long_quat);
 
-          long gravityQ16[3], temp_gravityQ16[3];
-          long linAccQ16[3];
-          long accelQ16[3];
+          // long gravityQ16[3], temp_gravityQ16[3];
+          // long linAccQ16[3];
+          // long accelQ16[3];
 
-          /*Calculate Gravity*/
-          inv_convert_rotation_vector_1(long_quat, temp_gravityQ16);
-          inv_mems_augmented_sensors_get_gravity(gravityQ16, temp_gravityQ16);
+          // /*Calculate Gravity*/
+          // inv_convert_rotation_vector_1(long_quat, temp_gravityQ16);
+          // inv_mems_augmented_sensors_get_gravity(gravityQ16, temp_gravityQ16);
 
-          /*Calculate Linear Acceleration*/
-          accelQ16[0] = (int32_t)((float)(accel_float[0]) * (1ULL << 16) + ((accel_float[0] >= 0) - 0.5f));
-          accelQ16[1] = (int32_t)((float)(accel_float[1]) * (1ULL << 16) + ((accel_float[1] >= 0) - 0.5f));
-          accelQ16[2] = (int32_t)((float)(accel_float[2]) * (1ULL << 16) + ((accel_float[2] >= 0) - 0.5f));
-          inv_mems_augmented_sensors_get_linearacceleration(linAccQ16, gravityQ16, accelQ16);
-          linAccFloat[0] = inv_q16_to_float(linAccQ16[0]);
-          linAccFloat[1] = inv_q16_to_float(linAccQ16[1]);
-          linAccFloat[2] = inv_q16_to_float(linAccQ16[2]);
+          // /*Calculate Linear Acceleration*/
+          // accelQ16[0] = (int32_t)((float)(accel_float[0]) * (1ULL << 16) + ((accel_float[0] >= 0) - 0.5f));
+          // accelQ16[1] = (int32_t)((float)(accel_float[1]) * (1ULL << 16) + ((accel_float[1] >= 0) - 0.5f));
+          // accelQ16[2] = (int32_t)((float)(accel_float[2]) * (1ULL << 16) + ((accel_float[2] >= 0) - 0.5f));
+          // inv_mems_augmented_sensors_get_linearacceleration(linAccQ16, gravityQ16, accelQ16);
+          // linAccFloat[0] = inv_q16_to_float(linAccQ16[0]);
+          // linAccFloat[1] = inv_q16_to_float(linAccQ16[1]);
+          // linAccFloat[2] = inv_q16_to_float(linAccQ16[2]);
 
           inv_convert_rotation_vector(long_quat, rv_float);
           quat_float[0] = rv_float[0];
