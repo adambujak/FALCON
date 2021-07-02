@@ -12,6 +12,7 @@
 #include "rtwtypes.h"
 #include "system_time.h"
 #include "persistent_data.h"
+#include "MahonyAHRS.h"
 
 #define IMU_SAMPLE_RATE  (200) // Hz
 #define BARO_SAMPLE_RATE (10)  // Hz
@@ -55,6 +56,9 @@ static void imu_calibration_complete_cb(void)
   persistent_data_write();
 }
 
+static float RPY[3] = {0};
+volatile float q0, q1, q2, q3;
+
 static void calibrate(void)
 {
   FLN_ERR_CHECK(baro_calibrate());
@@ -66,6 +70,13 @@ static void calibrate(void)
 void sensors_calibrate(void)
 {
   calibration_required = true;
+}
+
+static void quat2ypr(float quat[4], float *RPY)
+{
+  RPY[0]  = atan2(2.0 * (quat[3] * quat[2] + quat[0] * quat[1]) , 1.0 - 2.0 * (quat[1] * quat[1] + quat[2] * quat[2]));
+  RPY[1] = asin(2.0 * (quat[2] * quat[0] - quat[3] * quat[1]));
+  RPY[2]   = atan2(2.0 * (quat[3] * quat[0] + quat[1] * quat[2]) , - 1.0 + 2.0 * (quat[0] * quat[0] + quat[1] * quat[1]));
 }
 
 static void sensors_task(void *pvParameters)
@@ -108,7 +119,18 @@ static void sensors_task(void *pvParameters)
       }
       // LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
       old_time = system_time_get();
-      // LOG_INFO("\tp,q,r:\t %7.4f\t %7.4f\t %7.4f\t accel:\t %7.4f\t %7.4f\t %7.4f\t mag:\t %7.4f\t %7.4f\t %7.4f\t alt:\t %7.4f\t\r\n",        
+      
+      MahonyAHRSupdateIMU(gyro_data[0], -gyro_data[1], -gyro_data[2], accel_data[0], -accel_data[1], -accel_data[2]);
+      quat_data[0] = q0;
+      quat_data[1] = q1;
+      quat_data[2] = q2;
+      quat_data[3] = q3;
+      // quat2ypr(quat_data, RPY);
+
+      // LOG_DEBUG("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
+      //       RPY[0],
+      //       RPY[1],
+      //       RPY[2],            
       //       gyro_data[0],
       //       gyro_data[1],
       //       gyro_data[2],

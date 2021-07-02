@@ -39,6 +39,7 @@ RADIO_SOURCES = \
 FLIGHT_SOURCES = \
 	$(LIB_ROOT)/flight_control/flightController.c \
 	$(LIB_ROOT)/flight_control/flightController_data.c \
+	$(LIB_ROOT)/madgwick_algorithm_c/MahonyAHRS/MahonyAHRS.c \
 	$(DRV_ROOT)/ICM20948/common/inv_mems_drv_hook.c \
 	$(DRV_ROOT)/ICM20948/dmp3a/dmp3Default_20648.c \
 	$(DRV_ROOT)/ICM20948/dmp3/inv_mems_interface_mapping.c \
@@ -148,6 +149,8 @@ C_INCLUDES += \
 	-I$(DRV_ROOT)/ICM20948/dmp3a \
 	-I$(DRV_ROOT)/ICM20948/dmp3 \
 	-I$(DRV_ROOT)/ICM20948/common \
+	-I$(DEV_ROOT)/drivers/MPL3115A2 \
+	-I$(LIB_ROOT)/madgwick_algorithm_c/MahonyAHRS \
 	-I$(LIB_ROOT)/flight_control
 
 # macros for gcc
