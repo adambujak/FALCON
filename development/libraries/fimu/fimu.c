@@ -6,7 +6,7 @@
  * @author   Devin Bell
  ******************************************************************************/
 
-#include "fimu.h"
+#include "imu.h"
 
 signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0, 1, 0, 0, 0, 0, -1};
 signed char COMPASS_ORIENTATION[9] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
