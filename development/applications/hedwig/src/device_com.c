@@ -106,7 +106,14 @@ static void status_process(void)
   last_status_process_time = now;
   uint8_t length;
   uint8_t packet_buffer[MAX_PACKET_SIZE];
-  if (flight_control_get_mode() >= FE_FLIGHT_MODE_FCS_READY) {
+
+  fe_flight_mode_t flight_mode;
+  if (flight_control_get_mode(&flight_mode) != FLN_OK) {
+    LOG_ERROR("error getting flight mode\r\n");
+    return;
+  }
+
+  if (flight_mode >= FE_FLIGHT_MODE_FCS_READY) {
     fpr_status_t status_response;
     flight_control_get_outputs(&status_response);
     length = fpr_status_encode(packet_buffer, &status_response);

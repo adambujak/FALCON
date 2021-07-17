@@ -1,16 +1,13 @@
 #include "sensors.h"
 
-#include "falcon_common.h"
-#include "bsp.h"
-#include "fimu.h"
-#include "fbaro.h"
-#include "flight_control.h"
 #include <stdbool.h>
 
+#include "falcon_common.h"
 #include "flightController.h"
+#include "flight_control.h"
+#include "i2c.h"
+#include "imu.h"
 #include "rtwtypes.h"
-
-fln_i2c_handle_t i2cHandle;
 
 static bool calibration_required = false;
 
@@ -30,22 +27,9 @@ static float accel_data[3] = {0.0F, 0.0F, 0.0F};
 static float quat_data[4] = {0.0F, 0.0F, 0.0F, 0.0F};
 static float alt_data = 0.0F;
 
-static fimu_config_t IMU_config = {
-  .i2cHandle = &i2cHandle,
-  .gyro_fsr = MPU_FS_2000dps,
-  .accel_fsr = MPU_FS_16G,
-  .output_data_rate = IMU_SAMPLE_RATE
-};
-
-static fbaro_config_t baro_config = {
-  .i2cHandle = &i2cHandle,
-  .chip_id = 0xC4,
-  .sample_rate = BARO_SAMPLE_RATE
-};
-
 static TaskHandle_t sensors_task_handle = NULL;
 
-void IMU_data_ready_cb(void)
+static void sensor_timer_cb(void)
 {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
@@ -70,23 +54,34 @@ void sensors_get_bias(sensor_bias_t *bias)
 
 static void calibrate(void)
 {
-  fimu_calibrate(gyro_bias, accel_bias, quat_bias);
+  //fimu_calibrate(gyro_bias, accel_bias, quat_bias);
+  //FLN_ERR_CHECK(fbaro_calibrate());
 
-  FLN_ERR_CHECK(fbaro_calibrate());
+  //calibration_required = false;
+}
 
-  calibration_required = false;
+void sensors_calibrate(void)
+{
+  //calibration_required = true;
 }
 
 static void sensors_task(void *pvParameters)
 {
   LOG_DEBUG("SENSORS TASK STARTED\r\n");
 
+  fe_flight_mode_t initial_flight_mode;
+
+  if (flight_control_get_mode(&initial_flight_mode) != FLN_OK) {
+    LOG_ERROR("error getting flight mode\r\n");
+    return;
+  }
+
   flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING);
 
-  FLN_ERR_CHECK(fbaro_calibrate());
-  FLN_ERR_CHECK(fimu_start(IMU_config));
+  //FLN_ERR_CHECK(fbaro_calibrate());
+  //FLN_ERR_CHECK(fimu_start(imu_config));
 
-  flight_control_set_mode(FE_FLIGHT_MODE_IDLE);
+  flight_control_set_mode(initial_flight_mode);
 
   rtos_delay_ms(200);
 
@@ -97,23 +92,18 @@ static void sensors_task(void *pvParameters)
       calibrate();
     }
     /* Wait to be notified of an interrupt. */
-    sensorNotification = xTaskNotifyWait(pdFALSE,
-                                         0xFFFFFFFF,
-                                         NULL,
-                                         MS_TO_TICKS(10));
+   // sensorNotification = xTaskNotifyWait(pdFALSE,
+   //                                      0xFFFFFFFF,
+   //                                      NULL,
+   //                                      MS_TO_TICKS(10));
 
+   //
+    sensorNotification = pdPASS;
     if (sensorNotification == pdPASS) {
-      fimu_fifo_handler(gyro_data, accel_data, quat_data);
-
-      if (baro_delay_count == BARO_DELAY_COUNT) {
-        fbaro_get_altitude(&alt_data);
-        baro_delay_count = 0;
-      }
-      baro_delay_count++;
-
-      flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
-
-      rtos_delay_ms(1);
+      //flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
+      LOG_DEBUG("get data\r\n");
+      imu_get_data();
+      rtos_delay_ms(100);
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");
@@ -124,10 +114,10 @@ static void sensors_task(void *pvParameters)
 
 void sensors_task_setup(void)
 {
-  FLN_ERR_CHECK(bsp_i2c_init(&i2cHandle));
-  FLN_ERR_CHECK(fimu_init(IMU_config));
-  FLN_ERR_CHECK(fbaro_init(&baro_config));
-  bsp_IMU_int_init(IMU_data_ready_cb);
+  FLN_ERR_CHECK(i2c_init());
+  FLN_ERR_CHECK(imu_init());
+  //FLN_ERR_CHECK(fbaro_init(&baro_config));
+  //bsp_imu_int_init(imu_data_ready_cb);
 }
 
 void sensors_task_start(void)
