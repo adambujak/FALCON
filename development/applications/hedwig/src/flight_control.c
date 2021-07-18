@@ -3,6 +3,7 @@
 #include "falcon_common.h"
 #include "motors.h"
 #include "falcon_packet.h"
+#include "fp_encode.h"
 #include "sensors.h"
 #include "device_com.h"
 #include <stdbool.h>
@@ -288,20 +289,20 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
   return FLN_ERR;
 }
 
-fe_flight_mode_t flight_control_get_mode(void)
+int flight_control_get_mode(fe_flight_mode_t *mode)
 {
-  fe_flight_mode_t mode;
   if (lock_mode() == pdTRUE) {
-    mode = flight_control_mode;
+    *mode = flight_control_mode;
     unlock_mode();
+    return FLN_OK;
   }
-  return mode;
+  return FLN_ERR;
 }
 
 static void flight_control_reset(void)
 {
   if (flight_control_mode != FE_FLIGHT_MODE_FLY) {
-    if (lock_sensor_data() == pdTRUE ) {
+    if (lock_sensor_data() == pdTRUE) {
       if (lock_command_data() == pdTRUE) {
         if (lock_output_data() == pdTRUE) {
           flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);

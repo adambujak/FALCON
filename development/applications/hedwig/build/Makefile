@@ -37,29 +37,9 @@ RADIO_SOURCES = \
 	$(COMMON_ROOT)/radio_common.c \
 
 IMU_SOURCES = \
-	$(LIB_ROOT)/fimu/fimu.c \
 	$(LIB_ROOT)/flight_control/flightController.c \
 	$(LIB_ROOT)/flight_control/flightController_data.c \
-	$(DRV_ROOT)/ICM20948/common/inv_mems_drv_hook.c \
-	$(DRV_ROOT)/ICM20948/dmp3a/dmp3Default_20648.c \
-	$(DRV_ROOT)/ICM20948/dmp3/inv_mems_interface_mapping.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_augmented_sensors.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_base_control.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_base_driver.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_data_converter.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_load_firmware.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_mpu_fifo_control.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_mpu_selftest.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_secondary_transport.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_slave_compass.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_slave_pressure.c \
-	$(DRV_ROOT)/ICM20948/driver/inv_mems_transport.c \
-	$(DRV_ROOT)/ICM20948/invn/common/ml_math_func.c \
-	$(DRV_ROOT)/ICM20948/invn/common/mlmath.c \
-
-BARO_SOURCES = \
-	$(DRV_ROOT)/MPL3115A2/MPL3115A2.c \
-	$(LIB_ROOT)/fbaro/fbaro.c \
+	$(DRV_ROOT)/icm20948_murphy/icm20948.c \
 
 FREERTOS_SOURCES = \
 	$(FREERTOS_ROOT)/tasks.c \
@@ -92,6 +72,8 @@ C_SOURCES = \
 	$(PROJ_ROOT)/src/stm32f4xx_it.c \
 	$(PROJ_ROOT)/src/system_stm32f4xx.c \
 	$(PROJ_ROOT)/src/leds.c \
+	$(PROJ_ROOT)/src/i2c.c \
+	$(PROJ_ROOT)/src/imu.c \
 	$(PROJ_ROOT)/src/radio.c \
 	$(PROJ_ROOT)/src/uart.c \
 	$(PROJ_ROOT)/src/device_com.c \
@@ -138,15 +120,7 @@ C_INCLUDES += \
 	-I$(CMSIS_ROOT)/Include \
 	-I$(FREERTOS_ROOT)/include \
 	-I$(FREERTOS_PORTABLE) \
-	-I$(DRV_ROOT)/ICM20948 \
-	-I$(DRV_ROOT)/ICM20948/invn/common \
-	-I$(DRV_ROOT)/ICM20948/driver \
-	-I$(DRV_ROOT)/ICM20948/dmp3a \
-	-I$(DRV_ROOT)/ICM20948/dmp3 \
-	-I$(DRV_ROOT)/ICM20948/common \
-	-I$(LIB_ROOT)/fimu \
-	-I$(DEV_ROOT)/drivers/MPL3115A2 \
-	-I$(LIB_ROOT)/fbaro \
+	-I$(DRV_ROOT)/icm20948_murphy \
 	-I$(LIB_ROOT)/flight_control
 
 # macros for gcc
