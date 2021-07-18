@@ -2,6 +2,7 @@
 
 #include "board.h"
 #include "stm32f4xx_it.h"
+#include "i2c.h"
 #include "uart.h"
 
 #include "device_com.h"
@@ -91,6 +92,7 @@ static void board_bringup(void)
   sysclk_init();
 
   uart_init();
+  i2c_init();
   system_time_init();
 }
 

@@ -36,10 +36,11 @@ RADIO_SOURCES = \
 	$(DRV_ROOT)/nRF24L01/nRF24L01.c \
 	$(COMMON_ROOT)/radio_common.c \
 
-IMU_SOURCES = \
+FLIGHT_SOURCES = \
 	$(LIB_ROOT)/flight_control/flightController.c \
 	$(LIB_ROOT)/flight_control/flightController_data.c \
 	$(DRV_ROOT)/icm20948_murphy/icm20948.c \
+	$(DRV_ROOT)/MPL3115A2/MPL3115A2.c \
 
 FREERTOS_SOURCES = \
 	$(FREERTOS_ROOT)/tasks.c \
@@ -71,6 +72,7 @@ C_SOURCES = \
 	$(PROJ_ROOT)/src/main.c \
 	$(PROJ_ROOT)/src/stm32f4xx_it.c \
 	$(PROJ_ROOT)/src/system_stm32f4xx.c \
+	$(PROJ_ROOT)/src/baro.c \
 	$(PROJ_ROOT)/src/leds.c \
 	$(PROJ_ROOT)/src/i2c.c \
 	$(PROJ_ROOT)/src/imu.c \
@@ -85,7 +87,7 @@ C_SOURCES = \
 	$(COMMON_ROOT)/system_time/system_time.c \
 	$(FALCON_PACKET_SOURCES) \
 	$(RADIO_SOURCES) \
-	$(IMU_SOURCES) \
+	$(FLIGHT_SOURCES) \
 	$(BARO_SOURCES) \
 	$(FREERTOS_SOURCES) \
 	$(HAL_SOURCES) \
@@ -120,6 +122,7 @@ C_INCLUDES += \
 	-I$(CMSIS_ROOT)/Include \
 	-I$(FREERTOS_ROOT)/include \
 	-I$(FREERTOS_PORTABLE) \
+	-I$(DRV_ROOT)/MPL3115A2 \
 	-I$(DRV_ROOT)/icm20948_murphy \
 	-I$(LIB_ROOT)/flight_control
 

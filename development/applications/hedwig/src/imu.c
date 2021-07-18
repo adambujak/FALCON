@@ -22,6 +22,12 @@ static int8_t icm_read(uint8_t addr, uint8_t *data, uint32_t len) {
   return ret;
 }
 
+int imu_calibrate(float *gyro_bias, float *accel_bias)
+{
+  // TODO: add this
+  return FLN_OK;
+}
+
 int imu_get_data(void)
 {
   icm20948_gyro_t gyro_data;
@@ -31,9 +37,11 @@ int imu_get_data(void)
   ret |= icm20948_getGyroData(&gyro_data);
   ret |= icm20948_getAccelData(&accel_data);
 
-  LOG_DEBUG("accel: %d, %d, %d, %d\r\n", accel_data.x, accel_data.y, accel_data.z, ret);
-  LOG_DEBUG("gyro: %d, %d, %d, %d\r\n", gyro_data.x, gyro_data.y, gyro_data.z, ret);
-  return ret;
+  if (ret == ICM20948_RET_OK) {
+    return FLN_OK;
+  }
+
+  return FLN_ERR;
 }
 
 int imu_init(void) {
@@ -42,7 +50,6 @@ int imu_init(void) {
 
   // Init the device function pointers
   ret = icm20948_init(icm_read, icm_write, delay_us);
-  LOG_DEBUG("icm init ok?: %d\r\n", ret);
 
   settings.gyro.en = ICM20948_MOD_ENABLED;
   settings.gyro.fs = ICM20948_GYRO_FS_SEL_2000DPS;

@@ -42,6 +42,18 @@ int i2c_imu_read(uint8_t slave_addr, uint8_t reg_addr,
   return read(&sensors_i2c_handle, slave_addr, reg_addr, data, length);
 }
 
+int i2c_baro_write(uint8_t slave_addr, uint8_t reg_addr,
+                  const uint8_t *data, uint16_t length)
+{
+  return write(&sensors_i2c_handle, slave_addr, reg_addr, data, length);
+}
+
+int i2c_baro_read(uint8_t slave_addr, uint8_t reg_addr,
+                 uint8_t *data, uint16_t length)
+{
+  return read(&sensors_i2c_handle, slave_addr, reg_addr, data, length);
+}
+
 int i2c_init(void)
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
