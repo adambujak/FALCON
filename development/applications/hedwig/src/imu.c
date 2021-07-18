@@ -6,7 +6,7 @@
 #include "i2c.h"
 #include "icm20948_api.h"
 
-static int8_t i2c_write(uint8_t addr, const uint8_t *data, const uint32_t len) {
+static int8_t icm_write(uint8_t addr, const uint8_t *data, const uint32_t len) {
   icm20948_return_code_t ret = ICM20948_RET_OK;
   if (i2c_imu_write(ICM20948_SLAVE_ADDR, addr, data, len) != FLN_OK) {
     return ICM20948_RET_GEN_FAIL;
@@ -14,7 +14,7 @@ static int8_t i2c_write(uint8_t addr, const uint8_t *data, const uint32_t len) {
   return ret;
 }
 
-static int8_t i2c_read(uint8_t addr, uint8_t *data, uint32_t len) {
+static int8_t icm_read(uint8_t addr, uint8_t *data, uint32_t len) {
   icm20948_return_code_t ret = ICM20948_RET_OK;
   if (i2c_imu_read(ICM20948_SLAVE_ADDR, addr, data, len) != FLN_OK) {
     return ICM20948_RET_GEN_FAIL;
@@ -40,20 +40,29 @@ int imu_get_data(void)
 int imu_init(void) {
   icm20948_return_code_t ret = ICM20948_RET_OK;
   icm20948_settings_t settings;
+  uint8_t accel;
 
   // Init the device function pointers
-  ret = icm20948_init(i2c_read, i2c_write, delay_us);
+  ret = icm20948_init(icm_read, icm_write, delay_us);
+  LOG_DEBUG("icm init ok?: %d\r\n", ret);
+  ret |= icm20948_getAccelConfig(&accel);
+  LOG_DEBUG("accel 1: config %d %d\r\n", accel, ret);
+  ret |= icm20948_setAccelConfig();
+  ret |= icm20948_getAccelConfig(&accel);
+  LOG_DEBUG("accel 2: config %d\r\n", accel);
 
   // Check if we successfully stored the function poiners provided
   if (ret == ICM20948_RET_OK) {
       settings.gyro.en = ICM20948_MOD_ENABLED;
       settings.gyro.fs = ICM20948_GYRO_FS_SEL_2000DPS;
-      settings.accel.en = ICM20948_MOD_ENABLED;
+      settings.accel.en = ICM20948_MOD_DISABLED;
       settings.accel.fs = ICM20948_ACCEL_FS_SEL_16G;
       ret = icm20948_applySettings(&settings);
   }
 
   ret |= icm20948_setAccelConfig();
+  ret |= icm20948_getAccelConfig(&accel);
+  LOG_DEBUG("accel: config %d\r\n", accel);
   if (ret == ICM20948_RET_OK) {
     LOG_DEBUG("IMU configured\r\n");
     return FLN_OK;

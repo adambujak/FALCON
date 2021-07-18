@@ -306,7 +306,7 @@ typedef union {
             struct {
                 uint8_t RSVD0               : 4;
                 uint8_t USER_BANK           : 2;
-                uint8_t RSVD1               : 2;
+                uint8_t RSVD1               : 3;
             } bits;
             uint8_t byte;
         } REG_BANK_SEL;
