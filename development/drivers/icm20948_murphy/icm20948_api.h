@@ -58,7 +58,8 @@ typedef enum {
 
 typedef enum {
     ICM20948_GYRO_FS_SEL_250DPS = 0x00,
-    ICM20948_GYRO_FS_SEL_500DPS = 0x01, ICM20948_GYRO_FS_SEL_1000DPS = 0x02,
+    ICM20948_GYRO_FS_SEL_500DPS = 0x01,
+    ICM20948_GYRO_FS_SEL_1000DPS = 0x02,
     ICM20948_GYRO_FS_SEL_2000DPS = 0x03
 } icm20948_gyro_full_scale_select_t;
 
@@ -147,8 +148,6 @@ icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro);
  * @return Returns the status of reading accel data
  */
 icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel);
-int icm20948_getAccelConfig(uint8_t *dest);
-int icm20948_setAccelConfig(void);
 
 #endif // _ICM20948_API_H_
 
