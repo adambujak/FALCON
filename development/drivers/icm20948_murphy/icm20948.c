@@ -1,42 +1,11 @@
-/****************************************************************************
-    ICM-20948 9-Axis MEMS Motion Tracking Device Driver
-
-    Copyright (C) 2020 Stephen Murphy - github.com/stephendpmurphy
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-****************************************************************************/
-
-/*! @file icm20948.c
- * @brief Source file for the ICM20948 9-Axis MEMS device driver.
- */
-
 #include <string.h>
 #include "icm20948.h"
 #include "icm20948_api.h"
 
 #include "hedwig.h"
 
-/*! @brief Structure holding reference to our interface functions
-and the ICM20948 register values */
 static icm20948_dev_t dev;
 
-/*! @brief Current settings applied to the device */
 static icm20948_settings_t settings;
 
 /*!
@@ -50,7 +19,7 @@ static icm20948_settings_t settings;
  * @return Returns the read status
  */
 static icm20948_return_code_t _spi_read(uint8_t addr, uint8_t *data, uint32_t len) {
-    return dev.intf.read((addr | (0x01 << 7)), data, len);
+    return dev.intf.read(addr, data, len);
 }
 
 /*!
@@ -70,9 +39,14 @@ int icm20948_getAccelConfig(uint8_t *dest)
 {
   int ret = 0;
   dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
-  ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL,  (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+  uint8_t data = 2 << 3;
+  ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &data, 0x01);
+  data = 0;
 
-  ret |= _spi_read(ICM20948_ADDR_ACCEL_CONFIG, dest, 0x01);
+  ret |= _spi_read(ICM20948_ADDR_REG_BANK_SEL, &data, 0x01);
+  LOG_DEBUG("bank %d %d\r\n", data, ret);
+
+  ret |= _spi_read(0x14, dest, 0x01);
   return ret;
 }
 
@@ -80,10 +54,12 @@ int icm20948_setAccelConfig(void)
 {
   int ret = 0;
   dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
-  ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL,  (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+  uint8_t data = 2 << 3;
+  ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &data, 0x01);
 
-  uint8_t data = 0x3 << 1;
-  ret |= _spi_write(ICM20948_ADDR_ACCEL_CONFIG, &data, 0x01);
+  //data = 0x3 << 1;
+  data = 1;
+  ret |= _spi_write(0x14, &data, 0x01);
   return ret;
 }
 
@@ -133,10 +109,27 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
 
     if( ret == ICM20948_RET_OK ) {
         // Set the clock to best available
-        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.CLKSEL = 1;
+        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.CLKSEL = 0;
         dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.SLEEP = 0;
         dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.DEVICE_RESET = 0;
-        ret = _spi_write(ICM20948_ADDR_PWR_MGMT_1, & dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        ret = _spi_write(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        ret = _spi_read(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        LOG_DEBUG("imu pwr config before %d %d\r\n", dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, ret);
+
+        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.CLKSEL = 1;
+        ret = _spi_write(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        ret = _spi_read(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        LOG_DEBUG("imu pwr config after %d %d\r\n", dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, ret);
+
+        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.CLKSEL = 2;
+        ret = _spi_write(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        ret = _spi_read(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        LOG_DEBUG("imu pwr config after 1 %d %d\r\n", dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, ret);
+
+        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.CLKSEL = 1;
+        ret = _spi_write(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        ret = _spi_read(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        LOG_DEBUG("imu pwr config after 2 %d %d\r\n", dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, ret);
     }
 
     // Return our init status
