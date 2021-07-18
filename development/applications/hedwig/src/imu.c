@@ -26,43 +26,30 @@ int imu_get_data(void)
 {
   icm20948_gyro_t gyro_data;
   icm20948_accel_t accel_data;
-  uint8_t config;
 
   int ret = 0;
   ret |= icm20948_getGyroData(&gyro_data);
   ret |= icm20948_getAccelData(&accel_data);
 
-  ret |= icm20948_getAccelConfig(&config);
-  LOG_DEBUG("accel: %d, %d, %d, %d, %d\r\n", accel_data.x, accel_data.y, accel_data.z, config, ret);
+  LOG_DEBUG("accel: %d, %d, %d, %d\r\n", accel_data.x, accel_data.y, accel_data.z, ret);
+  LOG_DEBUG("gyro: %d, %d, %d, %d\r\n", gyro_data.x, gyro_data.y, gyro_data.z, ret);
   return ret;
 }
 
 int imu_init(void) {
   icm20948_return_code_t ret = ICM20948_RET_OK;
   icm20948_settings_t settings;
-  uint8_t accel;
 
   // Init the device function pointers
   ret = icm20948_init(icm_read, icm_write, delay_us);
   LOG_DEBUG("icm init ok?: %d\r\n", ret);
-  ret |= icm20948_getAccelConfig(&accel);
-  LOG_DEBUG("accel 1: config %d %d\r\n", accel, ret);
-  ret |= icm20948_setAccelConfig();
-  ret |= icm20948_getAccelConfig(&accel);
-  LOG_DEBUG("accel 2: config %d\r\n", accel);
 
-  // Check if we successfully stored the function poiners provided
-  if (ret == ICM20948_RET_OK) {
-      settings.gyro.en = ICM20948_MOD_ENABLED;
-      settings.gyro.fs = ICM20948_GYRO_FS_SEL_2000DPS;
-      settings.accel.en = ICM20948_MOD_DISABLED;
-      settings.accel.fs = ICM20948_ACCEL_FS_SEL_16G;
-      ret = icm20948_applySettings(&settings);
-  }
+  settings.gyro.en = ICM20948_MOD_ENABLED;
+  settings.gyro.fs = ICM20948_GYRO_FS_SEL_2000DPS;
+  settings.accel.en = ICM20948_MOD_ENABLED;
+  settings.accel.fs = ICM20948_ACCEL_FS_SEL_16G;
+  ret |= icm20948_applySettings(&settings);
 
-  ret |= icm20948_setAccelConfig();
-  ret |= icm20948_getAccelConfig(&accel);
-  LOG_DEBUG("accel: config %d\r\n", accel);
   if (ret == ICM20948_RET_OK) {
     LOG_DEBUG("IMU configured\r\n");
     return FLN_OK;
