@@ -9,7 +9,8 @@
 
 #include "flightController.h"
 #include "rtwtypes.h"
-#include "MahonyAHRS.h"
+#include "attitude.h"
+#include "system_time.h"
 
 fln_i2c_handle_t i2cHandle;
 
@@ -71,9 +72,6 @@ void sensors_get_bias(sensor_bias_t *bias)
   // bias->alt_bias = 0;
 }
 
-static float RPY[3] = {0};
-volatile float q0, q1, q2, q3;
-
 static void calibrate(void)
 {
 
@@ -85,16 +83,9 @@ static void calibrate(void)
   calibration_required = false;
 }
 
-static void quat2ypr(float quat[4], float *RPY)
-{
-  RPY[0]  = atan2(2.0 * (quat[3] * quat[2] + quat[0] * quat[1]) , 1.0 - 2.0 * (quat[1] * quat[1] + quat[2] * quat[2]));
-  RPY[1] = asin(2.0 * (quat[2] * quat[0] - quat[3] * quat[1]));
-  RPY[2]   = atan2(2.0 * (quat[3] * quat[0] + quat[1] * quat[2]) , - 1.0 + 2.0 * (quat[0] * quat[0] + quat[1] * quat[1]));
-}
-
 static void sensors_task(void *pvParameters)
 {
-  LOG_DEBUG("SENSORS TASK STARTED\r\n");
+  LOG_DEBUG("SENSORS TASK STARTED\r\n");  
 
   flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING);
 
@@ -103,6 +94,8 @@ static void sensors_task(void *pvParameters)
 
   flight_control_set_mode(FE_FLIGHT_MODE_IDLE);
 
+  attitude_init_axis();
+  
   rtos_delay_ms(200);
 
   BaseType_t sensorNotification;
@@ -125,19 +118,18 @@ static void sensors_task(void *pvParameters)
         baro_delay_count = 0;
       }
       baro_delay_count++;
-      
-      MahonyAHRSupdateIMU(gyro_data[0], -gyro_data[1], -gyro_data[2], accel_data[0], -accel_data[1], -accel_data[2]);
-      quat_data[0] = q0;
-      quat_data[1] = q1;
-      quat_data[2] = q2;
-      quat_data[3] = q3;
-      // quat2ypr(quat_data, RPY);
 
+      attitude_compute_estimation(system_time_get(), accel_data, gyro_data, NULL);
+
+      quat_data[0] = q.w;
+      quat_data[1] = q.x;
+      quat_data[2] = q.y;
+      quat_data[3] = q.z;
 
       // LOG_DEBUG("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
-      //       RPY[0],
-      //       RPY[1],
-      //       RPY[2],            
+      //       attitude.roll,
+      //       attitude.pitch,
+      //       attitude.yaw,            
       //       gyro_data[0],
       //       gyro_data[1],
       //       gyro_data[2],

@@ -8,8 +8,15 @@
 
 #include "fimu.h"
 
-signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0, 1, 0, 0, 0, 0, -1};
-signed char COMPASS_ORIENTATION[9] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+// signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0, 1, 0, 0, 0, 0, -1};
+// signed char COMPASS_ORIENTATION[9] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+
+signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0,
+                                         -1, 0, 0,
+                                         0, 0, 1};
+signed char COMPASS_ORIENTATION[9] = {1, 0, 0,
+                                      0, -1, 0, 
+                                      0, 0, -1};
 
 const unsigned char ACCEL_GYRO_CHIP_ADDR = 0x68;
 const unsigned char COMPASS_SLAVE_ID = HW_AK09916;
