@@ -71,7 +71,8 @@ const FCS_command_t flightController_rtZFCS_command = { 0U,/* control_type */
 
 const sensor_bias_t flightController_rtZsensor_bias = { { 0.0F, 0.0F, 0.0F },/* gyro_bias */
   { 0.0F, 0.0F, 0.0F },                /* accel_bias */
-  { 0.7071F, 0.0F, 0.0F, -0.7071F },          /* quat_bias */
+  // { 0.7071F, 0.0F, 0.0F, -0.7071F },       /* quat_bias */
+  { 1.0F, 0.0F, 0.0F, 0.0F },          /* quat_bias */
   0.0F                                 /* alt_bias */
 };
 
