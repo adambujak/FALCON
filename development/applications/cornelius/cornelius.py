@@ -117,8 +117,6 @@ class Albus(SerialDevice):
             else:
                 print("Calibration Canceled, Check Mode")
         elif (packet_type == fp_type_t.FPT_STATUS_RESPONSE):
-            # status = fpr_status_t(encoded)
-            # print(status.to_dict())
             None
         else:
             print("decoder callback:", packet_type)

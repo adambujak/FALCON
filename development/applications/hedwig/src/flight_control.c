@@ -158,12 +158,12 @@ void rt_OneStep(RT_MODEL *const rtM)
       if (lock_output_data() == pdTRUE) {
 
         flightController_step(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
-        if(flight_control_mode == FE_FLIGHT_MODE_FLY) {
+        if (flight_control_mode == FE_FLIGHT_MODE_FLY) {
 
           if (spin_up_flag) {
-            for (int i=0; i<=3; i++) {
-              if (rtY_Throttle[i] > (spin_up_counter*10)) {
-                rtY_Throttle[i] = spin_up_counter*10;
+            for (int i = 0; i <= 3; i++) {
+              if (rtY_Throttle[i] > (spin_up_counter * 10)) {
+                rtY_Throttle[i] = spin_up_counter * 10;
               }
             }
           }          
