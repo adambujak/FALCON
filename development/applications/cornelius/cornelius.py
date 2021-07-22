@@ -117,8 +117,7 @@ class Albus(SerialDevice):
             else:
                 print("Calibration Canceled, Check Mode")
         elif (packet_type == fp_type_t.FPT_STATUS_RESPONSE):
-            status = fpr_status_t(encoded)
-            print(status.to_dict())
+            None
         else:
             print("decoder callback:", packet_type)
 
@@ -143,8 +142,33 @@ class Albus(SerialDevice):
         fcsControlPacket = fpc_flight_control_t(**kwargs)
         self.write_packet(fcsControlPacket)
 
+    def send_att_params(self, att_Kp, att_Ki, att_Kd):
+        kwargs = {
+            'PID_pitch_P' : att_Kp,
+            'PID_pitch_roll_I' : att_Ki,
+            'PID_pitch_D' : att_Kd,
+        }
+        fcsParamInput = ft_fcs_att_control_params_t(**kwargs)
+
+        kwargs = {'fcsAttParams': fcsParamInput}
+        fcsParamPacket = fpc_attitude_params_t(**kwargs)
+        self.write_packet(fcsParamPacket)
+
+    def send_alt_params(self, alt_Kp, alt_Kd, alt_Hover):
+        kwargs = {
+            'PID_alt_P' : alt_Kp,
+            'PID_alt_D' : alt_Kd,
+            'Alt_Hover_Const' : alt_Hover,
+        }
+        fcsParamInput = ft_fcs_alt_control_params_t(**kwargs)
+
+        kwargs = {'fcsAltParams': fcsParamInput}
+        fcsParamPacket = fpc_alt_params_t(**kwargs)
+        self.write_packet(fcsParamPacket)
+
     def send_fcs_mode(self, mode):
-        kwargs = {'mode' : mode}
+        _mode = fe_flight_mode_t(mode)
+        kwargs = {'mode' : _mode}
         fcsModePacket = fpc_fcs_mode_t(**kwargs)
         self.write_packet(fcsModePacket)
 
@@ -171,53 +195,39 @@ def quit():
     exit(0)
 
 def main():
-    ports = serial.tools.list_ports.comports()
-    # Delete bluetooth port
-    for i in range(len(ports)):
-        if "Bluetooth" in ports[i].name:
-            ports.pop(i)
-            break
-
-    if len(ports) == 1:
-        selectedPort = 0
-        print("Using port: {}".format(ports[0].name))
-
-    else:
-        for i in range(len(ports)):
-            print("{}: {}".format(i+1, ports[i].name))
-
-        print("Which serial port do you want to use?")
-        selectedPort = int(input()) - 1
-
-    serialPort = ports[selectedPort].device
 
     global albus
-    albus = Albus(serialPort, 115200, 1)
+
+    connected = False
+    ports = serial.tools.list_ports.comports()
+
+    for i in range(len(ports)):
+        if ports[i].product == "STM32 STLink":
+            albus = Albus(ports[i].device, 115200, 1)
+            connected = True
+            print("Connected to Albus")
+            break
+
+    if connected == False:
+        # Delete bluetooth port
+        for i in range(len(ports)):
+            if "Bluetooth" in ports[i].name:
+                ports.pop(i)
+                break
+
+        if len(ports) == 1:
+            selectedPort = 0
+            print("Using port: {}".format(ports[0].name))
+
+        else:
+            for i in range(len(ports)):
+                print("{}: {}".format(i+1, ports[i].name))
+
+            print("Which serial port do you want to use?")
+            selectedPort = int(input()) - 1
+
+        serialPort = ports[selectedPort].device
+
+        albus = Albus(serialPort, 115200, 1)
+
     albus.init_frame_encoder()
-
-    yaw = -1.5707963268
-    pitch = 0
-    roll = 0
-    alt = 0
-
-    while(1):
-        user_input = input("enter command: ")
-        if user_input == "s":
-            print("sending test query")
-            albus.send_test_query()
-        elif user_input == "r":
-            print("sending radio stats query")
-            albus.send_radio_stats_query()
-        elif user_input == "m":
-            mode_input = fe_flight_mode_t(int(input("enter mode: ")))
-            albus.send_fcs_mode(mode_input)
-        elif user_input == "c":
-            albus.send_calibration_command();
-        elif user_input == "i":
-            yaw, pitch, roll, alt = [float(i) for i in input("enter fcs input: ").split()]
-            albus.send_control(yaw, pitch, roll, alt)
-        elif user_input == "q":
-            print("quit")
-            quit()
-
-main()

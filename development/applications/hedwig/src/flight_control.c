@@ -3,6 +3,8 @@
 #include "falcon_common.h"
 #include "motors.h"
 #include "falcon_packet.h"
+#include "fp_encode.h"
+#include "fp_decode.h"
 #include "sensors.h"
 #include "device_com.h"
 #include <stdbool.h>
@@ -23,11 +25,19 @@ static FCS_command_t rtU_Commands;
 /* '<Root>/Sensors' */
 static sensor_data_t rtU_Sensors;
 
+/* '<Root>/Bias' */
+static sensor_bias_t rtU_Bias;
+
 /* '<Root>/State_Estim' */
 static states_estimate_t rtY_State_Estim;
 
 /* '<Root>/Throttle' */
 static uint16_T rtY_Throttle[4];
+
+static float Alt_Hover_Const_Base;
+
+static bool spin_up_flag = false;
+static int spin_up_counter = 0;
 
 static TimerHandle_t flight_control_timer;
 static BaseType_t FC_timerStatus;
@@ -146,7 +156,23 @@ void rt_OneStep(RT_MODEL *const rtM)
   if (lock_sensor_data() == pdTRUE ) {
     if (lock_command_data() == pdTRUE) {
       if (lock_output_data() == pdTRUE) {
-        flightController_step(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+
+        flightController_step(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+        if (flight_control_mode == FE_FLIGHT_MODE_FLY) {
+
+          if (spin_up_flag) {
+            for (int i = 0; i <= 3; i++) {
+              if (rtY_Throttle[i] > (spin_up_counter * 10)) {
+                rtY_Throttle[i] = spin_up_counter * 10;
+              }
+            }
+          }          
+          motors_set_motor_us(MOTOR_1, rtY_Throttle[0]);
+          motors_set_motor_us(MOTOR_2, rtY_Throttle[1]);
+          motors_set_motor_us(MOTOR_3, rtY_Throttle[2]);
+          motors_set_motor_us(MOTOR_4, rtY_Throttle[3]);
+        }
+        
         unlock_output_data();
       }
       else {
@@ -164,14 +190,6 @@ void rt_OneStep(RT_MODEL *const rtM)
   else {
     LOG_WARN("sensorDataMutex take failed\r\n");
     error_handler();
-  }
-
-  /* Get model outputs here */
-  if(flight_control_mode == FE_FLIGHT_MODE_FLY) {
-    motors_set_motor_us(MOTOR_1, rtY_Throttle[0]);
-    motors_set_motor_us(MOTOR_2, rtY_Throttle[1]);
-    motors_set_motor_us(MOTOR_3, rtY_Throttle[2]);
-    motors_set_motor_us(MOTOR_4, rtY_Throttle[3]);
   }
 
   /* Indicate task complete */
@@ -222,6 +240,40 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input)
   }
 }
 
+void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType)
+{
+  if(lock_command_data() == pdTRUE) {
+    switch (packetType) {
+      case FPT_ATTITUDE_PARAMS_COMMAND: {
+        fpc_attitude_params_t attParams = {};
+        fpc_attitude_params_decode(data, &attParams);
+        PID_pitch_P = attParams.fcsAttParams.PID_pitch_P;
+        PID_pitch_roll_I = attParams.fcsAttParams.PID_pitch_roll_I;
+        PID_pitch_D = attParams.fcsAttParams.PID_pitch_D;
+      } break;
+      case FPT_YAW_PARAMS_COMMAND: {
+        fpc_yaw_params_t yawParams = {};
+        fpc_yaw_params_decode(data, &yawParams);
+        PID_yaw_P = yawParams.fcsYawParams.PID_yaw_P;
+        PID_yaw_D = yawParams.fcsYawParams.PID_yaw_D;
+      } break;
+      case FPT_ALT_PARAMS_COMMAND: {
+        fpc_alt_params_t altParams = {};
+        fpc_alt_params_decode(data, &altParams);
+        PID_alt_P = altParams.fcsAltParams.PID_alt_P;
+        PID_alt_D = altParams.fcsAltParams.PID_alt_D;
+        Alt_Hover_Const = Alt_Hover_Const_Base * altParams.fcsAltParams.Alt_Hover_Const;
+      } break;
+    default:
+      break;
+  }
+    unlock_command_data();
+  }
+  else {
+    LOG_WARN("commandDataMutex take failed\r\n");
+  }
+}
+
 void flight_control_get_outputs(fpr_status_t *status_response)
 {
   if (lock_mode() == pdTRUE) {
@@ -248,6 +300,37 @@ void flight_control_get_outputs(fpr_status_t *status_response)
   }
   else {
     LOG_WARN("commandDataMutex take failed\r\n");
+  }
+}
+
+static void flight_control_reset(void)
+{
+  if (flight_control_mode != FE_FLIGHT_MODE_FLY) {
+    if (lock_sensor_data() == pdTRUE ) {
+      if (lock_command_data() == pdTRUE) {
+        if (lock_output_data() == pdTRUE) {
+          flightController_initialize(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+          unlock_output_data();
+        }
+        else {
+          LOG_WARN("outputDataMutex take failed\r\n");
+          error_handler();
+        }
+        unlock_command_data();
+      }
+      else {
+        LOG_WARN("commandDataMutex take failed\r\n");
+        error_handler();
+      }
+      unlock_sensor_data();
+    }
+    else {
+      LOG_WARN("sensorDataMutex take failed\r\n");
+      error_handler();
+    }
+  }
+  else {
+    LOG_DEBUG("Cannot reset while flying");
   }
 }
 
@@ -280,7 +363,9 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
       break;
     case FE_FLIGHT_MODE_FLY:
       if (flight_control_mode == FE_FLIGHT_MODE_FCS_READY) {
-        flight_control_mode = FE_FLIGHT_MODE_FLY;
+        flight_control_reset();
+        flight_control_mode = FE_FLIGHT_MODE_FLY;        
+        spin_up_flag = true;
         return FLN_OK;
       }
       break;
@@ -298,37 +383,6 @@ fe_flight_mode_t flight_control_get_mode(void)
   return mode;
 }
 
-static void flight_control_reset(void)
-{
-  if (flight_control_mode != FE_FLIGHT_MODE_FLY) {
-    if (lock_sensor_data() == pdTRUE ) {
-      if (lock_command_data() == pdTRUE) {
-        if (lock_output_data() == pdTRUE) {
-          flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
-          unlock_output_data();
-        }
-        else {
-          LOG_WARN("outputDataMutex take failed\r\n");
-          error_handler();
-        }
-        unlock_command_data();
-      }
-      else {
-        LOG_WARN("commandDataMutex take failed\r\n");
-        error_handler();
-      }
-      unlock_sensor_data();
-    }
-    else {
-      LOG_WARN("sensorDataMutex take failed\r\n");
-      error_handler();
-    }
-  }
-  else {
-    LOG_DEBUG("Cannot reset while flying");
-  }
-}
-
 void flight_control_calibrate_sensors(void)
 {
   calibration_required = true;
@@ -340,8 +394,9 @@ static fe_calib_request_t calibrate_sensors(void)
   if (flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING) == FLN_OK) {
     sensors_calibrate();
     rtos_delay_ms(3000);
-    flight_control_set_mode(prevMode);
     flight_control_reset();
+    sensors_get_bias(&rtU_Bias);
+    flight_control_set_mode(prevMode);
     return FE_CALIBRATE_SUCCESS;
   }
   return FE_CALIBRATE_FAILED;
@@ -349,6 +404,18 @@ static fe_calib_request_t calibrate_sensors(void)
 
 static void flight_control_task(void *pvParameters)
 {
+
+  PID_alt_P = 0;//0.64F;
+  PID_alt_D = 0;//0.24F;
+
+  PID_pitch_P = 3.6;
+  PID_pitch_roll_I = 0.2;
+  PID_pitch_D = 0.18;
+
+  PID_yaw_P = 0;//0.1F;
+  PID_yaw_D = 0;//0.14F;
+
+  Alt_Hover_Const_Base = Alt_Hover_Const;
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
@@ -376,7 +443,17 @@ static void flight_control_task(void *pvParameters)
 
         rt_OneStep(rtM);
 
-        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f\r\n",
+        if (spin_up_flag == true) {
+          if (spin_up_counter <= 100) {
+            spin_up_counter++;
+          }
+          else {
+            spin_up_counter = 0;
+            spin_up_flag = false;
+          }
+        }
+
+        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u ALT_PD: %7.4f, %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n",
             rtY_State_Estim.z,
             rtY_State_Estim.dz,
             rtY_State_Estim.yaw,
@@ -384,7 +461,19 @@ static void flight_control_task(void *pvParameters)
             rtY_State_Estim.roll,
             rtY_State_Estim.p,
             rtY_State_Estim.q,
-            rtY_State_Estim.r);
+            rtY_State_Estim.r,
+            rtY_Throttle[0],
+            rtY_Throttle[1],
+            rtY_Throttle[2],
+            rtY_Throttle[3],
+            PID_alt_P,
+            PID_alt_D,
+            Alt_Hover_Const,
+            PID_pitch_P,
+            PID_pitch_roll_I,
+            PID_pitch_D,
+            PID_yaw_P,
+            PID_yaw_D);
 
         rtos_delay_ms(1);
       }
@@ -405,7 +494,7 @@ void flight_control_setup(void)
   rtM->dwork = &rtDW;
 
   /* Initialize model */
-  flightController_initialize(rtM, &rtU_Commands, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
+  flightController_initialize(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors, &rtY_State_Estim, rtY_Throttle);
 
   flight_control_timer = xTimerCreate("flight_control_timer", FC_PERIOD_TICKS, pdTRUE, 0, flight_control_callback);
 

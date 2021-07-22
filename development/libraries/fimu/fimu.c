@@ -157,17 +157,26 @@ int fimu_start(fimu_config_t config)
 {
   int result = 0;
 
-  result |= inv_set_gyro_divider(1U);   // Initial sampling rate 1125Hz/10+1 = 102Hz.
-  result |= inv_set_accel_divider(1U);  // Initial sampling rate 1125Hz/10+1 = 102Hz.
-  result |= inv_set_gyro_fullscale(config.gyro_fsr);
-  result |= inv_set_accel_fullscale(config.accel_fsr);
+  // result |= inv_set_gyro_divider(1U);   // Initial sampling rate 1125Hz/10+1 = 102Hz.
+  // result |= inv_set_accel_divider(1U);  // Initial sampling rate 1125Hz/10+1 = 102Hz.
+  // result |= inv_set_gyro_fullscale(config.gyro_fsr);
+  // result |= inv_set_accel_fullscale(config.accel_fsr);
   result |= inv_enable_sensor(ANDROID_SENSOR_GYROSCOPE, 1);
   result |= inv_enable_sensor(ANDROID_SENSOR_LINEAR_ACCELERATION, 1);
-  result |= inv_enable_sensor(ANDROID_SENSOR_ROTATION_VECTOR, 1);
-  unsigned short data_output_delay_ms = (unsigned short)(1000 / config.output_data_rate);
+  result |= inv_enable_sensor(ANDROID_SENSOR_GAME_ROTATION_VECTOR, 1);
+  unsigned short data_output_delay_ms = (unsigned short)(1125 / config.output_data_rate);
   result |= inv_set_odr(ANDROID_SENSOR_GYROSCOPE, data_output_delay_ms);
   result |= inv_set_odr(ANDROID_SENSOR_LINEAR_ACCELERATION, data_output_delay_ms);
-  result |= inv_set_odr(ANDROID_SENSOR_ROTATION_VECTOR, data_output_delay_ms);
+  result |= inv_set_odr(ANDROID_SENSOR_GAME_ROTATION_VECTOR, data_output_delay_ms);
+
+  uint8_t gyro_config_1;
+  uint8_t accel_config_1;
+  inv_read_mems_reg_core(REG_GYRO_CONFIG_1, 1, &gyro_config_1);
+  inv_read_mems_reg_core(REG_ACCEL_CONFIG, 1, &accel_config_1);
+  gyro_config_1 |= (6 << 3) | 1;
+  accel_config_1 |= (0 << 3) | 1;
+  inv_write_single_mems_reg_core(REG_GYRO_CONFIG_1, gyro_config_1);
+  // inv_write_single_mems_reg_core(REG_ACCEL_CONFIG, accel_config_1);
 
   result |= inv_reset_dmp_odr_counters();
   result |= dmp_reset_fifo();
@@ -258,6 +267,12 @@ void fimu_fifo_handler(float *gyro_float, float *linAccFloat, float *quat_float)
           linAccFloat[0] = inv_q16_to_float(linAccQ16[0]);
           linAccFloat[1] = inv_q16_to_float(linAccQ16[1]);
           linAccFloat[2] = inv_q16_to_float(linAccQ16[2]);
+
+          inv_convert_rotation_vector(long_quat, rv_float);
+          quat_float[0] = rv_float[0];
+          quat_float[1] = -rv_float[3];
+          quat_float[2] = rv_float[2];
+          quat_float[3] = -rv_float[1];
         }  // header & QUAT6_SET
 
         if (header & QUAT9_SET) {
@@ -378,6 +393,8 @@ void fimu_calibrate(float *gyro_bias, float *accel_bias, float *quat_bias)
   float gyro_samples[3] = {0.0F, 0.0F, 0.0F};
   float accel_samples[3] = {0.0F, 0.0F, 0.0F};
   float quat_samples[4] = {0.0F, 0.0F, 0.0F, 0.0F};
+
+  rtos_delay_ms(20);
 
   for (int i = 0; i < samples; i++) {
     fimu_fifo_handler(test_gyro, test_accel, test_quat);

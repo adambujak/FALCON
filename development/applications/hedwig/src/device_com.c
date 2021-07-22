@@ -68,6 +68,12 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
                 controlInput.fcsControlCmd.roll,
                 controlInput.fcsControlCmd.alt);
     } break;
+    case FPT_ATTITUDE_PARAMS_COMMAND:
+    case FPT_YAW_PARAMS_COMMAND: 
+    case FPT_ALT_PARAMS_COMMAND: {
+      LOG_INFO("PARAMETER UPDATE COMMAND\r\n");
+      flight_control_set_controller_params(data, packetType);
+    } break;
     case FPT_FCS_MODE_COMMAND: {
       fpc_fcs_mode_t fcsMode = {};
       fpc_fcs_mode_decode(data, &fcsMode);
