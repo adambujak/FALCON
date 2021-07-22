@@ -66,8 +66,6 @@ void sensors_get_bias(sensor_bias_t *bias)
 {
   memcpy(bias->gyro_bias, gyro_bias, sizeof(bias->gyro_bias));
   memcpy(bias->accel_bias, accel_bias, sizeof(bias->accel_bias));
-  // memcpy(bias->quat_bias, quat_bias, sizeof(bias->quat_bias));
-  // bias->alt_bias = 0;
 }
 
 static void calibrate(void)
