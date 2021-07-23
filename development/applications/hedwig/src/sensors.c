@@ -46,11 +46,6 @@ static void sensor_timer_cb(TimerHandle_t xTimer)
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-void sensors_calibrate(void)
-{
-  calibration_required = true;
-}
-
 void sensors_get_bias(sensor_bias_t *bias)
 {
   memcpy(bias->gyro_bias, gyro_bias, sizeof(bias->gyro_bias));
@@ -102,14 +97,26 @@ static void sensors_task(void *pvParameters)
 
     if (sensor_notification == pdPASS) {
 
-      FLN_ERR_CHECK(imu_get_data());
+      FLN_ERR_CHECK(imu_get_data(accel_data, gyro_data));
 
       if (baro_skip_count++ >= BARO_SKIP_COUNT) {
         baro_get_altitude(&alt_data);
         baro_skip_count = 1;
       }
 
-      //flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
+      LOG_DEBUG("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
+            0.f,
+            0.f,
+            0.f,            
+            gyro_data[0],
+            gyro_data[1],
+            gyro_data[2],
+            accel_data[0],
+            accel_data[1],
+            accel_data[2],
+            alt_data);
+
+      flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");
