@@ -121,7 +121,7 @@ int main(void)
   leds_task_tart();
 #endif
 #if INCLUDE_DEVICE_COM
-//  device_com_start();
+ device_com_start();
 #endif
 #if INCLUDE_SENSORS
   sensors_task_start();
