@@ -496,7 +496,7 @@ static void flight_control_task(void *pvParameters)
   RTOS_ERR_CHECK(FC_timerStatus);
 
   BaseType_t flightTimerNotification;
-
+  uint32_t old_time = 0;
   while(1)
   {
     if (calibration_required) {
@@ -528,29 +528,31 @@ static void flight_control_task(void *pvParameters)
           }
         }
 
-        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u ALT_PD: %7.4f, %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n",
-            rtY_State_Estim.z,
-            rtY_State_Estim.dz,
-            rtY_State_Estim.yaw,
-            rtY_State_Estim.pitch,
-            rtY_State_Estim.roll,
-            rtY_State_Estim.p,
-            rtY_State_Estim.q,
-            rtY_State_Estim.r,
-            rtY_Throttle[0],
-            rtY_Throttle[1],
-            rtY_Throttle[2],
-            rtY_Throttle[3],
-            PID_alt_P,
-            PID_alt_D,
-            Alt_Hover_Const,
-            PID_pitch_P,
-            PID_pitch_roll_I,
-            PID_pitch_D,
-            PID_yaw_P,
-            PID_yaw_D);
+        // LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u ALT_PD: %7.4f, %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n",
+        //     rtY_State_Estim.z,
+        //     rtY_State_Estim.dz,
+        //     rtY_State_Estim.yaw,
+        //     rtY_State_Estim.pitch,
+        //     rtY_State_Estim.roll,
+        //     rtY_State_Estim.p,
+        //     rtY_State_Estim.q,
+        //     rtY_State_Estim.r,
+        //     rtY_Throttle[0],
+        //     rtY_Throttle[1],
+        //     rtY_Throttle[2],
+        //     rtY_Throttle[3],
+        //     PID_alt_P,
+        //     PID_alt_D,
+        //     Alt_Hover_Const,
+        //     PID_pitch_P,
+        //     PID_pitch_roll_I,
+        //     PID_pitch_D,
+        //     PID_yaw_P,
+        //     PID_yaw_D);
 
-        rtos_delay_ms(1);
+        // LOG_DEBUG("%u\r\n", system_time_cmp_us(old_time, system_time_get()));
+        // old_time = system_time_get();
+        // rtos_delay_ms(1);
       }
       else {
         LOG_DEBUG("timer notif not received\r\n");

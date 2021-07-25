@@ -100,6 +100,7 @@ static void sensors_task(void *pvParameters)
 
   uint32_t baro_skip_count = 1;
   uint32_t old_time;
+
   while (1) {
 
     /* Wait to be notified of an interrupt. */
@@ -125,20 +126,17 @@ static void sensors_task(void *pvParameters)
       quat_data[3] = q.z;
 
       // LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
-      // LOG_DEBUG("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
-      //       attitude.roll,
-      //       attitude.pitch,
-      //       attitude.yaw,            
-      //       gyro_data[0],
-      //       gyro_data[1],
-      //       gyro_data[2],
-      //       accel_data[0],
-      //       accel_data[1],
-      //       accel_data[2],
-      //       mag_data[0],
-      //       mag_data[1],
-      //       mag_data[2],
-      //       alt_data);
+      LOG_DEBUG("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
+            attitude.roll,
+            attitude.pitch,
+            attitude.yaw,            
+            gyro_data[0],
+            gyro_data[1],
+            gyro_data[2],
+            accel_data[0],
+            accel_data[1],
+            accel_data[2],
+            alt_data);
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
       old_time = system_time_get();
