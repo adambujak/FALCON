@@ -1,42 +1,16 @@
 #include "imu.h"
 
-#include <stdint.h>
-
 #include "falcon_common.h"
-#include "i2c.h"
-#include "icm20948_api.h"
+#include "inv_mems.h"
 
-static float accel_scale_factor_array[4] = {
-  16384.f,
-  8192.f,
-  4096.f,
-  2048.f
-};
+signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0, 1, 0, 0, 0, 0, -1};
+signed char COMPASS_ORIENTATION[9] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
 
-static float gyro_scale_factor_array[4] = {
-  131.f,
-  65.5f,
-  32.8f,
-  16.4f
-};
-
-static icm20948_settings_t settings;
-
-static int8_t icm_write(uint8_t addr, const uint8_t *data, const uint32_t len) {
-  icm20948_return_code_t ret = ICM20948_RET_OK;
-  if (i2c_imu_write(ICM20948_SLAVE_ADDR, addr, data, len) != FLN_OK) {
-    return ICM20948_RET_GEN_FAIL;
-  }
-  return ret;
-}
-
-static int8_t icm_read(uint8_t addr, uint8_t *data, uint32_t len) {
-  icm20948_return_code_t ret = ICM20948_RET_OK;
-  if (i2c_imu_read(ICM20948_SLAVE_ADDR, addr, data, len) != FLN_OK) {
-    return ICM20948_RET_GEN_FAIL;
-  }
-  return ret;
-}
+const unsigned char ACCEL_GYRO_CHIP_ADDR = 0x68;
+const unsigned char COMPASS_SLAVE_ID = HW_AK09916;
+const unsigned char COMPASS_CHIP_ADDR = 0x0C;
+const unsigned char PRESSURE_CHIP_ADDR = 0x00;
+long SOFT_IRON_MATRIX[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int imu_calibrate(float *gyro_bias, float *accel_bias)
 {
@@ -44,45 +18,102 @@ int imu_calibrate(float *gyro_bias, float *accel_bias)
   return FLN_OK;
 }
 
-int imu_get_data(float *accel, float *gyro)
+int imu_get_data(float *accel_float, float *gyro_float)
 {
-  icm20948_gyro_t gyro_data;
-  icm20948_accel_t accel_data;  
+  short int_read_back = 0;
+  unsigned short header = 0, header2 = 0;
+  int data_left_in_fifo = 0;
+  short short_data[3] = {0};
+  signed long long_data[3] = {0};
+  unsigned short sample_cnt_array[GENERAL_SENSORS_MAX] = {0};
 
-  int ret = 0;
-  ret |= icm20948_getGyroData(&gyro_data);
-  ret |= icm20948_getAccelData(&accel_data);
+  // Process Incoming INT and Get/Pack FIFO Data
+  inv_identify_interrupt(&int_read_back);
+  if (int_read_back & (BIT_MSG_DMP_INT | BIT_MSG_DMP_INT_0 | BIT_MSG_DMP_INT_2 | BIT_MSG_DMP_INT_5)) {
+    // Read FIFO contents and parse it.
+    unsigned short total_sample_cnt = 0;
 
-  if (ret == ICM20948_RET_OK) {
-    accel[0] = accel_data.x / accel_scale_factor_array[settings.accel.fs];
-    accel[1] = accel_data.y / accel_scale_factor_array[settings.accel.fs];
-    accel[2] = accel_data.z / accel_scale_factor_array[settings.accel.fs];
-    gyro[0] = gyro_data.x / gyro_scale_factor_array[settings.gyro.fs];
-    gyro[1] = gyro_data.y / gyro_scale_factor_array[settings.gyro.fs];
-    gyro[2] = gyro_data.z / gyro_scale_factor_array[settings.gyro.fs];
+    do {
+      if (inv_mems_fifo_swmirror(&data_left_in_fifo, &total_sample_cnt, sample_cnt_array)) break;
+
+      while (total_sample_cnt--) {
+        if (inv_mems_fifo_pop(&header, &header2, &data_left_in_fifo)) break;
+
+        if (header & ACCEL_SET) {
+          float scale;
+          dmp_get_accel(long_data);
+          scale = (1 << inv_get_accel_fullscale()) * 2.f / (1L << 30);  // Convert from raw units to g's
+          scale *= 9.80665f;                                            // Convert to m/s^2
+          inv_convert_dmp3_to_body(long_data, scale, accel_float);
+        }  // header & ACCEL_SET
+
+        if (header & GYRO_SET) {
+          float scale;
+          signed long raw_data[3] = {0};
+          signed long bias_data[3] = {0};
+          float gyro_bias_float[3] = {0};
+          float gyro_raw_float[3] = {0};
+
+          dmp_get_raw_gyro(short_data);
+          scale = (1 << inv_get_gyro_fullscale()) * 250.f / (1L << 15);  // From raw to dps
+          scale *= (float)M_PI / 180.f;                                  // Convert to radian.
+          raw_data[0] = (long)short_data[0];
+          raw_data[1] = (long)short_data[1];
+          raw_data[2] = (long)short_data[2];
+          inv_convert_dmp3_to_body(raw_data, scale, gyro_raw_float);
+
+          // We have gyro bias data in raw units, scaled by 2^5
+          dmp_get_gyro_bias(short_data);
+          scale = (1 << inv_get_gyro_fullscale()) * 250.f / (1L << 20);  // From raw to dps
+          scale *= (float)M_PI / 180.f;                                  // Convert to radian.
+          bias_data[0] = (long)short_data[0];
+          bias_data[1] = (long)short_data[1];
+          bias_data[2] = (long)short_data[2];
+          inv_convert_dmp3_to_body(bias_data, scale, gyro_bias_float);
+
+          // shift to Q20 to do all operations in Q20
+          raw_data[0] = raw_data[0] << 5;
+          raw_data[1] = raw_data[1] << 5;
+          raw_data[2] = raw_data[2] << 5;
+          inv_mems_dmp_get_calibrated_gyro(long_data, raw_data, bias_data);
+          inv_convert_dmp3_to_body(long_data, scale, gyro_float);
+        }  // header & GYRO_SET
+
+      }  // total_sample_cnt
+
+      if (!data_left_in_fifo) break;
+    } while (data_left_in_fifo);
     return FLN_OK;
   }
-
-  return FLN_ERR;
+  else {    
+    return FLN_ERR;
+  }
 }
 
-int imu_init(void) {
-  icm20948_return_code_t ret = ICM20948_RET_OK;
-
-  // Init the device function pointers
-  ret = icm20948_init(icm_read, icm_write, delay_us);
-
-  settings.gyro.en = ICM20948_MOD_ENABLED;
-  settings.gyro.fs = ICM20948_GYRO_FS_SEL_2000DPS;
-  settings.accel.en = ICM20948_MOD_ENABLED;
-  settings.accel.fs = ICM20948_ACCEL_FS_SEL_16G;
-  ret |= icm20948_applySettings(&settings);
-
-  if (ret == ICM20948_RET_OK) {
-    LOG_DEBUG("IMU configured\r\n");
-    return FLN_OK;
+int imu_init(void) {  
+  int result = 0;
+  inv_set_chip_to_body_axis_quaternion(ACCEL_GYRO_ORIENTATION, 0.0);
+  result |= inv_initialize_lower_driver(SERIAL_INTERFACE_I2C, 0);
+  result |= inv_set_slave_compass_id(COMPASS_SLAVE_ID);
+  if (result) {
+    LOG_DEBUG("Could not initialize.\r\n");
+    return FLN_ERR;
   }
+  else {
+    LOG_DEBUG("Initialized.\r\n");
+  }
+  // result |= inv_set_gyro_divider(1U);   // Initial sampling rate 1125Hz/10+1 = 102Hz.
+  // result |= inv_set_accel_divider(1U);  // Initial sampling rate 1125Hz/10+1 = 102Hz.
+  result |= inv_set_gyro_fullscale(MPU_FS_250dps);
+  result |= inv_set_accel_fullscale(MPU_FS_2G);
+  result |= inv_enable_sensor(ANDROID_SENSOR_GYROSCOPE, 1);
+  result |= inv_enable_sensor(ANDROID_SENSOR_ACCELEROMETER, 1);
+  unsigned short data_output_delay_ms = 5;
+  result |= inv_set_odr(ANDROID_SENSOR_GYROSCOPE, data_output_delay_ms);
+  result |= inv_set_odr(ANDROID_SENSOR_ACCELEROMETER, data_output_delay_ms);
 
-  LOG_ERROR("Error applying IMU settings\r\n");
-  return FLN_ERR;
+  result |= inv_reset_dmp_odr_counters();
+  result |= dmp_reset_fifo();
+
+  return result;
 }

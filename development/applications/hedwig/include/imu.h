@@ -2,7 +2,7 @@
 #define IMU_H
 
 int imu_init(void);
-int imu_get_data(float *accel, float *gyro);
+int imu_get_data(float *accel_float, float *gyro_float);
 int imu_calibrate(float *, float *);
 
 #endif // IMU_H
