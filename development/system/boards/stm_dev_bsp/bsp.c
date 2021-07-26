@@ -68,7 +68,7 @@ void FLN_LED_TIMER_IRQ_Handler(void)
 }
 
 static void (*imuISRCallback) (void);
-void bsp_imu_int_init(void (*isrCallback) (void))
+int bsp_imu_int_init(void (*isrCallback) (void))
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
 
@@ -83,6 +83,7 @@ void bsp_imu_int_init(void (*isrCallback) (void))
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
   imuISRCallback = isrCallback;
+  return FLN_OK;
 }
 
 void EXTI9_5_IRQHandler(void)

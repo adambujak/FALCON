@@ -8,10 +8,11 @@
 #include "flight_control.h"
 #include "i2c.h"
 #include "imu.h"
+#include "bsp.h"
 #include "rtwtypes.h"
 #include "system_time.h"
 
-#define IMU_SAMPLE_RATE  (100) // Hz
+#define IMU_SAMPLE_RATE  (200) // Hz
 #define BARO_SAMPLE_RATE (10)  // Hz
 
 #define IMU_SAMPLE_PERIOD  (1000 / IMU_SAMPLE_RATE)
@@ -20,21 +21,19 @@
 #define IMU_SAMPLE_TIMEOUT (IMU_SAMPLE_PERIOD + (IMU_SAMPLE_PERIOD / 10))
 #define BARO_SKIP_COUNT  (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)
 
-static TimerHandle_t sensor_timer;
 static TaskHandle_t sensors_task_handle = NULL;
 
 static float gyro_bias[3] = {0.0F, 0.0F, 0.0F};
 static float accel_bias[3] = {0.0F, 0.0F, 0.0F};
-static float quat_bias[4] = {1.0F, 0.0F, 0.0F, 0.0F};
 
 static float gyro_data[3] = {0.0F, 0.0F, 0.0F};
 static float accel_data[3] = {0.0F, 0.0F, 0.0F};
-static float quat_data[4] = {0.0F, 0.0F, 0.0F, 0.0F};
+static float quat_data[4] = {1.0F, 0.0F, 0.0F, 0.0F};
 static float alt_data = 0.0F;
 
 static bool calibration_required = false;
 
-static void sensor_timer_cb(TimerHandle_t xTimer)
+void sensors_imu_int_cb(void)
 {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
@@ -86,7 +85,7 @@ static void sensors_task(void *pvParameters)
   BaseType_t sensor_notification;
 
   uint32_t baro_skip_count = 1;
-
+  uint32_t old_time;
   while (1) {
 
     /* Wait to be notified of an interrupt. */
@@ -104,7 +103,7 @@ static void sensors_task(void *pvParameters)
         baro_skip_count = 1;
       }
 
-      LOG_DEBUG("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
+      LOG_INFO("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
             0.f,
             0.f,
             0.f,            
@@ -117,6 +116,9 @@ static void sensors_task(void *pvParameters)
             alt_data);
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
+
+      LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
+      old_time = system_time_get();
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");
@@ -134,16 +136,13 @@ void sensors_task_setup(void)
 {
   FLN_ERR_CHECK(imu_init());
   FLN_ERR_CHECK(baro_init(BARO_SAMPLE_RATE));
+  FLN_ERR_CHECK(bsp_imu_int_init(sensors_imu_int_cb));
 
   LOG_DEBUG("Sensors Initialized\r\n");
-
-  sensor_timer = xTimerCreate("sensor_timer", MS_TO_TICKS(IMU_SAMPLE_PERIOD), pdTRUE, 0, sensor_timer_cb);
 }
 
 void sensors_task_start(void)
 {
-  RTOS_ERR_CHECK(xTimerStart(sensor_timer, 0));
-
   BaseType_t task_status = xTaskCreate(sensors_task,
                                        "sensors_task",
                                        SENSORS_STACK_SIZE,

@@ -23,6 +23,8 @@ void bsp_leds_set(uint8_t val);
 void bsp_leds_timer_start(void);
 void bsp_leds_timer_stop(void);
 
+int bsp_imu_int_init(void (*isrCallback) (void));
+
 int bsp_motors_init(void);
 void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us);
 
