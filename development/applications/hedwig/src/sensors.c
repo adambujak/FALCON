@@ -12,7 +12,7 @@
 #include "rtwtypes.h"
 #include "system_time.h"
 
-#define IMU_SAMPLE_RATE  (200) // Hz
+#define IMU_SAMPLE_RATE  (100) // Hz
 #define BARO_SAMPLE_RATE (10)  // Hz
 
 #define IMU_SAMPLE_PERIOD  (1000 / IMU_SAMPLE_RATE)
@@ -28,6 +28,7 @@ static float accel_bias[3] = {0.0F, 0.0F, 0.0F};
 
 static float gyro_data[3] = {0.0F, 0.0F, 0.0F};
 static float accel_data[3] = {0.0F, 0.0F, 0.0F};
+static float mag_data[3] = {0.0F, 0.0F, 0.0F};
 static float quat_data[4] = {1.0F, 0.0F, 0.0F, 0.0F};
 static float alt_data = 0.0F;
 
@@ -96,29 +97,27 @@ static void sensors_task(void *pvParameters)
 
     if (sensor_notification == pdPASS) {
 
-      FLN_ERR_CHECK(imu_get_data(accel_data, gyro_data));
+      FLN_ERR_CHECK(imu_get_data(accel_data, gyro_data, mag_data));
 
       if (baro_skip_count++ >= BARO_SKIP_COUNT) {
         baro_get_altitude(&alt_data);
         baro_skip_count = 1;
       }
-
-      LOG_INFO("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
-            0.f,
-            0.f,
-            0.f,            
+      LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
+      old_time = system_time_get();
+      LOG_INFO("\tp,q,r:\t %7.4f\t %7.4f\t %7.4f\t accel:\t %7.4f\t %7.4f\t %7.4f\t mag:\t %7.4f\t %7.4f\t %7.4f\t alt:\t %7.4f\t\r\n",        
             gyro_data[0],
             gyro_data[1],
             gyro_data[2],
             accel_data[0],
             accel_data[1],
             accel_data[2],
+            mag_data[0],
+            mag_data[1],
+            mag_data[2],
             alt_data);
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
-
-      LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
-      old_time = system_time_get();
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");

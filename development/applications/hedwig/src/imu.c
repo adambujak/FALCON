@@ -4,13 +4,13 @@
 #include "inv_mems.h"
 
 signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0, 1, 0, 0, 0, 0, -1};
-signed char COMPASS_ORIENTATION[9] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+signed char COMPASS_ORIENTATION[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 const unsigned char ACCEL_GYRO_CHIP_ADDR = 0x68;
 const unsigned char COMPASS_SLAVE_ID = HW_AK09916;
 const unsigned char COMPASS_CHIP_ADDR = 0x0C;
 const unsigned char PRESSURE_CHIP_ADDR = 0x00;
-long SOFT_IRON_MATRIX[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+long SOFT_IRON_MATRIX[] = {1073741824,0,0,0,1073741824,0,0,0,1073741824};
 
 int imu_calibrate(float *gyro_bias, float *accel_bias)
 {
@@ -18,7 +18,7 @@ int imu_calibrate(float *gyro_bias, float *accel_bias)
   return FLN_OK;
 }
 
-int imu_get_data(float *accel_float, float *gyro_float)
+int imu_get_data(float *accel_float, float *gyro_float, float *compass_float)
 {
   short int_read_back = 0;
   unsigned short header = 0, header2 = 0;
@@ -60,24 +60,23 @@ int imu_get_data(float *accel_float, float *gyro_float)
           raw_data[0] = (long)short_data[0];
           raw_data[1] = (long)short_data[1];
           raw_data[2] = (long)short_data[2];
-          inv_convert_dmp3_to_body(raw_data, scale, gyro_raw_float);
-
-          // We have gyro bias data in raw units, scaled by 2^5
-          dmp_get_gyro_bias(short_data);
-          scale = (1 << inv_get_gyro_fullscale()) * 250.f / (1L << 20);  // From raw to dps
-          scale *= (float)M_PI / 180.f;                                  // Convert to radian.
-          bias_data[0] = (long)short_data[0];
-          bias_data[1] = (long)short_data[1];
-          bias_data[2] = (long)short_data[2];
-          inv_convert_dmp3_to_body(bias_data, scale, gyro_bias_float);
-
-          // shift to Q20 to do all operations in Q20
-          raw_data[0] = raw_data[0] << 5;
-          raw_data[1] = raw_data[1] << 5;
-          raw_data[2] = raw_data[2] << 5;
-          inv_mems_dmp_get_calibrated_gyro(long_data, raw_data, bias_data);
-          inv_convert_dmp3_to_body(long_data, scale, gyro_float);
+          inv_convert_dmp3_to_body(raw_data, scale, gyro_float);
         }  // header & GYRO_SET
+
+        if (header & CPASS_CALIBR_SET) {
+          float scale;
+          dmp_get_calibrated_compass(long_data);
+          scale = 1.52587890625e-005f; //COMPASS_CONVERSION
+          inv_convert_dmp3_to_body(long_data, scale, compass_float);
+        } // header & CPASS_CALIBR_SET
+
+        if (header & CPASS_SET) {
+          // Raw compass [DMP]
+          dmp_get_raw_compass(long_data);
+          compass_float[0] = long_data[0] * 1.52587890625e-005f;
+          compass_float[1] = long_data[1] * 1.52587890625e-005f;
+          compass_float[2] = long_data[2] * 1.52587890625e-005f;
+        } // header & CPASS_SET
 
       }  // total_sample_cnt
 
@@ -102,12 +101,14 @@ int imu_init(unsigned short data_output_period_ms) {
   else {
     LOG_DEBUG("Initialized.\r\n");
   }
-  result |= inv_set_gyro_fullscale(MPU_FS_250dps);
-  result |= inv_set_accel_fullscale(MPU_FS_2G);
+  result |= inv_set_gyro_fullscale(MPU_FS_500dps);
+  result |= inv_set_accel_fullscale(MPU_FS_8G);
   result |= inv_enable_sensor(ANDROID_SENSOR_GYROSCOPE, 1);
   result |= inv_enable_sensor(ANDROID_SENSOR_ACCELEROMETER, 1);
+  result |= inv_enable_sensor(ANDROID_SENSOR_GEOMAGNETIC_FIELD, 1);
   result |= inv_set_odr(ANDROID_SENSOR_GYROSCOPE, data_output_period_ms);
   result |= inv_set_odr(ANDROID_SENSOR_ACCELEROMETER, data_output_period_ms);
+  result |= inv_set_odr(ANDROID_SENSOR_GEOMAGNETIC_FIELD, data_output_period_ms);
   result |= inv_reset_dmp_odr_counters();
   result |= dmp_reset_fifo();
 
