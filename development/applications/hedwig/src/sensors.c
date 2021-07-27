@@ -134,7 +134,7 @@ static void sensors_task(void *pvParameters)
 
 void sensors_task_setup(void)
 {
-  FLN_ERR_CHECK(imu_init());
+  FLN_ERR_CHECK(imu_init(IMU_SAMPLE_PERIOD));
   FLN_ERR_CHECK(baro_init(BARO_SAMPLE_RATE));
   FLN_ERR_CHECK(bsp_imu_int_init(sensors_imu_int_cb));
 

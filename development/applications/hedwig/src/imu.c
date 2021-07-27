@@ -90,7 +90,7 @@ int imu_get_data(float *accel_float, float *gyro_float)
   }
 }
 
-int imu_init(void) {  
+int imu_init(unsigned short data_output_period_ms) {
   int result = 0;
   inv_set_chip_to_body_axis_quaternion(ACCEL_GYRO_ORIENTATION, 0.0);
   result |= inv_initialize_lower_driver(SERIAL_INTERFACE_I2C, 0);
@@ -102,16 +102,12 @@ int imu_init(void) {
   else {
     LOG_DEBUG("Initialized.\r\n");
   }
-  // result |= inv_set_gyro_divider(1U);   // Initial sampling rate 1125Hz/10+1 = 102Hz.
-  // result |= inv_set_accel_divider(1U);  // Initial sampling rate 1125Hz/10+1 = 102Hz.
   result |= inv_set_gyro_fullscale(MPU_FS_250dps);
   result |= inv_set_accel_fullscale(MPU_FS_2G);
   result |= inv_enable_sensor(ANDROID_SENSOR_GYROSCOPE, 1);
   result |= inv_enable_sensor(ANDROID_SENSOR_ACCELEROMETER, 1);
-  unsigned short data_output_delay_ms = 5;
-  result |= inv_set_odr(ANDROID_SENSOR_GYROSCOPE, data_output_delay_ms);
-  result |= inv_set_odr(ANDROID_SENSOR_ACCELEROMETER, data_output_delay_ms);
-
+  result |= inv_set_odr(ANDROID_SENSOR_GYROSCOPE, data_output_period_ms);
+  result |= inv_set_odr(ANDROID_SENSOR_ACCELEROMETER, data_output_period_ms);
   result |= inv_reset_dmp_odr_counters();
   result |= dmp_reset_fifo();
 

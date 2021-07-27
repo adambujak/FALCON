@@ -17,7 +17,7 @@ int uart_init(void)
   gpio_config.Pin       = UART_TX_PIN;
   gpio_config.Mode      = GPIO_MODE_AF_PP;
   gpio_config.Pull      = GPIO_PULLUP;
-  gpio_config.Speed     = GPIO_SPEED_HIGH;
+  gpio_config.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
   gpio_config.Alternate = UART_TX_AF;
 
   HAL_GPIO_Init(UART_TX_GPIO_PORT, &gpio_config);

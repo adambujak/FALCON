@@ -44,7 +44,7 @@
 #define UART_RX_GPIO_PORT                     GPIOA
 #define UART_RX_AF                            GPIO_AF7_USART2
 
-#define UART_BAUDRATE                         115200
+#define UART_BAUDRATE                         1000000
 
 /* Sensors */
 #define FLN_SENSORS_I2C                       I2C1
