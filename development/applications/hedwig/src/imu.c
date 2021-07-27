@@ -3,8 +3,12 @@
 #include "falcon_common.h"
 #include "inv_mems.h"
 
-signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0, 1, 0, 0, 0, 0, -1};
-signed char COMPASS_ORIENTATION[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0,
+                                         -1, 0, 0,
+                                         0, 0, 1};
+signed char COMPASS_ORIENTATION[9] = {1, 0, 0,
+                                      0, -1, 0, 
+                                      0, 0, -1};
 
 const unsigned char ACCEL_GYRO_CHIP_ADDR = 0x68;
 const unsigned char COMPASS_SLAVE_ID = HW_AK09916;
@@ -47,7 +51,7 @@ static void imu_calibrate(float *accel_reading, float *gyro_reading)
     // calibration complete
     accel_bias[0] = accel_readings[0] / IMU_CALIBRATION_CYCLES;
     accel_bias[1] = accel_readings[1] / IMU_CALIBRATION_CYCLES;
-    accel_bias[2] = (accel_readings[2] / IMU_CALIBRATION_CYCLES) + 9.80665f;
+    accel_bias[2] = (accel_readings[2] / IMU_CALIBRATION_CYCLES) - 9.80665f;
     gyro_bias[0] = gyro_readings[0] / IMU_CALIBRATION_CYCLES;
     gyro_bias[1] = gyro_readings[1] / IMU_CALIBRATION_CYCLES;
     gyro_bias[2] = gyro_readings[2] / IMU_CALIBRATION_CYCLES;

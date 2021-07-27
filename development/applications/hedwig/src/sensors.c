@@ -125,8 +125,9 @@ static void sensors_task(void *pvParameters)
       quat_data[2] = q.y;
       quat_data[3] = q.z;
 
-      // LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
-      LOG_DEBUG("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
+
+      // LOG_INFO("%u\r\n", system_time_cmp_us(old_time, system_time_get()));
+      LOG_INFO("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
             attitude.roll,
             attitude.pitch,
             attitude.yaw,            
@@ -138,7 +139,7 @@ static void sensors_task(void *pvParameters)
             accel_data[2],
             alt_data);
 
-      flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
+      flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);      
       old_time = system_time_get();
     }
     else {
