@@ -373,14 +373,14 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
   return FLN_ERR;
 }
 
-fe_flight_mode_t flight_control_get_mode(void)
+int flight_control_get_mode(fe_flight_mode_t *mode)
 {
-  fe_flight_mode_t mode;
   if (lock_mode() == pdTRUE) {
-    mode = flight_control_mode;
+    *mode = flight_control_mode;
     unlock_mode();
+    return FLN_OK;
   }
-  return mode;
+  return FLN_ERR;
 }
 
 void flight_control_calibrate_sensors(void)

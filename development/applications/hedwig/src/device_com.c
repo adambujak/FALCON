@@ -62,7 +62,7 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
       fpc_flight_control_t controlInput = {};
       fpc_flight_control_decode(data, &controlInput);
       flight_control_set_command_data(&controlInput);
-      LOG_INFO("CONTROL INPUT: %f, %f, %f, %f\r\n",
+      LOG_DEBUG("CONTROL INPUT: %f, %f, %f, %f\r\n",
                 controlInput.fcsControlCmd.yaw,
                 controlInput.fcsControlCmd.pitch,
                 controlInput.fcsControlCmd.roll,
@@ -71,24 +71,24 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
     case FPT_ATTITUDE_PARAMS_COMMAND:
     case FPT_YAW_PARAMS_COMMAND: 
     case FPT_ALT_PARAMS_COMMAND: {
-      LOG_INFO("PARAMETER UPDATE COMMAND\r\n");
+      LOG_DEBUG("PARAMETER UPDATE COMMAND\r\n");
       flight_control_set_controller_params(data, packetType);
     } break;
     case FPT_FCS_MODE_COMMAND: {
       fpc_fcs_mode_t fcsMode = {};
       fpc_fcs_mode_decode(data, &fcsMode);
       flight_control_set_mode(fcsMode.mode);
-      LOG_INFO("MODE COMMAND: %d\r\n", fcsMode.mode);
+      LOG_DEBUG("MODE COMMAND: %d\r\n", fcsMode.mode);
     } break;
     case FPT_TEST_QUERY: {
-      LOG_INFO("TEST QUERY RECEIVED\r\n");
+      LOG_DEBUG("TEST QUERY RECEIVED\r\n");
       fpr_test_t response = {cnt++};
       uint8_t buffer[MAX_PACKET_SIZE];
       uint8_t length = fpr_test_encode(buffer, &response);
       device_com_send_packet(buffer, length);
     } break;
     case FPT_CALIBRATE_COMMAND: {
-      LOG_INFO("CALIBRATION COMMAND\r\n");
+      LOG_DEBUG("CALIBRATION COMMAND\r\n");
       flight_control_calibrate_sensors();
     }
     default:
@@ -106,7 +106,14 @@ static void status_process(void)
   last_status_process_time = now;
   uint8_t length;
   uint8_t packet_buffer[MAX_PACKET_SIZE];
-  if (flight_control_get_mode() >= FE_FLIGHT_MODE_FCS_READY) {
+
+  fe_flight_mode_t flight_mode;
+  if (flight_control_get_mode(&flight_mode) != FLN_OK) {
+    LOG_ERROR("error getting flight mode\r\n");
+    return;
+  }
+
+  if (flight_mode >= FE_FLIGHT_MODE_FCS_READY) {
     fpr_status_t status_response;
     flight_control_get_outputs(&status_response);
     length = fpr_status_encode(packet_buffer, &status_response);

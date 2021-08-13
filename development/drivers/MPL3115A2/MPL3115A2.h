@@ -23,9 +23,6 @@
 
 #include <stdint.h>
 
-#include "bsp.h"
-void MPL3115A2_i2c_connect(fln_i2c_handle_t *handle);
-
 #define TRUE    1
 #define FALSE   0
 

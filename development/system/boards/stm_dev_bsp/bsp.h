@@ -23,24 +23,7 @@ void bsp_leds_set(uint8_t val);
 void bsp_leds_timer_start(void);
 void bsp_leds_timer_stop(void);
 
-
-typedef I2C_HandleTypeDef fln_i2c_handle_t;
-
-int bsp_i2c_init(fln_i2c_handle_t *handle);
-
-int bsp_i2c_write(fln_i2c_handle_t *handle,
-                  uint8_t slave_addr,
-                  uint8_t reg_addr,
-                  uint16_t length,
-                  uint8_t *data);
-
-int bsp_i2c_read(fln_i2c_handle_t *handle,
-                 uint8_t slave_addr,
-                 uint8_t reg_addr,
-                 uint16_t length,
-                 uint8_t *data);
-
-void bsp_IMU_int_init(void (*isrCallback) (void));
+int bsp_imu_int_init(void (*isrCallback) (void));
 
 int bsp_motors_init(void);
 void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us);

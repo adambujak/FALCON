@@ -1,7 +1,6 @@
 #include "bsp.h"
 #define max(a,b) (a)>(b)?a:b
 
-
 /************************************************************
  *************************** LED ****************************
  ***********************************************************/
@@ -68,77 +67,8 @@ void FLN_LED_TIMER_IRQ_Handler(void)
   HAL_TIM_IRQHandler(&ledTimerHandle);
 }
 
-/************************************************************
- *************************** I2C ****************************
- ***********************************************************/
-int bsp_i2c_init(fln_i2c_handle_t *handle)
-{
-  GPIO_InitTypeDef  GPIO_InitStruct;
-
-  FLN_SENSORS_I2C_SCL_GPIO_CLK_ENABLE();
-  FLN_SENSORS_I2C_SDA_GPIO_CLK_ENABLE();
-  FLN_SENSORS_I2C_CLK_ENABLE();
-
-  FLN_SENSORS_I2C_FORCE_RESET();
-  FLN_SENSORS_I2C_RELEASE_RESET();
-
-  GPIO_InitStruct.Pin       = FLN_SENSORS_I2C_SCL_PIN;
-  GPIO_InitStruct.Mode      = GPIO_MODE_AF_OD;
-  GPIO_InitStruct.Pull      = GPIO_PULLUP;
-  GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
-  GPIO_InitStruct.Alternate = FLN_SENSORS_I2C_SCL_SDA_AF;
-  HAL_GPIO_Init(FLN_SENSORS_I2C_SCL_GPIO_PORT, &GPIO_InitStruct);
-
-  GPIO_InitStruct.Pin       = FLN_SENSORS_I2C_SDA_PIN;
-  GPIO_InitStruct.Alternate = FLN_SENSORS_I2C_SCL_SDA_AF;
-  HAL_GPIO_Init(FLN_SENSORS_I2C_SDA_GPIO_PORT, &GPIO_InitStruct);
-
-  handle->Instance             = FLN_SENSORS_I2C;
-  handle->Init.ClockSpeed      = FLN_SENSORS_I2C_SPEEDCLOCK;
-  handle->Init.DutyCycle       = FLN_SENSORS_I2C_DUTYCYCLE;
-  handle->Init.OwnAddress1     = 0xFF;
-  handle->Init.AddressingMode  = I2C_ADDRESSINGMODE_7BIT;
-  handle->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  handle->Init.OwnAddress2     = 0xFF;
-  handle->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  handle->Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;
-
-  if(HAL_I2C_Init(handle) != HAL_OK) {
-    return FLN_ERR;
-  }
-  return FLN_OK;
-}
-
-int bsp_i2c_write(fln_i2c_handle_t *handle,
-             uint8_t slave_addr,
-             uint8_t reg_addr,
-             uint16_t length,
-             uint8_t *data)
-{
-  while(HAL_I2C_Mem_Write(handle, ((uint16_t)slave_addr<<1), reg_addr, 1U, data, length, 25U)) {
-    if (HAL_I2C_GetError(handle) != HAL_I2C_ERROR_AF) {
-      return FLN_ERR;
-    }
-  }
-  return FLN_OK;
-}
-
-int bsp_i2c_read(fln_i2c_handle_t *handle,
-             uint8_t slave_addr,
-             uint8_t reg_addr,
-             uint16_t length,
-             uint8_t *data)
-{
-  while(HAL_I2C_Mem_Read(handle, ((uint16_t)slave_addr<<1), reg_addr, 1U, data, length, 25U)) {
-    if (HAL_I2C_GetError(handle) != HAL_I2C_ERROR_AF) {
-      return FLN_ERR;
-    }
-  }
-  return FLN_OK;
-}
-
 static void (*imuISRCallback) (void);
-void bsp_IMU_int_init(void (*isrCallback) (void))
+int bsp_imu_int_init(void (*isrCallback) (void))
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
 
@@ -153,6 +83,7 @@ void bsp_IMU_int_init(void (*isrCallback) (void))
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
   imuISRCallback = isrCallback;
+  return FLN_OK;
 }
 
 void EXTI9_5_IRQHandler(void)

@@ -1,51 +1,40 @@
 #include "sensors.h"
 
-#include "falcon_common.h"
-#include "bsp.h"
-#include "fimu.h"
-#include "fbaro.h"
-#include "flight_control.h"
 #include <stdbool.h>
 
+#include "baro.h"
+#include "falcon_common.h"
 #include "flightController.h"
+#include "flight_control.h"
+#include "i2c.h"
+#include "imu.h"
+#include "bsp.h"
 #include "rtwtypes.h"
+#include "system_time.h"
 
-fln_i2c_handle_t i2cHandle;
+#define IMU_SAMPLE_RATE  (200) // Hz
+#define BARO_SAMPLE_RATE (10)  // Hz
 
-static bool calibration_required = false;
+#define IMU_SAMPLE_PERIOD  (1000 / IMU_SAMPLE_RATE)
+#define BARO_SAMPLE_PERIOD (1000 / BARO_SAMPLE_RATE)
 
-#define IMU_SAMPLE_RATE  (200.f)
-#define BARO_SAMPLE_RATE (10.f)
-
-#define BARO_DELAY_COUNT (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)
-
-int baro_delay_count = BARO_DELAY_COUNT;
-
-static float gyro_bias[3] = {0.0F, 0.0F, 0.0F};
-static float accel_bias[3] = {0.0F, 0.0F, 0.0F};
-static float quat_bias[4] = {1.0F, 0.0F, 0.0F, 0.0F};
-
-static float gyro_data[3] = {0.0F, 0.0F, 0.0F};
-static float accel_data[3] = {0.0F, 0.0F, 0.0F};
-static float quat_data[4] = {0.0F, 0.0F, 0.0F, 0.0F};
-static float alt_data = 0.0F;
-
-static fimu_config_t IMU_config = {
-  .i2cHandle = &i2cHandle,
-  .gyro_fsr = MPU_FS_2000dps,
-  .accel_fsr = MPU_FS_16G,
-  .output_data_rate = IMU_SAMPLE_RATE
-};
-
-static fbaro_config_t baro_config = {
-  .i2cHandle = &i2cHandle,
-  .chip_id = 0xC4,
-  .sample_rate = BARO_SAMPLE_RATE
-};
+#define IMU_SAMPLE_TIMEOUT (IMU_SAMPLE_PERIOD + (IMU_SAMPLE_PERIOD / 10))
+#define BARO_SKIP_COUNT  (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)
 
 static TaskHandle_t sensors_task_handle = NULL;
 
-void IMU_data_ready_cb(void)
+static float gyro_bias[3] = {0.0F, 0.0F, 0.0F};
+static float accel_bias[3] = {0.0F, 0.0F, 0.0F};
+
+static float gyro_data[3] = {0.0F, 0.0F, 0.0F};
+static float accel_data[3] = {0.0F, 0.0F, 0.0F};
+static float mag_data[3] = {0.0F, 0.0F, 0.0F};
+static float quat_data[4] = {1.0F, 0.0F, 0.0F, 0.0F};
+static float alt_data = 0.0F;
+
+static bool calibration_required = false;
+
+void sensors_imu_int_cb(void)
 {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
@@ -57,11 +46,6 @@ void IMU_data_ready_cb(void)
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-void sensors_calibrate(void)
-{
-  calibration_required = true;
-}
-
 void sensors_get_bias(sensor_bias_t *bias)
 {
   memcpy(bias->gyro_bias, gyro_bias, sizeof(bias->gyro_bias));
@@ -70,74 +54,100 @@ void sensors_get_bias(sensor_bias_t *bias)
 
 static void calibrate(void)
 {
-  fimu_calibrate(gyro_bias, accel_bias, quat_bias);
-
-  FLN_ERR_CHECK(fbaro_calibrate());
+  FLN_ERR_CHECK(imu_start_calibration());
+  FLN_ERR_CHECK(baro_calibrate());
 
   calibration_required = false;
+}
+
+void sensors_calibrate(void)
+{
+  calibration_required = true;
 }
 
 static void sensors_task(void *pvParameters)
 {
   LOG_DEBUG("SENSORS TASK STARTED\r\n");
 
-  flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING);
+  fe_flight_mode_t initial_flight_mode;
+  if (flight_control_get_mode(&initial_flight_mode) == FLN_OK) {
 
-  FLN_ERR_CHECK(fbaro_calibrate());
-  FLN_ERR_CHECK(fimu_start(IMU_config));
-
-  flight_control_set_mode(FE_FLIGHT_MODE_IDLE);
+    flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING);
+    FLN_ERR_CHECK(baro_calibrate());
+    flight_control_set_mode(initial_flight_mode);
+  } else {
+    LOG_ERROR("error getting flight mode\r\n");
+    return;
+  }
+  LOG_DEBUG("Sensors Calibrated\r\n");
 
   rtos_delay_ms(200);
 
-  BaseType_t sensorNotification;
+  BaseType_t sensor_notification;
 
+  uint32_t baro_skip_count = 1;
+  uint32_t old_time;
   while (1) {
-    if (calibration_required) {
-      calibrate();
-    }
+
     /* Wait to be notified of an interrupt. */
-    sensorNotification = xTaskNotifyWait(pdFALSE,
+    sensor_notification = xTaskNotifyWait(pdFALSE,
                                          0xFFFFFFFF,
                                          NULL,
-                                         MS_TO_TICKS(10));
+                                         MS_TO_TICKS(IMU_SAMPLE_TIMEOUT));
 
-    if (sensorNotification == pdPASS) {
-      fimu_fifo_handler(gyro_data, accel_data, quat_data);
+    if (sensor_notification == pdPASS) {
 
-      if (baro_delay_count == BARO_DELAY_COUNT) {
-        fbaro_get_altitude(&alt_data);
-        baro_delay_count = 0;
+      FLN_ERR_CHECK(imu_get_data(accel_data, gyro_data, mag_data));
+
+      if (baro_skip_count++ >= BARO_SKIP_COUNT) {
+        baro_get_altitude(&alt_data);
+        baro_skip_count = 1;
       }
-      baro_delay_count++;
+      LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
+      old_time = system_time_get();
+      LOG_INFO("\tp,q,r:\t %7.4f\t %7.4f\t %7.4f\t accel:\t %7.4f\t %7.4f\t %7.4f\t mag:\t %7.4f\t %7.4f\t %7.4f\t alt:\t %7.4f\t\r\n",        
+            gyro_data[0],
+            gyro_data[1],
+            gyro_data[2],
+            accel_data[0],
+            accel_data[1],
+            accel_data[2],
+            mag_data[0],
+            mag_data[1],
+            mag_data[2],
+            alt_data);
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
-
-      rtos_delay_ms(1);
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");
       error_handler();
+    }
+
+    // Calibrate if requested
+    if (calibration_required) {
+      calibrate();
     }
   }
 }
 
 void sensors_task_setup(void)
 {
-  FLN_ERR_CHECK(bsp_i2c_init(&i2cHandle));
-  FLN_ERR_CHECK(fimu_init(IMU_config));
-  FLN_ERR_CHECK(fbaro_init(&baro_config));
-  bsp_IMU_int_init(IMU_data_ready_cb);
+  FLN_ERR_CHECK(imu_init(IMU_SAMPLE_PERIOD));
+  FLN_ERR_CHECK(baro_init(BARO_SAMPLE_RATE));
+  FLN_ERR_CHECK(bsp_imu_int_init(sensors_imu_int_cb));
+
+  LOG_DEBUG("Sensors Initialized\r\n");
 }
 
 void sensors_task_start(void)
 {
-  BaseType_t taskStatus = xTaskCreate(sensors_task,
-                          "sensors_task",
-                          SENSORS_STACK_SIZE,
-                          NULL,
-                          sensors_TASK_PRIORITY,
-                          &sensors_task_handle);
+  BaseType_t task_status = xTaskCreate(sensors_task,
+                                       "sensors_task",
+                                       SENSORS_STACK_SIZE,
+                                       NULL,
+                                       sensors_TASK_PRIORITY,
+                                       &sensors_task_handle);
 
-  RTOS_ERR_CHECK(taskStatus);
+  RTOS_ERR_CHECK(task_status);
 }

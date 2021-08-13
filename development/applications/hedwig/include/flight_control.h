@@ -11,7 +11,7 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input);
 void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType);
 void flight_control_get_outputs(fpr_status_t *status_response);
 int flight_control_set_mode(fe_flight_mode_t new_mode);
-fe_flight_mode_t flight_control_get_mode(void);
+int flight_control_get_mode(fe_flight_mode_t *mode);
 void flight_control_calibrate_sensors(void);
 
 

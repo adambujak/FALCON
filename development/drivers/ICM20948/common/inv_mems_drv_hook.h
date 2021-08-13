@@ -25,11 +25,6 @@
 
 #define inv_log(str)
 
-/*FALCON PORT SECTION*/
-#include "bsp.h"
-void ICM_connect_i2c(fln_i2c_handle_t *handle);
-
-
 /** @brief Hook function to be implemented by at integration level to actually write to serial interface
 * @param[in] reg        slave register address we want to write to
 * @param[in] length     length in bytes of data to be written
