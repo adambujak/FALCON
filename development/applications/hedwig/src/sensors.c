@@ -12,7 +12,7 @@
 #include "rtwtypes.h"
 #include "system_time.h"
 
-#define IMU_SAMPLE_RATE  (100) // Hz
+#define IMU_SAMPLE_RATE  (200) // Hz
 #define BARO_SAMPLE_RATE (10)  // Hz
 
 #define IMU_SAMPLE_PERIOD  (1000 / IMU_SAMPLE_RATE)
@@ -54,7 +54,7 @@ void sensors_get_bias(sensor_bias_t *bias)
 
 static void calibrate(void)
 {
-  FLN_ERR_CHECK(imu_calibrate(gyro_bias, accel_bias));
+  FLN_ERR_CHECK(imu_start_calibration());
   FLN_ERR_CHECK(baro_calibrate());
 
   calibration_required = false;

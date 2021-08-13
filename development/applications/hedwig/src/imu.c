@@ -12,10 +12,44 @@ const unsigned char COMPASS_CHIP_ADDR = 0x0C;
 const unsigned char PRESSURE_CHIP_ADDR = 0x00;
 long SOFT_IRON_MATRIX[] = {1073741824,0,0,0,1073741824,0,0,0,1073741824};
 
-int imu_calibrate(float *gyro_bias, float *accel_bias)
+#define IMU_CALIBRATION_CYCLES 400
+
+static int calibrating_imu = 0;
+static float gyro_bias[3] = {0, 0, 0};
+static float accel_bias[3] = {0, 0, 0};
+
+int imu_start_calibration(void)
 {
-  // TODO: add this
+  calibrating_imu = IMU_CALIBRATION_CYCLES;
   return FLN_OK;
+}
+
+static void imu_calibrate(float *accel_reading, float *gyro_reading)
+{
+  static float accel_readings[3];
+  static float gyro_readings[3];
+
+  
+  for (int i = 0; i < 3; i++) {
+    
+    if (calibrating_imu == IMU_CALIBRATION_CYCLES) {
+      accel_readings[i] = 0;
+      gyro_readings[i] = 0;
+    }
+
+    accel_readings[i] += accel_reading[i];
+    gyro_readings[i] += gyro_reading[i];
+  }
+
+  if (calibrating_imu == 1) {
+    accel_bias[0] = accel_readings[0] / IMU_CALIBRATION_CYCLES;
+    accel_bias[1] = accel_readings[1] / IMU_CALIBRATION_CYCLES;
+    accel_bias[2] = (accel_readings[2] / IMU_CALIBRATION_CYCLES) + 9.80665f;
+    gyro_bias[0] = gyro_readings[0] / IMU_CALIBRATION_CYCLES;
+    gyro_bias[1] = gyro_readings[1] / IMU_CALIBRATION_CYCLES;
+    gyro_bias[2] = gyro_readings[2] / IMU_CALIBRATION_CYCLES;
+  }
+  calibrating_imu--;
 }
 
 int imu_get_data(float *accel_float, float *gyro_float, float *compass_float)
@@ -82,6 +116,16 @@ int imu_get_data(float *accel_float, float *gyro_float, float *compass_float)
 
       if (!data_left_in_fifo) break;
     } while (data_left_in_fifo);
+
+    if (calibrating_imu ) {
+      imu_calibrate(accel_float, gyro_float);
+    }
+
+    for (int i = 0; i < 3; i++) {
+      accel_float[i] -= accel_bias[i];
+      gyro_float[i] -= gyro_bias[i];
+    }
+
     return FLN_OK;
   }
   else {    
