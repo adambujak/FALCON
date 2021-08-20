@@ -11,6 +11,7 @@
 #include "motors.h"
 #include "sensors.h"
 #include "system_time.h"
+#include "persistent_data.h"
 
 #include <stdint.h>
 
@@ -94,6 +95,7 @@ static void board_bringup(void)
   uart_init();
   i2c_init();
   system_time_init();
+  persistent_data_init();
 }
 
 int main(void)

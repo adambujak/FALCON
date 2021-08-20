@@ -93,6 +93,8 @@ C_SOURCES = \
 	$(PROJ_ROOT)/src/imu.c \
 	$(PROJ_ROOT)/src/radio.c \
 	$(PROJ_ROOT)/src/uart.c \
+	$(PROJ_ROOT)/src/flash.c \
+	$(PROJ_ROOT)/src/persistent_data.c \
 	$(PROJ_ROOT)/src/device_com.c \
 	$(PROJ_ROOT)/src/motors.c \
 	$(PROJ_ROOT)/src/sensors.c \
