@@ -17,9 +17,11 @@ long SOFT_IRON_MATRIX[] = {1073741824,0,0,0,1073741824,0,0,0,1073741824};
 static int calibrating_imu = 0;
 static float gyro_bias[3] = {0, 0, 0};
 static float accel_bias[3] = {0, 0, 0};
+static void (*calibration_complete_callback)(void);
 
-int imu_start_calibration(void)
+int imu_start_calibration(void (*complete_cb)(void))
 {
+  calibration_complete_callback = complete_cb;
   calibrating_imu = IMU_CALIBRATION_CYCLES;
   return FLN_OK;
 }
@@ -42,14 +44,30 @@ static void imu_calibrate(float *accel_reading, float *gyro_reading)
   }
 
   if (calibrating_imu == 1) {
+    // calibration complete
     accel_bias[0] = accel_readings[0] / IMU_CALIBRATION_CYCLES;
     accel_bias[1] = accel_readings[1] / IMU_CALIBRATION_CYCLES;
     accel_bias[2] = (accel_readings[2] / IMU_CALIBRATION_CYCLES) + 9.80665f;
     gyro_bias[0] = gyro_readings[0] / IMU_CALIBRATION_CYCLES;
     gyro_bias[1] = gyro_readings[1] / IMU_CALIBRATION_CYCLES;
     gyro_bias[2] = gyro_readings[2] / IMU_CALIBRATION_CYCLES;
+    calibration_complete_callback();
   }
   calibrating_imu--;
+}
+
+int imu_get_bias(float *accel_bias_out, float *gyro_bias_out)
+{
+  memcpy(gyro_bias_out, gyro_bias, sizeof(gyro_bias));
+  memcpy(accel_bias_out, accel_bias, sizeof(accel_bias));
+  return FLN_OK;
+}
+
+int imu_set_bias(float *accel_bias_in, float *gyro_bias_in)
+{
+  memcpy(gyro_bias, gyro_bias_in, sizeof(gyro_bias));
+  memcpy(accel_bias, accel_bias_in, sizeof(accel_bias));
+  return FLN_OK;
 }
 
 int imu_get_data(float *accel_float, float *gyro_float, float *compass_float)
@@ -117,7 +135,7 @@ int imu_get_data(float *accel_float, float *gyro_float, float *compass_float)
       if (!data_left_in_fifo) break;
     } while (data_left_in_fifo);
 
-    if (calibrating_imu ) {
+    if (calibrating_imu) {
       imu_calibrate(accel_float, gyro_float);
     }
 

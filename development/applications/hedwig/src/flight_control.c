@@ -395,7 +395,6 @@ static fe_calib_request_t calibrate_sensors(void)
     sensors_calibrate();
     rtos_delay_ms(3000);
     flight_control_reset();
-    sensors_get_bias(&rtU_Bias);
     flight_control_set_mode(prevMode);
     return FE_CALIBRATE_SUCCESS;
   }

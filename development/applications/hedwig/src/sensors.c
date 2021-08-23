@@ -11,6 +11,7 @@
 #include "bsp.h"
 #include "rtwtypes.h"
 #include "system_time.h"
+#include "persistent_data.h"
 
 #define IMU_SAMPLE_RATE  (200) // Hz
 #define BARO_SAMPLE_RATE (10)  // Hz
@@ -22,9 +23,6 @@
 #define BARO_SKIP_COUNT  (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)
 
 static TaskHandle_t sensors_task_handle = NULL;
-
-static float gyro_bias[3] = {0.0F, 0.0F, 0.0F};
-static float accel_bias[3] = {0.0F, 0.0F, 0.0F};
 
 static float gyro_data[3] = {0.0F, 0.0F, 0.0F};
 static float accel_data[3] = {0.0F, 0.0F, 0.0F};
@@ -46,16 +44,21 @@ void sensors_imu_int_cb(void)
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-void sensors_get_bias(sensor_bias_t *bias)
+static void imu_calibration_complete_cb(void)
 {
-  memcpy(bias->gyro_bias, gyro_bias, sizeof(bias->gyro_bias));
-  memcpy(bias->accel_bias, accel_bias, sizeof(bias->accel_bias));
+  float gyro_bias[3];
+  float accel_bias[3];
+
+  imu_get_bias(accel_bias, gyro_bias);
+
+  persistent_data_imu_bias_set(accel_bias, gyro_bias);
+  persistent_data_write();
 }
 
 static void calibrate(void)
 {
-  FLN_ERR_CHECK(imu_start_calibration());
   FLN_ERR_CHECK(baro_calibrate());
+  FLN_ERR_CHECK(imu_start_calibration(imu_calibration_complete_cb));
 
   calibration_required = false;
 }
@@ -136,6 +139,13 @@ void sensors_task_setup(void)
   FLN_ERR_CHECK(imu_init(IMU_SAMPLE_PERIOD));
   FLN_ERR_CHECK(baro_init(BARO_SAMPLE_RATE));
   FLN_ERR_CHECK(bsp_imu_int_init(sensors_imu_int_cb));
+
+  float accel_bias[3];
+  float gyro_bias[3];
+  
+  if (persistent_data_imu_bias_get(accel_bias, gyro_bias)) {
+    imu_set_bias(accel_bias, gyro_bias);  
+  } 
 
   LOG_DEBUG("Sensors Initialized\r\n");
 }
