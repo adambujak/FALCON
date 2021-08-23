@@ -26,7 +26,7 @@ static quaternionProducts_t qP = QUATERNION_PRODUCTS_INITIALIZE;
 
 attitudeEulerAngles_t attitude = EULER_INITIALIZE;
 
-volatile float q0, q1, q2, q3;
+extern volatile float q0, q1, q2, q3;
 
 static void QuaternionComputeProducts(quaternion_t *quat, quaternionProducts_t *quatProd)
 {
