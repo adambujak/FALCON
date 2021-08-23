@@ -166,6 +166,17 @@ class Albus(SerialDevice):
         fcsParamPacket = fpc_alt_params_t(**kwargs)
         self.write_packet(fcsParamPacket)
 
+    def send_yaw_params(self, yaw_Kp, yaw_Kd):
+        kwargs = {
+            'PID_yaw_P' : yaw_Kp,
+            'PID_yaw_D' : yaw_Kd,
+        }
+        fcsParamInput = ft_fcs_yaw_control_params_t(**kwargs)
+
+        kwargs = {'fcsYawParams': fcsParamInput}
+        fcsParamPacket = fpc_yaw_params_t(**kwargs)
+        self.write_packet(fcsParamPacket)
+
     def send_fcs_mode(self, mode):
         _mode = fe_flight_mode_t(mode)
         kwargs = {'mode' : _mode}

@@ -34,7 +34,9 @@ static states_estimate_t rtY_State_Estim;
 /* '<Root>/Throttle' */
 static uint16_T rtY_Throttle[4];
 
-static float Alt_Hover_Const_Base;
+static ft_fcs_att_control_params_t att_control_params;
+static ft_fcs_yaw_control_params_t yaw_control_params;
+static ft_fcs_alt_control_params_t alt_control_params;
 
 static bool spin_up_flag = false;
 static int spin_up_counter = 0;
@@ -240,6 +242,59 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input)
   }
 }
 
+static void save_controller_params(void)
+{
+  uint8_t changed = 0;
+
+  changed |= PID_pitch_P != att_control_params.PID_pitch_P;
+  changed |= PID_pitch_roll_I != att_control_params.PID_pitch_roll_I;
+  changed |= PID_pitch_D != att_control_params.PID_pitch_D;
+
+  changed |= PID_yaw_P != yaw_control_params.PID_yaw_P;
+  changed |= PID_yaw_D != yaw_control_params.PID_yaw_D;
+
+  changed |= PID_alt_P != alt_control_params.PID_alt_P;
+  changed |= PID_alt_D != alt_control_params.PID_alt_D;
+  changed |= Alt_Hover_Const != alt_control_params.Alt_Hover_Const;
+
+  att_control_params.PID_pitch_P = PID_pitch_P;
+  att_control_params.PID_pitch_roll_I = PID_pitch_roll_I;
+  att_control_params.PID_pitch_D = PID_pitch_D;
+
+  yaw_control_params.PID_yaw_P = PID_yaw_P;
+  yaw_control_params.PID_yaw_D = PID_yaw_D;
+
+  alt_control_params.PID_alt_P = PID_alt_P;  
+  alt_control_params.PID_alt_D = PID_alt_D;
+  alt_control_params.Alt_Hover_Const = Alt_Hover_Const;
+
+  if (changed) {
+    persistent_data_controller_params_set(&att_control_params, &yaw_control_params, &alt_control_params);
+    persistent_data_write();
+  }
+}
+
+static bool load_controller_params(void)
+{
+  if (persistent_data_controller_params_get(&att_control_params, &yaw_control_params, &alt_control_params)) {
+    PID_pitch_P = att_control_params.PID_pitch_P;
+    PID_pitch_roll_I = att_control_params.PID_pitch_roll_I;
+    PID_pitch_D = att_control_params.PID_pitch_D;
+
+    PID_yaw_P = yaw_control_params.PID_yaw_P;
+    PID_yaw_D = yaw_control_params.PID_yaw_D;
+
+    PID_alt_P = alt_control_params.PID_alt_P;
+    PID_alt_D = alt_control_params.PID_alt_D;
+    Alt_Hover_Const = alt_control_params.Alt_Hover_Const;
+
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType)
 {
   if(lock_command_data() == pdTRUE) {
@@ -249,24 +304,25 @@ void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType)
         fpc_attitude_params_decode(data, &attParams);
         PID_pitch_P = attParams.fcsAttParams.PID_pitch_P;
         PID_pitch_roll_I = attParams.fcsAttParams.PID_pitch_roll_I;
-        PID_pitch_D = attParams.fcsAttParams.PID_pitch_D;
+        PID_pitch_D = attParams.fcsAttParams.PID_pitch_D;        
       } break;
       case FPT_YAW_PARAMS_COMMAND: {
         fpc_yaw_params_t yawParams = {};
         fpc_yaw_params_decode(data, &yawParams);
         PID_yaw_P = yawParams.fcsYawParams.PID_yaw_P;
-        PID_yaw_D = yawParams.fcsYawParams.PID_yaw_D;
+        PID_yaw_D = yawParams.fcsYawParams.PID_yaw_D;        
       } break;
       case FPT_ALT_PARAMS_COMMAND: {
         fpc_alt_params_t altParams = {};
         fpc_alt_params_decode(data, &altParams);
         PID_alt_P = altParams.fcsAltParams.PID_alt_P;
         PID_alt_D = altParams.fcsAltParams.PID_alt_D;
-        Alt_Hover_Const = Alt_Hover_Const_Base * altParams.fcsAltParams.Alt_Hover_Const;
+        Alt_Hover_Const = altParams.fcsAltParams.Alt_Hover_Const;        
       } break;
     default:
       break;
   }
+    save_controller_params();
     unlock_command_data();
   }
   else {
@@ -414,7 +470,9 @@ static void flight_control_task(void *pvParameters)
   PID_yaw_P = 0;//0.1F;
   PID_yaw_D = 0;//0.14F;
 
-  Alt_Hover_Const_Base = Alt_Hover_Const;
+  if (load_controller_params()) {
+    //TODO: Update cornelius
+  }
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
@@ -501,6 +559,8 @@ void flight_control_setup(void)
   createCommandDataMutex();
   createOutputDataMutex();
   createModeMutex();
+
+
 }
 
 void flight_control_task_start(void)

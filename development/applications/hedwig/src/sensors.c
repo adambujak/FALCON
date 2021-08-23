@@ -106,19 +106,19 @@ static void sensors_task(void *pvParameters)
         baro_get_altitude(&alt_data);
         baro_skip_count = 1;
       }
-      LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
+      // LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
       old_time = system_time_get();
-      LOG_INFO("\tp,q,r:\t %7.4f\t %7.4f\t %7.4f\t accel:\t %7.4f\t %7.4f\t %7.4f\t mag:\t %7.4f\t %7.4f\t %7.4f\t alt:\t %7.4f\t\r\n",        
-            gyro_data[0],
-            gyro_data[1],
-            gyro_data[2],
-            accel_data[0],
-            accel_data[1],
-            accel_data[2],
-            mag_data[0],
-            mag_data[1],
-            mag_data[2],
-            alt_data);
+      // LOG_INFO("\tp,q,r:\t %7.4f\t %7.4f\t %7.4f\t accel:\t %7.4f\t %7.4f\t %7.4f\t mag:\t %7.4f\t %7.4f\t %7.4f\t alt:\t %7.4f\t\r\n",        
+      //       gyro_data[0],
+      //       gyro_data[1],
+      //       gyro_data[2],
+      //       accel_data[0],
+      //       accel_data[1],
+      //       accel_data[2],
+      //       mag_data[0],
+      //       mag_data[1],
+      //       mag_data[2],
+      //       alt_data);
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
     }

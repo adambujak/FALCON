@@ -40,6 +40,7 @@ def handle_button_event(event):
         cornelius.albus.send_alt_params(values['altitude-kp'], values['altitude-kd'], values['altitude-hover'])
     if event == 'Yaw Submit':
         serial_monitor_print('Yaw values set to: {}, {}'.format(values['yaw-kp'],values['yaw-kd']))
+        cornelius.albus.send_yaw_params(values['yaw-kp'], values['yaw-kd'])
 
 def signal_handler(sig, frame):
     sys.exit(0)
