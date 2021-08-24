@@ -131,7 +131,7 @@ class Albus(SerialDevice):
             self.update_alt_values(round(alt_params.fcsAltParams.Alt_Hover_Const,3), round(alt_params.fcsAltParams.PID_alt_P,3), round(alt_params.fcsAltParams.PID_alt_D,3))
         elif (packet_type == fp_type_t.FPT_YAW_PARAMS_COMMAND):
             yaw_params =fpc_yaw_params_t(encoded)
-            self.update_yaw_values(round(yaw_params.fcsYawParams.PID_yaw_P,3), round(yaw_params.fcsYawParams.PID_yaw_d,3))
+            self.update_yaw_values(round(yaw_params.fcsYawParams.PID_yaw_P,3), round(yaw_params.fcsYawParams.PID_yaw_D,3))
         else:
             print("decoder callback:", packet_type)
 
