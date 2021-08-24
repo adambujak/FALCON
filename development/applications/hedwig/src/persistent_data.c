@@ -32,19 +32,15 @@ void persistent_data_init(void)
 // call this after using setters to actually write the data to flash
 void persistent_data_write(void)
 {
-  flash_write_unlock();
-  flash_start_write(SECTOR);
+  flash_write_start(SECTOR);
   data_buffer.valid_data = VALID_DATA_KEY;
   memcpy(data, &data_buffer, sizeof(data_buffer));
-  flash_end_write(SECTOR);
-  flash_write_lock();
+  flash_write_end(SECTOR);
 }
 
 void persistent_data_clear(void)
 {
-  flash_write_unlock();
-  flash_erase_sector(SECTOR);
-  flash_write_lock();
+  flash_sector_erase(SECTOR);
 }
 
 void persistent_data_controller_params_set(
