@@ -34,7 +34,9 @@ static states_estimate_t rtY_State_Estim;
 /* '<Root>/Throttle' */
 static uint16_T rtY_Throttle[4];
 
-static float Alt_Hover_Const_Base;
+static ft_fcs_att_control_params_t att_control_params;
+static ft_fcs_yaw_control_params_t yaw_control_params;
+static ft_fcs_alt_control_params_t alt_control_params;
 
 static bool spin_up_flag = false;
 static int spin_up_counter = 0;
@@ -166,13 +168,13 @@ void rt_OneStep(RT_MODEL *const rtM)
                 rtY_Throttle[i] = spin_up_counter * 10;
               }
             }
-          }          
+          }
           motors_set_motor_us(MOTOR_1, rtY_Throttle[0]);
           motors_set_motor_us(MOTOR_2, rtY_Throttle[1]);
           motors_set_motor_us(MOTOR_3, rtY_Throttle[2]);
           motors_set_motor_us(MOTOR_4, rtY_Throttle[3]);
         }
-        
+
         unlock_output_data();
       }
       else {
@@ -240,37 +242,109 @@ void flight_control_set_command_data(fpc_flight_control_t *control_input)
   }
 }
 
-void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType)
+static void save_controller_params(void)
 {
-  if(lock_command_data() == pdTRUE) {
-    switch (packetType) {
-      case FPT_ATTITUDE_PARAMS_COMMAND: {
-        fpc_attitude_params_t attParams = {};
-        fpc_attitude_params_decode(data, &attParams);
-        PID_pitch_P = attParams.fcsAttParams.PID_pitch_P;
-        PID_pitch_roll_I = attParams.fcsAttParams.PID_pitch_roll_I;
-        PID_pitch_D = attParams.fcsAttParams.PID_pitch_D;
-      } break;
-      case FPT_YAW_PARAMS_COMMAND: {
-        fpc_yaw_params_t yawParams = {};
-        fpc_yaw_params_decode(data, &yawParams);
-        PID_yaw_P = yawParams.fcsYawParams.PID_yaw_P;
-        PID_yaw_D = yawParams.fcsYawParams.PID_yaw_D;
-      } break;
-      case FPT_ALT_PARAMS_COMMAND: {
-        fpc_alt_params_t altParams = {};
-        fpc_alt_params_decode(data, &altParams);
-        PID_alt_P = altParams.fcsAltParams.PID_alt_P;
-        PID_alt_D = altParams.fcsAltParams.PID_alt_D;
-        Alt_Hover_Const = Alt_Hover_Const_Base * altParams.fcsAltParams.Alt_Hover_Const;
-      } break;
-    default:
-      break;
+  uint8_t changed = 0;
+
+  changed |= PID_pitch_P != att_control_params.PID_pitch_P;
+  changed |= PID_pitch_roll_I != att_control_params.PID_pitch_roll_I;
+  changed |= PID_pitch_D != att_control_params.PID_pitch_D;
+
+  changed |= PID_yaw_P != yaw_control_params.PID_yaw_P;
+  changed |= PID_yaw_D != yaw_control_params.PID_yaw_D;
+
+  changed |= PID_alt_P != alt_control_params.PID_alt_P;
+  changed |= PID_alt_D != alt_control_params.PID_alt_D;
+  changed |= Alt_Hover_Const != alt_control_params.Alt_Hover_Const;
+
+  att_control_params.PID_pitch_P = PID_pitch_P;
+  att_control_params.PID_pitch_roll_I = PID_pitch_roll_I;
+  att_control_params.PID_pitch_D = PID_pitch_D;
+
+  yaw_control_params.PID_yaw_P = PID_yaw_P;
+  yaw_control_params.PID_yaw_D = PID_yaw_D;
+
+  alt_control_params.PID_alt_P = PID_alt_P;
+  alt_control_params.PID_alt_D = PID_alt_D;
+  alt_control_params.Alt_Hover_Const = Alt_Hover_Const;
+
+  if (changed) {
+    persistent_data_controller_params_set(&att_control_params, &yaw_control_params, &alt_control_params);
+    persistent_data_write();
   }
-    unlock_command_data();
+}
+
+static bool load_controller_params(void)
+{
+  if (persistent_data_controller_params_get(&att_control_params, &yaw_control_params, &alt_control_params)) {
+    PID_pitch_P = att_control_params.PID_pitch_P;
+    PID_pitch_roll_I = att_control_params.PID_pitch_roll_I;
+    PID_pitch_D = att_control_params.PID_pitch_D;
+
+    PID_yaw_P = yaw_control_params.PID_yaw_P;
+    PID_yaw_D = yaw_control_params.PID_yaw_D;
+
+    PID_alt_P = alt_control_params.PID_alt_P;
+    PID_alt_D = alt_control_params.PID_alt_D;
+    Alt_Hover_Const = alt_control_params.Alt_Hover_Const;
+
+    return true;
   }
   else {
-    LOG_WARN("commandDataMutex take failed\r\n");
+    return false;
+  }
+}
+
+static void send_params_back(void)
+{
+  uint8_t buffer[MAX_PACKET_SIZE];
+  uint8_t length = fpc_attitude_params_encode(buffer, &att_control_params);
+  device_com_send_packet(buffer, length);
+
+  length = fpc_yaw_params_encode(buffer, &yaw_control_params);
+  device_com_send_packet(buffer, length);
+
+  length = fpc_alt_params_encode(buffer, &alt_control_params);
+  device_com_send_packet(buffer, length);
+}
+
+void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType)
+{
+  if (flight_control_mode <= FE_FLIGHT_MODE_FCS_READY) {
+    if(lock_command_data() == pdTRUE) {
+      switch (packetType) {
+        case FPT_ATTITUDE_PARAMS_COMMAND: {
+          fpc_attitude_params_t attParams = {};
+          fpc_attitude_params_decode(data, &attParams);
+          PID_pitch_P = attParams.fcsAttParams.PID_pitch_P;
+          PID_pitch_roll_I = attParams.fcsAttParams.PID_pitch_roll_I;
+          PID_pitch_D = attParams.fcsAttParams.PID_pitch_D;
+        } break;
+        case FPT_YAW_PARAMS_COMMAND: {
+          fpc_yaw_params_t yawParams = {};
+          fpc_yaw_params_decode(data, &yawParams);
+          PID_yaw_P = yawParams.fcsYawParams.PID_yaw_P;
+          PID_yaw_D = yawParams.fcsYawParams.PID_yaw_D;
+        } break;
+        case FPT_ALT_PARAMS_COMMAND: {
+          fpc_alt_params_t altParams = {};
+          fpc_alt_params_decode(data, &altParams);
+          PID_alt_P = altParams.fcsAltParams.PID_alt_P;
+          PID_alt_D = altParams.fcsAltParams.PID_alt_D;
+          Alt_Hover_Const = altParams.fcsAltParams.Alt_Hover_Const;
+        } break;
+        default:
+          break;
+      }
+      save_controller_params();
+      unlock_command_data();
+    }
+    else {
+      LOG_WARN("commandDataMutex take failed\r\n");
+    }
+  }
+  else {
+    send_params_back();
   }
 }
 
@@ -364,7 +438,7 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
     case FE_FLIGHT_MODE_FLY:
       if (flight_control_mode == FE_FLIGHT_MODE_FCS_READY) {
         flight_control_reset();
-        flight_control_mode = FE_FLIGHT_MODE_FLY;        
+        flight_control_mode = FE_FLIGHT_MODE_FLY;
         spin_up_flag = true;
         return FLN_OK;
       }
@@ -395,7 +469,6 @@ static fe_calib_request_t calibrate_sensors(void)
     sensors_calibrate();
     rtos_delay_ms(3000);
     flight_control_reset();
-    sensors_get_bias(&rtU_Bias);
     flight_control_set_mode(prevMode);
     return FE_CALIBRATE_SUCCESS;
   }
@@ -415,7 +488,9 @@ static void flight_control_task(void *pvParameters)
   PID_yaw_P = 0;//0.1F;
   PID_yaw_D = 0;//0.14F;
 
-  Alt_Hover_Const_Base = Alt_Hover_Const;
+  if (load_controller_params()) {
+    send_params_back();
+  }
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
   RTOS_ERR_CHECK(FC_timerStatus);
@@ -502,6 +577,8 @@ void flight_control_setup(void)
   createCommandDataMutex();
   createOutputDataMutex();
   createModeMutex();
+
+
 }
 
 void flight_control_task_start(void)

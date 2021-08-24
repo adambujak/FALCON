@@ -33,13 +33,14 @@ def handle_button_event(event):
         cornelius.albus.send_fcs_mode(4)
 
     if event == 'Attitude Submit':
-        serial_monitor_print('Attitude values set to: {}, {}, {}'.format(values['attitude-kp'],values['attitude-ki'],values['attitude-kd']))
-        cornelius.albus.send_att_params(values['attitude-kp'], values['attitude-ki'], values['attitude-kd'])
+        serial_monitor_print('Attitude values set to: {}, {}, {}'.format(float(values['attitude-kp']),float(values['attitude-ki']),float(values['attitude-kd'])))
+        cornelius.albus.send_att_params(float(values['attitude-kp']), float(values['attitude-ki']), float(values['attitude-kd']))
     if event == 'Altitude Submit':
-        serial_monitor_print('Altitude values set to: {}, {}, {}'.format(values['altitude-hover'],values['altitude-kp'],values['altitude-kd']))
-        cornelius.albus.send_alt_params(values['altitude-kp'], values['altitude-kd'], values['altitude-hover'])
+        serial_monitor_print('Altitude values set to: {}, {}, {}'.format(float(values['altitude-hover']),float(values['altitude-kp']),float(values['altitude-kd'])))
+        cornelius.albus.send_alt_params(float(values['altitude-kp']), float(values['altitude-kd']), float(values['altitude-hover']))
     if event == 'Yaw Submit':
-        serial_monitor_print('Yaw values set to: {}, {}'.format(values['yaw-kp'],values['yaw-kd']))
+        serial_monitor_print('Yaw values set to: {}, {}'.format(float(values['yaw-kp']),float(values['yaw-kd'])))
+        cornelius.albus.send_yaw_params(float(values['yaw-kp']), float(values['yaw-kd']))
 
 def signal_handler(sig, frame):
     sys.exit(0)
@@ -55,14 +56,14 @@ signal.signal(signal.SIGINT, signal_handler)
 serial_monitor = sg.Multiline(size=(50, 10), key='serial-monitor')
 
 # Spin Boxes
-att_kp_spin = sg.Spin(key='attitude-kp',size=(5,1),values=np.arange(0.00,10.00,0.01), initial_value=3.60)
-att_ki_spin = sg.Spin(key='attitude-ki',size=(5,1),values=np.arange(0.00,10.00,0.01), initial_value=0.20)
-att_kd_spin = sg.Spin(key='attitude-kd',size=(5,1),values=np.arange(0.00,10.00,0.01), initial_value=0.18)
-alt_kp_spin = sg.Spin(key='altitude-kp',size=(5,1),values=np.arange(0.00,10.00,0.01), initial_value=0.00)
-alt_kd_spin = sg.Spin(key='altitude-kd',size=(5,1),values=np.arange(0.00,10.00,0.01), initial_value=0.00)
-alt_hover_spin = sg.Spin(key='altitude-hover',size=(5,1),values=np.arange(0.00,2.00,0.01), initial_value=1.00)
-yaw_kp_spin = sg.Spin(key='yaw-kp',size=(5,1),values=np.arange(0.00,10.00,0.01), initial_value=0.00)
-yaw_kd_spin = sg.Spin(key='yaw-kd',size=(5,1),values=np.arange(0.00,10.00,0.01), initial_value=0.00)
+att_kp_input = sg.Input(key='attitude-kp',size=(5,1), default_text='3.60')
+att_ki_input = sg.Input(key='attitude-ki',size=(5,1), default_text='0.20')
+att_kd_input = sg.Input(key='attitude-kd',size=(5,1), default_text='0.18')
+alt_kp_input = sg.Input(key='altitude-kp',size=(5,1), default_text='0.00')
+alt_kd_input = sg.Input(key='altitude-kd',size=(5,1), default_text='0.00')
+alt_kh_input = sg.Input(key='altitude-hover',size=(5,1), default_text='1.00')
+yaw_kp_input = sg.Input(key='yaw-kp',size=(5,1), default_text='0.00')
+yaw_kd_input = sg.Input(key='yaw-kd',size=(5,1), default_text='0.00')
 
 layout = [ [sg.Text('Cornelius')],
            [sg.Button('Test-Query'),sg.Button('Radio-Stats')],
@@ -71,18 +72,32 @@ layout = [ [sg.Text('Cornelius')],
            [sg.Button('Ready',size=(9,1))],
            [sg.Button('Fly',size=(9,1))],
            [sg.Text('Attitude Control')],
-           [sg.Text('Kp'), att_kp_spin, sg.Text('Ki'), att_ki_spin, sg.Text('Kd'), att_kd_spin],
+           [sg.Text('Kp'), att_kp_input, sg.Text('Ki'), att_ki_input, sg.Text('Kd'), att_kd_input],
            [sg.Button('Attitude Submit',size=(9,1))],
-           [sg.Text('Altitude Control')], 
-           [sg.Text('Hover'), alt_hover_spin, sg.Text('Kp'), alt_kp_spin, sg.Text('kd'), alt_kd_spin],
+           [sg.Text('Altitude Control')],
+           [sg.Text('Hover'), alt_kh_input, sg.Text('Kp'), alt_kp_input, sg.Text('Kd'), alt_kd_input],
            [sg.Button('Altitude Submit',size=(9,1))],
            [sg.Text('Yaw Control')],
-           [sg.Text('kp'), yaw_kp_spin, sg.Text('kd'), yaw_kd_spin],
+           [sg.Text('Kp'), yaw_kp_input, sg.Text('Kd'), yaw_kd_input],
            [sg.Button('Yaw Submit',size=(9,1))],
            [serial_monitor]
          ]
 
-cornelius.main()
+def update_alt_values(kh, kp, kd):
+    alt_kh_input.Update(value=kh)
+    alt_kp_input.Update(value=kp)
+    alt_kd_input.Update(value=kd)
+
+def update_att_values(kp, ki, kd):    
+    att_kp_input.Update(value=kp)
+    att_ki_input.Update(value=ki)
+    att_kd_input.Update(value=kd)
+
+def update_yaw_values(kp, kd):
+    yaw_kp_input.Update(value=kp)
+    yaw_kd_input.Update(value=kd)
+
+cornelius.main(update_att_values, update_alt_values, update_yaw_values)
 
 # Create the window
 window = sg.Window("Cornelius", layout)
