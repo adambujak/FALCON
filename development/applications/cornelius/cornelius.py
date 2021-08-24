@@ -103,6 +103,11 @@ class Albus(SerialDevice):
         self.encoder = FF_Encoder()
         self.decoder = FS_Decoder(self.decoder_callback)
 
+    def set_callbacks(self, update_att_values, update_alt_values, update_yaw_values):
+        self.update_att_values = update_att_values
+        self.update_alt_values = update_alt_values
+        self.update_yaw_values = update_yaw_values
+
     def decoder_callback(self, encoded, packet_type):
         if (packet_type == fp_type_t.FPT_TEST_RESPONSE):
             test_response = fpr_test_t(encoded)
@@ -118,6 +123,15 @@ class Albus(SerialDevice):
                 print("Calibration Canceled, Check Mode")
         elif (packet_type == fp_type_t.FPT_STATUS_RESPONSE):
             None
+        elif (packet_type == fp_type_t.FPT_ATTITUDE_PARAMS_COMMAND):
+            att_params = fpc_attitude_params_t(encoded)
+            self.update_att_values(round(att_params.fcsAttParams.PID_pitch_P,3), round(att_params.fcsAttParams.PID_pitch_roll_I,3), round(att_params.fcsAttParams.PID_pitch_D,3))
+        elif (packet_type == fp_type_t.FPT_ALT_PARAMS_COMMAND):
+            alt_params = fpc_alt_params_t(encoded)
+            self.update_alt_values(round(alt_params.fcsAltParams.Alt_Hover_Const,3), round(alt_params.fcsAltParams.PID_alt_P,3), round(alt_params.fcsAltParams.PID_alt_D,3))
+        elif (packet_type == fp_type_t.FPT_YAW_PARAMS_COMMAND):
+            yaw_params =fpc_yaw_params_t(encoded)
+            self.update_yaw_values(round(yaw_params.fcsYawParams.PID_yaw_P,3), round(yaw_params.fcsYawParams.PID_yaw_d,3))
         else:
             print("decoder callback:", packet_type)
 
@@ -205,7 +219,7 @@ def quit():
     del albus
     exit(0)
 
-def main():
+def main(update_att_values, update_alt_values, update_yaw_values):
 
     global albus
 
@@ -240,5 +254,7 @@ def main():
         serialPort = ports[selectedPort].device
 
         albus = Albus(serialPort, 115200, 1)
+
+    albus.set_callbacks(update_att_values, update_alt_values, update_yaw_values)
 
     albus.init_frame_encoder()

@@ -168,13 +168,13 @@ void rt_OneStep(RT_MODEL *const rtM)
                 rtY_Throttle[i] = spin_up_counter * 10;
               }
             }
-          }          
+          }
           motors_set_motor_us(MOTOR_1, rtY_Throttle[0]);
           motors_set_motor_us(MOTOR_2, rtY_Throttle[1]);
           motors_set_motor_us(MOTOR_3, rtY_Throttle[2]);
           motors_set_motor_us(MOTOR_4, rtY_Throttle[3]);
         }
-        
+
         unlock_output_data();
       }
       else {
@@ -264,7 +264,7 @@ static void save_controller_params(void)
   yaw_control_params.PID_yaw_P = PID_yaw_P;
   yaw_control_params.PID_yaw_D = PID_yaw_D;
 
-  alt_control_params.PID_alt_P = PID_alt_P;  
+  alt_control_params.PID_alt_P = PID_alt_P;
   alt_control_params.PID_alt_D = PID_alt_D;
   alt_control_params.Alt_Hover_Const = Alt_Hover_Const;
 
@@ -295,38 +295,56 @@ static bool load_controller_params(void)
   }
 }
 
+static void send_params_back(void)
+{
+  uint8_t buffer[MAX_PACKET_SIZE];
+  uint8_t length = fpc_attitude_params_encode(buffer, &att_control_params);
+  device_com_send_packet(buffer, length);
+
+  length = fpc_yaw_params_encode(buffer, &yaw_control_params);
+  device_com_send_packet(buffer, length);
+
+  length = fpc_alt_params_encode(buffer, &alt_control_params);
+  device_com_send_packet(buffer, length);
+}
+
 void flight_control_set_controller_params(uint8_t *data, fp_type_t packetType)
 {
-  if(lock_command_data() == pdTRUE) {
-    switch (packetType) {
-      case FPT_ATTITUDE_PARAMS_COMMAND: {
-        fpc_attitude_params_t attParams = {};
-        fpc_attitude_params_decode(data, &attParams);
-        PID_pitch_P = attParams.fcsAttParams.PID_pitch_P;
-        PID_pitch_roll_I = attParams.fcsAttParams.PID_pitch_roll_I;
-        PID_pitch_D = attParams.fcsAttParams.PID_pitch_D;        
-      } break;
-      case FPT_YAW_PARAMS_COMMAND: {
-        fpc_yaw_params_t yawParams = {};
-        fpc_yaw_params_decode(data, &yawParams);
-        PID_yaw_P = yawParams.fcsYawParams.PID_yaw_P;
-        PID_yaw_D = yawParams.fcsYawParams.PID_yaw_D;        
-      } break;
-      case FPT_ALT_PARAMS_COMMAND: {
-        fpc_alt_params_t altParams = {};
-        fpc_alt_params_decode(data, &altParams);
-        PID_alt_P = altParams.fcsAltParams.PID_alt_P;
-        PID_alt_D = altParams.fcsAltParams.PID_alt_D;
-        Alt_Hover_Const = altParams.fcsAltParams.Alt_Hover_Const;        
-      } break;
-    default:
-      break;
-  }
-    save_controller_params();
-    unlock_command_data();
+  if (flight_control_mode <= FE_FLIGHT_MODE_FCS_READY) {
+    if(lock_command_data() == pdTRUE) {
+      switch (packetType) {
+        case FPT_ATTITUDE_PARAMS_COMMAND: {
+          fpc_attitude_params_t attParams = {};
+          fpc_attitude_params_decode(data, &attParams);
+          PID_pitch_P = attParams.fcsAttParams.PID_pitch_P;
+          PID_pitch_roll_I = attParams.fcsAttParams.PID_pitch_roll_I;
+          PID_pitch_D = attParams.fcsAttParams.PID_pitch_D;
+        } break;
+        case FPT_YAW_PARAMS_COMMAND: {
+          fpc_yaw_params_t yawParams = {};
+          fpc_yaw_params_decode(data, &yawParams);
+          PID_yaw_P = yawParams.fcsYawParams.PID_yaw_P;
+          PID_yaw_D = yawParams.fcsYawParams.PID_yaw_D;
+        } break;
+        case FPT_ALT_PARAMS_COMMAND: {
+          fpc_alt_params_t altParams = {};
+          fpc_alt_params_decode(data, &altParams);
+          PID_alt_P = altParams.fcsAltParams.PID_alt_P;
+          PID_alt_D = altParams.fcsAltParams.PID_alt_D;
+          Alt_Hover_Const = altParams.fcsAltParams.Alt_Hover_Const;
+        } break;
+        default:
+          break;
+      }
+      save_controller_params();
+      unlock_command_data();
+    }
+    else {
+      LOG_WARN("commandDataMutex take failed\r\n");
+    }
   }
   else {
-    LOG_WARN("commandDataMutex take failed\r\n");
+    send_params_back();
   }
 }
 
@@ -420,7 +438,7 @@ int flight_control_set_mode(fe_flight_mode_t new_mode)
     case FE_FLIGHT_MODE_FLY:
       if (flight_control_mode == FE_FLIGHT_MODE_FCS_READY) {
         flight_control_reset();
-        flight_control_mode = FE_FLIGHT_MODE_FLY;        
+        flight_control_mode = FE_FLIGHT_MODE_FLY;
         spin_up_flag = true;
         return FLN_OK;
       }
@@ -471,7 +489,7 @@ static void flight_control_task(void *pvParameters)
   PID_yaw_D = 0;//0.14F;
 
   if (load_controller_params()) {
-    //TODO: Update cornelius
+    send_params_back();
   }
 
   FC_timerStatus = xTimerStart( flight_control_timer, 0 );
