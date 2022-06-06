@@ -1,16 +1,17 @@
 /******************************************************************************
- * @file     grinbuf.h
- * @brief    grinbuf - modified nondestructive, static ringbuf library
- * @version  1.0
- * @date     2021-03-10
- * @author   Adam Bujak
- ******************************************************************************/
+* @file     grinbuf.h
+* @brief    grinbuf - modified nondestructive, static ringbuf library
+* @version  1.0
+* @date     2021-03-10
+* @author   Adam Bujak
+******************************************************************************/
 #ifndef GRINBUF_H
 #define GRINBUF_H
 
 #include <stdint.h>
 
-typedef struct {
+typedef struct
+{
   uint8_t *buffer;
   uint32_t size;
   uint32_t bytesUsed;

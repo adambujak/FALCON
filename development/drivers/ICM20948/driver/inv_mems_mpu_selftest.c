@@ -27,28 +27,29 @@ extern int a_average[3];
 extern int g_average[3];
 
 /* full scale and LPF setting */
-#define SELFTEST_GYRO_FS            ((0 << 3) | 1)
-#define SELFTEST_ACCEL_FS           ((7 << 3) | 1)
+#define SELFTEST_GYRO_FS               ((0 << 3) | 1)
+#define SELFTEST_ACCEL_FS              ((7 << 3) | 1)
 
 /* register settings */
-#define SELFTEST_GYRO_SMPLRT_DIV    10
-#define SELFTEST_GYRO_AVGCFG        3
-#define SELFTEST_ACCEL_SMPLRT_DIV   10
-#define SELFTEST_ACCEL_DEC3_CFG     2
+#define SELFTEST_GYRO_SMPLRT_DIV       10
+#define SELFTEST_GYRO_AVGCFG           3
+#define SELFTEST_ACCEL_SMPLRT_DIV      10
+#define SELFTEST_ACCEL_DEC3_CFG        2
 
 /* wait time in ms between 2 data collection */
-#define WAIT_TIME_BTW_2_SAMPLESREAD 10
+#define WAIT_TIME_BTW_2_SAMPLESREAD    10
 /* wait time in ms after sensor self-test enabling for oscillations to stabilize */
-#define DEF_ST_STABLE_TIME          20  // ms
+#define DEF_ST_STABLE_TIME             20 // ms
 /* number of times self test reading should be done until abord */
-#define DEF_ST_TRY_TIMES            2
+#define DEF_ST_TRY_TIMES               2
 /* number of samples to be read to be averaged */
-#define DEF_ST_SAMPLES              200
+#define DEF_ST_SAMPLES                 200
 
-#define LOWER_BOUND_CHECK(value)    ((value) >> 1)              // value * 0.5
-#define UPPER_BOUND_CHECK(value)    ((value) + ((value) >> 1))  // value * 1.5
+#define LOWER_BOUND_CHECK(value)       ((value) >> 1)             // value * 0.5
+#define UPPER_BOUND_CHECK(value)       ((value) + ((value) >> 1)) // value * 1.5
 
-struct recover_regs {
+struct recover_regs
+{
   // Bank#0
   uint8_t fifo_cfg;      // REG_FIFO_CFG
   uint8_t user_ctrl;     // REG_USER_CTRL
@@ -73,8 +74,8 @@ struct recover_regs {
 };
 static struct recover_regs saved_regs;
 
-static uint8_t gyro_st_data[3] = {0};
-static uint8_t accel_st_data[3] = {0};
+static uint8_t gyro_st_data[3]  = { 0 };
+static uint8_t accel_st_data[3] = { 0 };
 
 // Table for list of results for factory self-test value equation
 // st_otp = 2620/2^FS * 1.01^(st_value - 1)
@@ -83,22 +84,22 @@ static uint8_t accel_st_data[3] = {0};
 // st_value = 2 => 2620 * 1.01 = 2646
 // etc../
 static const uint16_t sSelfTestEquation[256]
-    = {2620,  2646,  2672,  2699,  2726,  2753,  2781,  2808,  2837,  2865,  2894,  2923,  2952,  2981,  3011,  3041,
-       3072,  3102,  3133,  3165,  3196,  3228,  3261,  3293,  3326,  3359,  3393,  3427,  3461,  3496,  3531,  3566,
-       3602,  3638,  3674,  3711,  3748,  3786,  3823,  3862,  3900,  3939,  3979,  4019,  4059,  4099,  4140,  4182,
-       4224,  4266,  4308,  4352,  4395,  4439,  4483,  4528,  4574,  4619,  4665,  4712,  4759,  4807,  4855,  4903,
-       4953,  5002,  5052,  5103,  5154,  5205,  5257,  5310,  5363,  5417,  5471,  5525,  5581,  5636,  5693,  5750,
-       5807,  5865,  5924,  5983,  6043,  6104,  6165,  6226,  6289,  6351,  6415,  6479,  6544,  6609,  6675,  6742,
-       6810,  6878,  6946,  7016,  7086,  7157,  7229,  7301,  7374,  7448,  7522,  7597,  7673,  7750,  7828,  7906,
-       7985,  8065,  8145,  8227,  8309,  8392,  8476,  8561,  8647,  8733,  8820,  8909,  8998,  9088,  9178,  9270,
-       9363,  9457,  9551,  9647,  9743,  9841,  9939,  10038, 10139, 10240, 10343, 10446, 10550, 10656, 10763, 10870,
-       10979, 11089, 11200, 11312, 11425, 11539, 11654, 11771, 11889, 12008, 12128, 12249, 12371, 12495, 12620, 12746,
-       12874, 13002, 13132, 13264, 13396, 13530, 13666, 13802, 13940, 14080, 14221, 14363, 14506, 14652, 14798, 14946,
-       15096, 15247, 15399, 15553, 15709, 15866, 16024, 16184, 16346, 16510, 16675, 16842, 17010, 17180, 17352, 17526,
-       17701, 17878, 18057, 18237, 18420, 18604, 18790, 18978, 19167, 19359, 19553, 19748, 19946, 20145, 20347, 20550,
-       20756, 20963, 21173, 21385, 21598, 21814, 22033, 22253, 22475, 22700, 22927, 23156, 23388, 23622, 23858, 24097,
-       24338, 24581, 24827, 25075, 25326, 25579, 25835, 26093, 26354, 26618, 26884, 27153, 27424, 27699, 27976, 28255,
-       28538, 28823, 29112, 29403, 29697, 29994, 30294, 30597, 30903, 31212, 31524, 31839, 32157, 32479, 32804};
+  = { 2620,   2646,  2672,  2699,  2726,  2753,  2781,  2808,  2837,  2865,  2894,  2923,  2952,  2981,  3011,  3041,
+      3072,   3102,  3133,  3165,  3196,  3228,  3261,  3293,  3326,  3359,  3393,  3427,  3461,  3496,  3531,  3566,
+      3602,   3638,  3674,  3711,  3748,  3786,  3823,  3862,  3900,  3939,  3979,  4019,  4059,  4099,  4140,  4182,
+      4224,   4266,  4308,  4352,  4395,  4439,  4483,  4528,  4574,  4619,  4665,  4712,  4759,  4807,  4855,  4903,
+      4953,   5002,  5052,  5103,  5154,  5205,  5257,  5310,  5363,  5417,  5471,  5525,  5581,  5636,  5693,  5750,
+      5807,   5865,  5924,  5983,  6043,  6104,  6165,  6226,  6289,  6351,  6415,  6479,  6544,  6609,  6675,  6742,
+      6810,   6878,  6946,  7016,  7086,  7157,  7229,  7301,  7374,  7448,  7522,  7597,  7673,  7750,  7828,  7906,
+      7985,   8065,  8145,  8227,  8309,  8392,  8476,  8561,  8647,  8733,  8820,  8909,  8998,  9088,  9178,  9270,
+      9363,   9457,  9551,  9647,  9743,  9841,  9939, 10038, 10139, 10240, 10343, 10446, 10550, 10656, 10763, 10870,
+      10979, 11089, 11200, 11312, 11425, 11539, 11654, 11771, 11889, 12008, 12128, 12249, 12371, 12495, 12620, 12746,
+      12874, 13002, 13132, 13264, 13396, 13530, 13666, 13802, 13940, 14080, 14221, 14363, 14506, 14652, 14798, 14946,
+      15096, 15247, 15399, 15553, 15709, 15866, 16024, 16184, 16346, 16510, 16675, 16842, 17010, 17180, 17352, 17526,
+      17701, 17878, 18057, 18237, 18420, 18604, 18790, 18978, 19167, 19359, 19553, 19748, 19946, 20145, 20347, 20550,
+      20756, 20963, 21173, 21385, 21598, 21814, 22033, 22253, 22475, 22700, 22927, 23156, 23388, 23622, 23858, 24097,
+      24338, 24581, 24827, 25075, 25326, 25579, 25835, 26093, 26354, 26618, 26884, 27153, 27424, 27699, 27976, 28255,
+      28538, 28823, 29112, 29403, 29697, 29994, 30294, 30597, 30903, 31212, 31524, 31839, 32157, 32479, 32804 };
 
 static inv_error_t inv_save_setting()
 {
@@ -148,7 +149,7 @@ static inv_error_t inv_recover_setting()
 
   // Stop sensors
   result
-      |= inv_write_single_mems_reg_core(REG_PWR_MGMT_2, BIT_PWR_PRESSURE_STBY | BIT_PWR_ACCEL_STBY | BIT_PWR_GYRO_STBY);
+    |= inv_write_single_mems_reg_core(REG_PWR_MGMT_2, BIT_PWR_PRESSURE_STBY | BIT_PWR_ACCEL_STBY | BIT_PWR_GYRO_STBY);
 
   // Restore sensor configurations
   result |= inv_write_single_mems_reg_core(REG_GYRO_SMPLRT_DIV, saved_regs.gyro_smplrt_div);
@@ -274,7 +275,7 @@ static inv_error_t inv_setup_selftest()
 
   // Stop sensors
   result
-      |= inv_write_single_mems_reg_core(REG_PWR_MGMT_2, BIT_PWR_PRESSURE_STBY | BIT_PWR_ACCEL_STBY | BIT_PWR_GYRO_STBY);
+    |= inv_write_single_mems_reg_core(REG_PWR_MGMT_2, BIT_PWR_PRESSURE_STBY | BIT_PWR_ACCEL_STBY | BIT_PWR_GYRO_STBY);
 
   // Set cycle mode
   result |= inv_write_single_mems_reg_core(REG_LP_CONFIG, BIT_I2C_MST_CYCLE | BIT_ACCEL_CYCLE | BIT_GYRO_CYCLE);
@@ -321,7 +322,7 @@ static int inv_selftest_read_samples(enum INV_SENSORS type, int *sum_result, int
   uint8_t w;
   int16_t vals[3];
   uint8_t d[BYTES_PER_SENSOR];
-  int j;
+  int     j;
 
   // Average 200 readings and save the averaged values as GX_OS, GY_OS, GZ_OS, AX_OS, AY_OS and AZ_OS.
   // - GX_OS = Average (GYRO_XOUT_H | GYRO_XOUT_L)
@@ -340,7 +341,7 @@ static int inv_selftest_read_samples(enum INV_SENSORS type, int *sum_result, int
     if (inv_read_mems_reg_core(w, BYTES_PER_SENSOR, d)) return -1;
 
     for (j = 0; j < THREE_AXES; j++) {
-      vals[j] = (d[(2 * j)] << 8) | (d[(2 * j) + 1] & 0xff);
+      vals[j]        = (d[(2 * j)] << 8) | (d[(2 * j) + 1] & 0xff);
       sum_result[j] += vals[j];
     }
 
@@ -361,7 +362,7 @@ static int inv_do_test_accelgyro(enum INV_SENSORS sensorType, int *meanValue, in
 
   // initialize output to be 0
   for (i = 0; i < THREE_AXES; i++) {
-    meanValue[i] = 0;
+    meanValue[i]   = 0;
     stMeanValue[i] = 0;
   }
 
@@ -395,7 +396,7 @@ static int inv_do_test_accelgyro(enum INV_SENSORS sensorType, int *meanValue, in
   // Read the accel/gyro output and average 200 readings
   // These readings are in units of LSBs
   lNbSamples = 0;
-  result = inv_selftest_read_samples(sensorType, stMeanValue, &lNbSamples);
+  result     = inv_selftest_read_samples(sensorType, stMeanValue, &lNbSamples);
 
   if (result) {
     return result;
@@ -410,14 +411,14 @@ static int inv_do_test_accelgyro(enum INV_SENSORS sensorType, int *meanValue, in
 
 int inv_mems_run_selftest(void)
 {
-  int result;
-  int gyro_bias_st[THREE_AXES], gyro_bias_regular[THREE_AXES];
-  int accel_bias_st[THREE_AXES], accel_bias_regular[THREE_AXES];
-  int test_times;
+  int  result;
+  int  gyro_bias_st[THREE_AXES], gyro_bias_regular[THREE_AXES];
+  int  accel_bias_st[THREE_AXES], accel_bias_regular[THREE_AXES];
+  int  test_times;
   char accel_result, gyro_result, compass_result;
 
-  accel_result = 0;
-  gyro_result = 0;
+  accel_result   = 0;
+  gyro_result    = 0;
   compass_result = 0;
 
   // save original state of the chip, initialize registers, configure sensors and read ST values
@@ -462,7 +463,7 @@ int inv_mems_run_selftest(void)
   }
   // check values read at various steps
   accel_result = !inv_check_accelgyro_self_test(INV_SENSOR_ACCEL, accel_st_data, accel_bias_regular, accel_bias_st);
-  gyro_result = !inv_check_accelgyro_self_test(INV_SENSOR_GYRO, gyro_st_data, gyro_bias_regular, gyro_bias_st);
+  gyro_result  = !inv_check_accelgyro_self_test(INV_SENSOR_GYRO, gyro_st_data, gyro_bias_regular, gyro_bias_st);
 #if defined MEMS_SECONDARY_DEVICE
   compass_result = !inv_check_akm_self_test();
 #endif
@@ -473,7 +474,9 @@ test_fail:
 
   return (compass_result << 2) | (accel_result << 1) | gyro_result;
 }
+
 #endif
+
 /**
  * @}
  */

@@ -21,7 +21,8 @@
 
 #include "flightController.h"
 
-const states_estimate_t flightController_rtZstates_estimate_t = {
+const states_estimate_t flightController_rtZstates_estimate_t =
+{
   0.0F,                                /* x */
   0.0F,                                /* y */
   0.0F,                                /* z */
@@ -34,77 +35,77 @@ const states_estimate_t flightController_rtZstates_estimate_t = {
   0.0F,                                /* p */
   0.0F,                                /* q */
   0.0F                                 /* r */
-} ;                                    /* states_estimate_t ground */
+};                                     /* states_estimate_t ground */
 
 /* Exported block parameters */
-real32_T Alt_Hover_Const = 1.25813246F;/* Variable: Alt_Hover_Const
-                                        * Referenced by: '<S6>/Constant'
-                                        */
-real32_T PID_alt_D = 0.24F;            /* Variable: PID_alt_D
-                                        * Referenced by: '<S6>/Alt_D_Gain'
-                                        */
-real32_T PID_alt_P = 0.64F;            /* Variable: PID_alt_P
-                                        * Referenced by: '<S6>/Alt_P_Gain'
-                                        */
-real32_T PID_pitch_D = 0.005F;         /* Variable: PID_pitch_D
-                                        * Referenced by: '<S7>/D_pr'
-                                        */
-real32_T PID_pitch_P = 0.005F;         /* Variable: PID_pitch_P
-                                        * Referenced by: '<S7>/P_pr'
-                                        */
-real32_T PID_pitch_roll_I = 0.003F;    /* Variable: PID_pitch_roll_I
-                                        * Referenced by: '<S7>/I_pr'
-                                        */
-real32_T PID_yaw_D = 0.14F;            /* Variable: PID_yaw_D
-                                        * Referenced by: '<S8>/Yaw_D_Gain'
-                                        */
-real32_T PID_yaw_P = 0.1F;             /* Variable: PID_yaw_P
-                                        * Referenced by: '<S8>/Yaw_P_Gain'
-                                        */
-const FCS_command_t flightController_rtZFCS_command = { 0U,/* control_type */
-  { 0.0F,                              /* yaw_cmd */
-    0.0F,                              /* roll_cmd */
-    0.0F,                              /* pitch_cmd */
-    0.0F                               /* alt_cmd */
-  }                                    /* control_input */
+real32_T Alt_Hover_Const  = 1.25813246F;                        /* Variable: Alt_Hover_Const
+                                                                 * Referenced by: '<S6>/Constant'
+                                                                 */
+real32_T PID_alt_D        = 0.24F;                              /* Variable: PID_alt_D
+                                                                 * Referenced by: '<S6>/Alt_D_Gain'
+                                                                 */
+real32_T PID_alt_P        = 0.64F;                              /* Variable: PID_alt_P
+                                                                 * Referenced by: '<S6>/Alt_P_Gain'
+                                                                 */
+real32_T PID_pitch_D      = 0.005F;                             /* Variable: PID_pitch_D
+                                                                 * Referenced by: '<S7>/D_pr'
+                                                                 */
+real32_T PID_pitch_P      = 0.005F;                             /* Variable: PID_pitch_P
+                                                                 * Referenced by: '<S7>/P_pr'
+                                                                 */
+real32_T PID_pitch_roll_I = 0.003F;                             /* Variable: PID_pitch_roll_I
+                                                                 * Referenced by: '<S7>/I_pr'
+                                                                 */
+real32_T PID_yaw_D        = 0.14F;                              /* Variable: PID_yaw_D
+                                                                 * Referenced by: '<S8>/Yaw_D_Gain'
+                                                                 */
+real32_T PID_yaw_P        = 0.1F;                               /* Variable: PID_yaw_P
+                                                                 * Referenced by: '<S8>/Yaw_P_Gain'
+                                                                 */
+const FCS_command_t flightController_rtZFCS_command = { 0U,     /* control_type */
+                                                        { 0.0F, /* yaw_cmd */
+                                                          0.0F, /* roll_cmd */
+                                                          0.0F, /* pitch_cmd */
+                                                          0.0F  /* alt_cmd */
+                                                        } /* control_input */
 };
 
-const sensor_bias_t flightController_rtZsensor_bias = { { 0.0F, 0.0F, 0.0F },/* gyro_bias */
-  { 0.0F, 0.0F, 0.0F },                /* accel_bias */
-  { 0.7071F, 0.0F, 0.0F, -0.7071F },          /* quat_bias */
-  0.0F                                 /* alt_bias */
+const sensor_bias_t flightController_rtZsensor_bias = { {    0.0F, 0.0F,     0.0F }, /* gyro_bias */
+                                                        {    0.0F, 0.0F,     0.0F }, /* accel_bias */
+                                                        { 0.7071F, 0.0F,0.0F, -0.7071F }, /* quat_bias */
+                                                        0.0F                         /* alt_bias */
 };
 
-const sensor_data_t flightController_rtZsensor_data = { { 0.0F, 0.0F, 0.0F },/* gyro_data_SI */
-  { 0.0F, 0.0F, 0.0F },                /* accel_data_SI */
-  { 1.0F, 0.0F, 0.0F, 0.0F },          /* quat_data */
-  0.0F                                 /* alt_data_SI */
+const sensor_data_t flightController_rtZsensor_data = { { 0.0F, 0.0F, 0.0F }, /* gyro_data_SI */
+                                                        { 0.0F, 0.0F, 0.0F }, /* accel_data_SI */
+                                                        { 1.0F, 0.0F,0.0F, 0.0F }, /* quat_data */
+                                                        0.0F                  /* alt_data_SI */
 };
 
 /* Model step function */
 void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
-  sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors, states_estimate_t
-  *rtY_State_Estim, uint16_T rtY_Throttle[4])
+                           sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors, states_estimate_t
+                           *rtY_State_Estim, uint16_T rtY_Throttle[4])
 {
-  DW *rtDW = rtM->dwork;
-  real_T rtb_VectorConcatenate[9];
-  real_T rtb_VectorConcatenate_p[3];
-  real_T rtb_Product1_l;
-  real_T rtb_Product2_pi;
-  real_T rtb_VectorConcatenate_h_tmp;
-  real_T rtb_fcn2;
-  real_T rtb_fcn3;
-  real_T rtb_fcn4;
-  real_T rtb_preprocessing_quat2double_0;
-  real_T rtb_preprocessing_quat2double_1;
-  real_T rtb_sincos_o2_idx_0;
-  real_T rtb_sincos_o2_idx_0_tmp;
-  real_T rtb_sincos_o2_idx_0_tmp_0;
-  real_T rtb_sincos_o2_idx_2;
-  real_T u1_tmp;
-  real_T u1_tmp_0;
-  int32_T cff;
-  int32_T i;
+  DW *     rtDW = rtM->dwork;
+  real_T   rtb_VectorConcatenate[9];
+  real_T   rtb_VectorConcatenate_p[3];
+  real_T   rtb_Product1_l;
+  real_T   rtb_Product2_pi;
+  real_T   rtb_VectorConcatenate_h_tmp;
+  real_T   rtb_fcn2;
+  real_T   rtb_fcn3;
+  real_T   rtb_fcn4;
+  real_T   rtb_preprocessing_quat2double_0;
+  real_T   rtb_preprocessing_quat2double_1;
+  real_T   rtb_sincos_o2_idx_0;
+  real_T   rtb_sincos_o2_idx_0_tmp;
+  real_T   rtb_sincos_o2_idx_0_tmp_0;
+  real_T   rtb_sincos_o2_idx_2;
+  real_T   u1_tmp;
+  real_T   u1_tmp_0;
+  int32_T  cff;
+  int32_T  i;
   real32_T Subtract1[3];
   real32_T rtb_VectorConcatenate_0[3];
   real32_T IIR_IMUgyro_r_tmp;
@@ -122,6 +123,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
 
   /* Outputs for Atomic SubSystem: '<Root>/StatesEstimator' */
   /* Outputs for Atomic SubSystem: '<S2>/SensorPreprocessing' */
+
   /* Sqrt: '<S56>/sqrt' incorporates:
    *  DataTypeConversion: '<S14>/preprocessing_quat2doubleSens'
    *  Inport: '<Root>/Sensors'
@@ -165,17 +167,17 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S41>/fcn5'
    */
   rtb_preprocessing_quat2double_1 = rtb_Product2_pi * rtb_Product2_pi;
-  rtb_sincos_o2_idx_2 = rtb_Product1_l * rtb_Product1_l;
-  rtb_sincos_o2_idx_0_tmp = rtb_fcn4 * rtb_fcn4;
-  rtb_sincos_o2_idx_0_tmp_0 = rtb_fcn2 * rtb_fcn2;
+  rtb_sincos_o2_idx_2             = rtb_Product1_l * rtb_Product1_l;
+  rtb_sincos_o2_idx_0_tmp         = rtb_fcn4 * rtb_fcn4;
+  rtb_sincos_o2_idx_0_tmp_0       = rtb_fcn2 * rtb_fcn2;
 
   /* Trigonometry: '<S50>/Trigonometric Function1' incorporates:
    *  Fcn: '<S41>/fcn1'
    *  Fcn: '<S41>/fcn2'
    */
   rtb_sincos_o2_idx_0 = atan2((rtb_Product1_l * rtb_fcn4 + rtb_Product2_pi *
-    rtb_fcn2) * 2.0, ((rtb_preprocessing_quat2double_1 + rtb_sincos_o2_idx_2) -
-                      rtb_sincos_o2_idx_0_tmp) - rtb_sincos_o2_idx_0_tmp_0);
+                               rtb_fcn2) * 2.0, ((rtb_preprocessing_quat2double_1 + rtb_sincos_o2_idx_2) -
+                                                 rtb_sincos_o2_idx_0_tmp) - rtb_sincos_o2_idx_0_tmp_0);
 
   /* Fcn: '<S41>/fcn3' */
   rtb_fcn3 = (rtb_Product1_l * rtb_fcn2 - rtb_Product2_pi * rtb_fcn4) * -2.0;
@@ -192,14 +194,16 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
     rtb_preprocessing_quat2double_0 = 1.0;
 
     /* End of Outputs for SubSystem: '<S52>/If Action Subsystem' */
-  } else if (rtb_fcn3 < -1.0) {
+  }
+  else if (rtb_fcn3 < -1.0) {
     /* Outputs for IfAction SubSystem: '<S52>/If Action Subsystem1' incorporates:
      *  ActionPort: '<S54>/Action Port'
      */
     rtb_preprocessing_quat2double_0 = 1.0;
 
     /* End of Outputs for SubSystem: '<S52>/If Action Subsystem1' */
-  } else {
+  }
+  else {
     /* Outputs for IfAction SubSystem: '<S52>/If Action Subsystem2' incorporates:
      *  ActionPort: '<S55>/Action Port'
      */
@@ -215,8 +219,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S41>/fcn5'
    */
   rtb_sincos_o2_idx_2 = atan2((rtb_fcn4 * rtb_fcn2 + rtb_Product2_pi *
-    rtb_Product1_l) * 2.0, ((rtb_preprocessing_quat2double_1 -
-    rtb_sincos_o2_idx_2) - rtb_sincos_o2_idx_0_tmp) + rtb_sincos_o2_idx_0_tmp_0);
+                               rtb_Product1_l) * 2.0, ((rtb_preprocessing_quat2double_1 -
+                                                        rtb_sincos_o2_idx_2) - rtb_sincos_o2_idx_0_tmp) + rtb_sincos_o2_idx_0_tmp_0);
 
   /* Sqrt: '<S48>/sqrt' incorporates:
    *  DataTypeConversion: '<S14>/preprocessing_quat2doubleBias'
@@ -259,9 +263,9 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   /* Fcn: '<S40>/fcn2' incorporates:
    *  Fcn: '<S40>/fcn5'
    */
-  rtb_sincos_o2_idx_0_tmp = rtb_fcn2 * rtb_fcn2;
+  rtb_sincos_o2_idx_0_tmp   = rtb_fcn2 * rtb_fcn2;
   rtb_sincos_o2_idx_0_tmp_0 = rtb_Product2_pi * rtb_Product2_pi;
-  u1_tmp = rtb_Product1_l * rtb_Product1_l;
+  u1_tmp   = rtb_Product1_l * rtb_Product1_l;
   u1_tmp_0 = rtb_fcn3 * rtb_fcn3;
 
   /* Fcn: '<S40>/fcn3' */
@@ -278,7 +282,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
     rtb_fcn4 = 1.0;
 
     /* End of Outputs for SubSystem: '<S44>/If Action Subsystem' */
-  } else {
+  }
+  else {
     if (rtb_fcn4 < -1.0) {
       /* Outputs for IfAction SubSystem: '<S44>/If Action Subsystem1' incorporates:
        *  ActionPort: '<S46>/Action Port'
@@ -298,9 +303,9 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Trigonometry: '<S42>/Trigonometric Function1'
    */
   rtb_preprocessing_quat2double_1 = (rtb_sincos_o2_idx_0 - atan2
-    ((rtb_Product2_pi * rtb_Product1_l + rtb_fcn2 * rtb_fcn3) * 2.0,
-     ((rtb_sincos_o2_idx_0_tmp + rtb_sincos_o2_idx_0_tmp_0) - u1_tmp) - u1_tmp_0))
-    * 0.5;
+                                       ((rtb_Product2_pi * rtb_Product1_l + rtb_fcn2 * rtb_fcn3) * 2.0,
+                                       ((rtb_sincos_o2_idx_0_tmp + rtb_sincos_o2_idx_0_tmp_0) - u1_tmp) - u1_tmp_0))
+                                    * 0.5;
 
   /* Sum: '<S14>/Subtract1' incorporates:
    *  Inport: '<Root>/Bias'
@@ -309,7 +314,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   Subtract1[0] = rtU_Sensors->accel_data_SI[0] - rtU_Bias->accel_bias[0];
 
   /* Trigonometry: '<S39>/sincos' */
-  rtb_sincos_o2_idx_0 = cos(rtb_preprocessing_quat2double_1);
+  rtb_sincos_o2_idx_0        = cos(rtb_preprocessing_quat2double_1);
   rtb_VectorConcatenate_p[0] = sin(rtb_preprocessing_quat2double_1);
 
   /* Gain: '<S39>/1//2' incorporates:
@@ -318,7 +323,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Trigonometry: '<S50>/trigFcn'
    */
   rtb_preprocessing_quat2double_1 = (asin(rtb_preprocessing_quat2double_0) -
-    asin(rtb_fcn4)) * 0.5;
+                                     asin(rtb_fcn4)) * 0.5;
 
   /* Sum: '<S14>/Subtract1' incorporates:
    *  Inport: '<Root>/Bias'
@@ -337,8 +342,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Trigonometry: '<S42>/Trigonometric Function3'
    */
   rtb_preprocessing_quat2double_1 = (rtb_sincos_o2_idx_2 - atan2((rtb_Product1_l
-    * rtb_fcn3 + rtb_fcn2 * rtb_Product2_pi) * 2.0, ((rtb_sincos_o2_idx_0_tmp -
-    rtb_sincos_o2_idx_0_tmp_0) - u1_tmp) + u1_tmp_0)) * 0.5;
+                                                                  * rtb_fcn3 + rtb_fcn2 * rtb_Product2_pi) * 2.0, ((rtb_sincos_o2_idx_0_tmp -
+                                                                                                                    rtb_sincos_o2_idx_0_tmp_0) - u1_tmp) + u1_tmp_0)) * 0.5;
 
   /* Trigonometry: '<S39>/sincos' */
   rtb_fcn2 = cos(rtb_preprocessing_quat2double_1);
@@ -359,13 +364,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   cff = 1;
   for (i = rtDW->FIR_IMUaccel_circBuf; i < 5; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUaccel_states[i] *
-      rtConstP.FIR_IMUaccel_Coefficients[cff];
+                         rtConstP.FIR_IMUaccel_Coefficients[cff];
     cff++;
   }
 
   for (i = 0; i < rtDW->FIR_IMUaccel_circBuf; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUaccel_states[i] *
-      rtConstP.FIR_IMUaccel_Coefficients[cff];
+                         rtConstP.FIR_IMUaccel_Coefficients[cff];
     cff++;
   }
 
@@ -384,13 +389,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   cff = 1;
   for (i = rtDW->FIR_IMUaccel_circBuf; i < 5; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUaccel_states[i + 5] *
-      rtConstP.FIR_IMUaccel_Coefficients[cff];
+                         rtConstP.FIR_IMUaccel_Coefficients[cff];
     cff++;
   }
 
   for (i = 0; i < rtDW->FIR_IMUaccel_circBuf; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUaccel_states[i + 5] *
-      rtConstP.FIR_IMUaccel_Coefficients[cff];
+                         rtConstP.FIR_IMUaccel_Coefficients[cff];
     cff++;
   }
 
@@ -409,13 +414,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   cff = 1;
   for (i = rtDW->FIR_IMUaccel_circBuf; i < 5; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUaccel_states[i + 10] *
-      rtConstP.FIR_IMUaccel_Coefficients[cff];
+                         rtConstP.FIR_IMUaccel_Coefficients[cff];
     cff++;
   }
 
   for (i = 0; i < rtDW->FIR_IMUaccel_circBuf; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUaccel_states[i + 10] *
-      rtConstP.FIR_IMUaccel_Coefficients[cff];
+                         rtConstP.FIR_IMUaccel_Coefficients[cff];
     cff++;
   }
 
@@ -426,13 +431,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   cff = 1;
   for (i = rtDW->FIR_IMUgyro_circBuf; i < 5; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUgyro_states[i] *
-      rtConstP.FIR_IMUgyro_Coefficients[cff];
+                         rtConstP.FIR_IMUgyro_Coefficients[cff];
     cff++;
   }
 
   for (i = 0; i < rtDW->FIR_IMUgyro_circBuf; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUgyro_states[i] *
-      rtConstP.FIR_IMUgyro_Coefficients[cff];
+                         rtConstP.FIR_IMUgyro_Coefficients[cff];
     cff++;
   }
 
@@ -441,13 +446,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   cff = 1;
   for (i = rtDW->FIR_IMUgyro_circBuf; i < 5; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUgyro_states[i + 5] *
-      rtConstP.FIR_IMUgyro_Coefficients[cff];
+                         rtConstP.FIR_IMUgyro_Coefficients[cff];
     cff++;
   }
 
   for (i = 0; i < rtDW->FIR_IMUgyro_circBuf; i++) {
     IIR_IMUgyro_r_tmp += rtDW->FIR_IMUgyro_states[i + 5] *
-      rtConstP.FIR_IMUgyro_Coefficients[cff];
+                         rtConstP.FIR_IMUgyro_Coefficients[cff];
     cff++;
   }
 
@@ -464,7 +469,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   cff = 1;
   for (i = 0; i < 5; i++) {
     IIR_IMUgyro_r_tmp -= rtConstP.IIR_IMUgyro_r_DenCoef[cff] *
-      rtDW->IIR_IMUgyro_r_states[i];
+                         rtDW->IIR_IMUgyro_r_states[i];
     cff++;
   }
 
@@ -472,7 +477,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   cff = 1;
   for (i = 0; i < 5; i++) {
     rtb_preprocessing_alt_ned += rtConstP.IIR_IMUgyro_r_NumCoef[cff] *
-      rtDW->IIR_IMUgyro_r_states[i];
+                                 rtDW->IIR_IMUgyro_r_states[i];
     cff++;
   }
 
@@ -487,13 +492,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Sum: '<S14>/Subtract3'
    */
   pressureFilter_IIR_tmp = ((-(rtU_Sensors->alt_data_SI - rtU_Bias->alt_bias) -
-    -2.93717074F * rtDW->pressureFilter_IIR_states[0]) - 2.87629962F *
-    rtDW->pressureFilter_IIR_states[1]) - -0.939098954F *
-    rtDW->pressureFilter_IIR_states[2];
+                             -2.93717074F * rtDW->pressureFilter_IIR_states[0]) - 2.87629962F *
+                            rtDW->pressureFilter_IIR_states[1]) - -0.939098954F *
+                           rtDW->pressureFilter_IIR_states[2];
   rtb_preprocessing_alt_out = ((3.75683794E-6F * pressureFilter_IIR_tmp +
-    1.12705138E-5F * rtDW->pressureFilter_IIR_states[0]) + 1.12705138E-5F *
-    rtDW->pressureFilter_IIR_states[1]) + 3.75683794E-6F *
-    rtDW->pressureFilter_IIR_states[2];
+                                1.12705138E-5F * rtDW->pressureFilter_IIR_states[0]) + 1.12705138E-5F *
+                               rtDW->pressureFilter_IIR_states[1]) + 3.75683794E-6F *
+                              rtDW->pressureFilter_IIR_states[2];
 
   /* Update for DiscreteFir: '<S14>/FIR_IMUaccel' incorporates:
    *  Sum: '<S14>/Subtract1'
@@ -505,8 +510,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   }
 
   /* Update circular buffer */
-  rtDW->FIR_IMUaccel_states[rtDW->FIR_IMUaccel_circBuf] = Subtract1[0];
-  rtDW->FIR_IMUaccel_states[rtDW->FIR_IMUaccel_circBuf + 5] = Subtract1[1];
+  rtDW->FIR_IMUaccel_states[rtDW->FIR_IMUaccel_circBuf]      = Subtract1[0];
+  rtDW->FIR_IMUaccel_states[rtDW->FIR_IMUaccel_circBuf + 5]  = Subtract1[1];
   rtDW->FIR_IMUaccel_states[rtDW->FIR_IMUaccel_circBuf + 10] = Subtract1[2];
 
   /* End of Update for DiscreteFir: '<S14>/FIR_IMUaccel' */
@@ -519,7 +524,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   }
 
   /* Update circular buffer */
-  rtDW->FIR_IMUgyro_states[rtDW->FIR_IMUgyro_circBuf] = Subtract2_idx_0;
+  rtDW->FIR_IMUgyro_states[rtDW->FIR_IMUgyro_circBuf]     = Subtract2_idx_0;
   rtDW->FIR_IMUgyro_states[rtDW->FIR_IMUgyro_circBuf + 5] = Subtract2_idx_1;
 
   /* End of Update for DiscreteFir: '<S14>/FIR_IMUgyro' */
@@ -540,10 +545,11 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S39>/q1'
    */
   rtb_Product2_pi = rtb_sincos_o2_idx_0 * rtb_fcn4;
-  rtb_Product1_l = rtb_VectorConcatenate_p[0] * rtb_VectorConcatenate_p[1];
+  rtb_Product1_l  = rtb_VectorConcatenate_p[0] * rtb_VectorConcatenate_p[1];
 
   /* Outputs for Atomic SubSystem: '<S2>/AltitudeEstimator' */
   /* Outputs for Atomic SubSystem: '<S2>/OrientationEstimator' */
+
   /* DataTypeConversion: '<S13>/orientation_quat2double' incorporates:
    *  DataTypeConversion: '<S12>/altitude_quat2double'
    *  DataTypeConversion: '<S14>/preprocessing_quat2single'
@@ -551,9 +557,9 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S39>/q1'
    */
   rtb_preprocessing_quat2double_0 = (real32_T)(rtb_Product2_pi * rtb_fcn2 +
-    rtb_Product1_l * rtb_VectorConcatenate_p[2]);
+                                               rtb_Product1_l * rtb_VectorConcatenate_p[2]);
   rtb_preprocessing_quat2double_1 = (real32_T)(rtb_Product2_pi *
-    rtb_VectorConcatenate_p[2] - rtb_Product1_l * rtb_fcn2);
+                                               rtb_VectorConcatenate_p[2] - rtb_Product1_l * rtb_fcn2);
 
   /* End of Outputs for SubSystem: '<S2>/OrientationEstimator' */
   /* End of Outputs for SubSystem: '<S2>/AltitudeEstimator' */
@@ -563,10 +569,11 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S39>/q3'
    */
   rtb_Product2_pi = rtb_VectorConcatenate_p[0] * rtb_fcn4;
-  rtb_Product1_l = rtb_sincos_o2_idx_0 * rtb_VectorConcatenate_p[1];
+  rtb_Product1_l  = rtb_sincos_o2_idx_0 * rtb_VectorConcatenate_p[1];
 
   /* Outputs for Atomic SubSystem: '<S2>/AltitudeEstimator' */
   /* Outputs for Atomic SubSystem: '<S2>/OrientationEstimator' */
+
   /* DataTypeConversion: '<S13>/orientation_quat2double' incorporates:
    *  DataTypeConversion: '<S12>/altitude_quat2double'
    *  DataTypeConversion: '<S14>/preprocessing_quat2single'
@@ -575,9 +582,9 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S39>/q3'
    */
   rtb_sincos_o2_idx_0 = (real32_T)(rtb_Product1_l * rtb_fcn2 + rtb_Product2_pi *
-    rtb_VectorConcatenate_p[2]);
+                                   rtb_VectorConcatenate_p[2]);
   rtb_sincos_o2_idx_2 = (real32_T)(rtb_Product2_pi * rtb_fcn2 - rtb_Product1_l *
-    rtb_VectorConcatenate_p[2]);
+                                   rtb_VectorConcatenate_p[2]);
 
   /* End of Outputs for SubSystem: '<S2>/SensorPreprocessing' */
 
@@ -591,9 +598,9 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Sum: '<S38>/Sum'
    */
   rtb_sincos_o2_idx_0_tmp = sqrt(((rtb_preprocessing_quat2double_0 *
-    rtb_preprocessing_quat2double_0 + rtb_preprocessing_quat2double_1 *
-    rtb_preprocessing_quat2double_1) + rtb_sincos_o2_idx_0 * rtb_sincos_o2_idx_0)
-    + rtb_sincos_o2_idx_2 * rtb_sincos_o2_idx_2);
+                                   rtb_preprocessing_quat2double_0 + rtb_preprocessing_quat2double_1 *
+                                   rtb_preprocessing_quat2double_1) + rtb_sincos_o2_idx_0 * rtb_sincos_o2_idx_0)
+                                 + rtb_sincos_o2_idx_2 * rtb_sincos_o2_idx_2);
 
   /* End of Outputs for SubSystem: '<S2>/AltitudeEstimator' */
 
@@ -625,7 +632,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S30>/fcn5'
    */
   rtb_sincos_o2_idx_0_tmp_0 = rtb_fcn2 * rtb_fcn2;
-  u1_tmp = rtb_Product2_pi * rtb_Product2_pi;
+  u1_tmp   = rtb_Product2_pi * rtb_Product2_pi;
   u1_tmp_0 = rtb_Product1_l * rtb_Product1_l;
   rtb_VectorConcatenate_h_tmp = rtb_fcn3 * rtb_fcn3;
 
@@ -634,8 +641,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S30>/fcn2'
    */
   rtb_VectorConcatenate_p[0] = atan2((rtb_Product2_pi * rtb_Product1_l +
-    rtb_fcn2 * rtb_fcn3) * 2.0, ((rtb_sincos_o2_idx_0_tmp_0 + u1_tmp) - u1_tmp_0)
-    - rtb_VectorConcatenate_h_tmp);
+                                      rtb_fcn2 * rtb_fcn3) * 2.0, ((rtb_sincos_o2_idx_0_tmp_0 + u1_tmp) - u1_tmp_0)
+                                     - rtb_VectorConcatenate_h_tmp);
 
   /* Fcn: '<S30>/fcn3' */
   rtb_fcn4 = (rtb_Product2_pi * rtb_fcn3 - rtb_fcn2 * rtb_Product1_l) * -2.0;
@@ -651,7 +658,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
     rtb_fcn4 = 1.0;
 
     /* End of Outputs for SubSystem: '<S33>/If Action Subsystem' */
-  } else {
+  }
+  else {
     if (rtb_fcn4 < -1.0) {
       /* Outputs for IfAction SubSystem: '<S33>/If Action Subsystem1' incorporates:
        *  ActionPort: '<S35>/Action Port'
@@ -672,12 +680,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Fcn: '<S30>/fcn5'
    */
   rtb_VectorConcatenate_p[2] = atan2((rtb_Product1_l * rtb_fcn3 + rtb_fcn2 *
-    rtb_Product2_pi) * 2.0, ((rtb_sincos_o2_idx_0_tmp_0 - u1_tmp) - u1_tmp_0) +
-    rtb_VectorConcatenate_h_tmp);
+                                      rtb_Product2_pi) * 2.0, ((rtb_sincos_o2_idx_0_tmp_0 - u1_tmp) - u1_tmp_0) +
+                                     rtb_VectorConcatenate_h_tmp);
 
   /* End of Outputs for SubSystem: '<S2>/OrientationEstimator' */
 
   /* Outputs for Atomic SubSystem: '<S2>/AltitudeEstimator' */
+
   /* Product: '<S27>/Product3' incorporates:
    *  DataTypeConversion: '<S12>/altitude_quat2double'
    */
@@ -727,7 +736,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Product: '<S17>/Product3'
    */
   rtb_VectorConcatenate[0] = ((rtb_fcn4 + rtb_sincos_o2_idx_0) -
-    rtb_preprocessing_quat2double_0) - rtb_preprocessing_quat2double_1;
+                              rtb_preprocessing_quat2double_0) - rtb_preprocessing_quat2double_1;
 
   /* Product: '<S18>/Product2' incorporates:
    *  Product: '<S20>/Product2'
@@ -745,7 +754,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Sum: '<S18>/Sum'
    */
   rtb_VectorConcatenate[3] = (rtb_sincos_o2_idx_0_tmp + rtb_sincos_o2_idx_2) *
-    2.0;
+                             2.0;
 
   /* Product: '<S19>/Product1' incorporates:
    *  Product: '<S23>/Product1'
@@ -768,14 +777,14 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Sum: '<S20>/Sum'
    */
   rtb_VectorConcatenate[1] = (rtb_sincos_o2_idx_2 - rtb_sincos_o2_idx_0_tmp) *
-    2.0;
+                             2.0;
 
   /* Sum: '<S21>/Sum' incorporates:
    *  Sum: '<S25>/Sum'
    */
   rtb_fcn4 -= rtb_sincos_o2_idx_0;
   rtb_VectorConcatenate[4] = (rtb_fcn4 + rtb_preprocessing_quat2double_0) -
-    rtb_preprocessing_quat2double_1;
+                             rtb_preprocessing_quat2double_1;
 
   /* Product: '<S22>/Product2' incorporates:
    *  Product: '<S24>/Product2'
@@ -806,7 +815,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
 
   /* Sum: '<S25>/Sum' */
   rtb_VectorConcatenate[8] = (rtb_fcn4 - rtb_preprocessing_quat2double_0) +
-    rtb_preprocessing_quat2double_1;
+                             rtb_preprocessing_quat2double_1;
 
   /* SampleTimeMath: '<S15>/TSamp'
    *
@@ -826,9 +835,9 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
      *  DiscreteFir: '<S14>/FIR_IMUaccel'
      */
     rtb_VectorConcatenate_0[i] = (real32_T)rtb_VectorConcatenate[3 * i + 2] *
-      rtb_preprocessing_accel_out_i_1 + ((real32_T)rtb_VectorConcatenate[3 * i +
-      1] * rtb_preprocessing_accel_out_i_0 + (real32_T)rtb_VectorConcatenate[3 *
-      i] * rtb_preprocessing_accel_out_idx);
+                                 rtb_preprocessing_accel_out_i_1 + ((real32_T)rtb_VectorConcatenate[3 * i +
+                                                                                                    1] * rtb_preprocessing_accel_out_i_0 + (real32_T)rtb_VectorConcatenate[3 *
+                                                                                                                                                                           i] * rtb_preprocessing_accel_out_idx);
   }
 
   /* End of Outputs for SubSystem: '<S2>/OrientationEstimator' */
@@ -853,7 +862,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    */
   IIR_IMUgyro_r_tmp = (0.01F * rtb_VectorConcatenate_0[2] +
                        rtDW->altitude_delay0_DSTATE) * 0.999F +
-    (rtb_preprocessing_alt_ned - rtDW->UD_DSTATE) * 0.001F;
+                      (rtb_preprocessing_alt_ned - rtDW->UD_DSTATE) * 0.001F;
 
   /* Sum: '<S12>/altitude_baroCorrection' incorporates:
    *  Delay: '<S12>/altitude_delay'
@@ -863,7 +872,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Sum: '<S12>/altitude_accelCorrection'
    */
   rtb_preprocessing_alt_out = (0.01F * IIR_IMUgyro_r_tmp +
-    rtDW->altitude_delay_DSTATE) * 0.99F + 0.01F * rtb_preprocessing_alt_out;
+                               rtDW->altitude_delay_DSTATE) * 0.99F + 0.01F * rtb_preprocessing_alt_out;
 
   /* Update for Delay: '<S12>/altitude_delay0' */
   rtDW->altitude_delay0_DSTATE = IIR_IMUgyro_r_tmp;
@@ -884,14 +893,17 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
 
   /* Outputs for Atomic SubSystem: '<Root>/FCS' */
   /* Outputs for Atomic SubSystem: '<S1>/CommandHandling' */
+
   /* Saturate: '<S3>/Saturation3' incorporates:
    *  Inport: '<Root>/Commands'
    */
   if (rtU_Commands->control_input.alt_cmd > 10.0F) {
     rtb_preprocessing_accel_out_i_0 = 10.0F;
-  } else if (rtU_Commands->control_input.alt_cmd < -10.0F) {
+  }
+  else if (rtU_Commands->control_input.alt_cmd < -10.0F) {
     rtb_preprocessing_accel_out_i_0 = -10.0F;
-  } else {
+  }
+  else {
     rtb_preprocessing_accel_out_i_0 = rtU_Commands->control_input.alt_cmd;
   }
 
@@ -900,6 +912,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
 
   /* Outputs for Atomic SubSystem: '<S1>/Controller' */
   /* Outputs for Atomic SubSystem: '<S4>/AltitudeControl' */
+
   /* Sum: '<S6>/Sum2' incorporates:
    *  Constant: '<S6>/Constant'
    *  Gain: '<S6>/Alt_D_Gain'
@@ -910,25 +923,28 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Sum: '<S6>/Sum1'
    */
   rtb_preprocessing_alt_ned = ((rtb_preprocessing_accel_out_i_0 -
-    (-rtb_preprocessing_alt_out)) * PID_alt_P - PID_alt_D * -IIR_IMUgyro_r_tmp)
-    + Alt_Hover_Const;
+                                (-rtb_preprocessing_alt_out)) * PID_alt_P - PID_alt_D * -IIR_IMUgyro_r_tmp)
+                              + Alt_Hover_Const;
 
   /* End of Outputs for SubSystem: '<S4>/AltitudeControl' */
   /* End of Outputs for SubSystem: '<S1>/Controller' */
 
   /* Outputs for Atomic SubSystem: '<S1>/CommandHandling' */
+
   /* Saturate: '<S3>/Saturation1' incorporates:
    *  Inport: '<Root>/Commands'
    */
   /* Unit Conversion - from: deg to: rad
-     Expression: output = (0.0174533*input) + (0) */
+   * Expression: output = (0.0174533*input) + (0) */
   /* Unit Conversion - from: deg to: rad
-     Expression: output = (0.0174533*input) + (0) */
+   * Expression: output = (0.0174533*input) + (0) */
   if (rtU_Commands->control_input.pitch_cmd > 45.0F) {
     rtb_preprocessing_accel_out_i_0 = 45.0F;
-  } else if (rtU_Commands->control_input.pitch_cmd < -45.0F) {
+  }
+  else if (rtU_Commands->control_input.pitch_cmd < -45.0F) {
     rtb_preprocessing_accel_out_i_0 = -45.0F;
-  } else {
+  }
+  else {
     rtb_preprocessing_accel_out_i_0 = rtU_Commands->control_input.pitch_cmd;
   }
 
@@ -937,24 +953,28 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
 
   /* Outputs for Atomic SubSystem: '<S1>/Controller' */
   /* Outputs for Atomic SubSystem: '<S4>/PitchRollControl' */
+
   /* Sum: '<S7>/Sum19' incorporates:
    *  UnitConversion: '<S9>/Unit Conversion'
    */
   pressureFilter_IIR_tmp = 0.0174532924F * rtb_preprocessing_accel_out_i_0 -
-    Subtract1[1];
+                           Subtract1[1];
 
   /* End of Outputs for SubSystem: '<S4>/PitchRollControl' */
   /* End of Outputs for SubSystem: '<S1>/Controller' */
 
   /* Outputs for Atomic SubSystem: '<S1>/CommandHandling' */
+
   /* Saturate: '<S3>/Saturation2' incorporates:
    *  Inport: '<Root>/Commands'
    */
   if (rtU_Commands->control_input.roll_cmd > 45.0F) {
     rtb_preprocessing_accel_out_i_0 = 45.0F;
-  } else if (rtU_Commands->control_input.roll_cmd < -45.0F) {
+  }
+  else if (rtU_Commands->control_input.roll_cmd < -45.0F) {
     rtb_preprocessing_accel_out_i_0 = -45.0F;
-  } else {
+  }
+  else {
     rtb_preprocessing_accel_out_i_0 = rtU_Commands->control_input.roll_cmd;
   }
 
@@ -963,14 +983,16 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
 
   /* Outputs for Atomic SubSystem: '<S1>/Controller' */
   /* Outputs for Atomic SubSystem: '<S4>/PitchRollControl' */
+
   /* Sum: '<S7>/Sum19' incorporates:
    *  UnitConversion: '<S10>/Unit Conversion'
    */
   rtb_preprocessing_accel_out_i_0 = 0.0174532924F *
-    rtb_preprocessing_accel_out_i_0 - Subtract1[2];
+                                    rtb_preprocessing_accel_out_i_0 - Subtract1[2];
 
   /* Outputs for Atomic SubSystem: '<Root>/StatesEstimator' */
   /* Outputs for Atomic SubSystem: '<S2>/OrientationEstimator' */
+
   /* Sum: '<S7>/Sum16' incorporates:
    *  Concatenate: '<S14>/preprocessing_pqr_concat'
    *  DiscreteIntegrator: '<S7>/Discrete-Time Integrator'
@@ -980,11 +1002,11 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Inport: '<S13>/<gyro_data_SI>'
    */
   rtb_preprocessing_accel_out_idx = (PID_pitch_P * pressureFilter_IIR_tmp +
-    PID_pitch_roll_I * rtDW->DiscreteTimeIntegrator_DSTATE[0]) - PID_pitch_D *
-    rtb_preprocessing_gyro_out_id_0;
+                                     PID_pitch_roll_I * rtDW->DiscreteTimeIntegrator_DSTATE[0]) - PID_pitch_D *
+                                    rtb_preprocessing_gyro_out_id_0;
   Subtract2_idx_0 = (PID_pitch_P * rtb_preprocessing_accel_out_i_0 +
                      PID_pitch_roll_I * rtDW->DiscreteTimeIntegrator_DSTATE[1])
-    - PID_pitch_D * rtb_preprocessing_gyro_out_id_1;
+                    - PID_pitch_D * rtb_preprocessing_gyro_out_id_1;
 
   /* End of Outputs for SubSystem: '<S2>/OrientationEstimator' */
   /* End of Outputs for SubSystem: '<Root>/StatesEstimator' */
@@ -1004,7 +1026,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   rtDW->DiscreteTimeIntegrator_DSTATE[0] += 0.01F * pressureFilter_IIR_tmp;
   if (rtDW->DiscreteTimeIntegrator_DSTATE[0] >= 2.0F) {
     rtDW->DiscreteTimeIntegrator_DSTATE[0] = 2.0F;
-  } else {
+  }
+  else {
     if (rtDW->DiscreteTimeIntegrator_DSTATE[0] <= -2.0F) {
       rtDW->DiscreteTimeIntegrator_DSTATE[0] = -2.0F;
     }
@@ -1015,7 +1038,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Gain: '<S7>/antiWU_Gain'
    */
   pressureFilter_IIR_tmp = rtb_preprocessing_accel_out_i_0 - 0.001F *
-    rtDW->Delay_DSTATE[1];
+                           rtDW->Delay_DSTATE[1];
 
   /* Update for Delay: '<S7>/Delay' incorporates:
    *  DiscreteIntegrator: '<S7>/Discrete-Time Integrator'
@@ -1026,7 +1049,8 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   rtDW->DiscreteTimeIntegrator_DSTATE[1] += 0.01F * pressureFilter_IIR_tmp;
   if (rtDW->DiscreteTimeIntegrator_DSTATE[1] >= 2.0F) {
     rtDW->DiscreteTimeIntegrator_DSTATE[1] = 2.0F;
-  } else {
+  }
+  else {
     if (rtDW->DiscreteTimeIntegrator_DSTATE[1] <= -2.0F) {
       rtDW->DiscreteTimeIntegrator_DSTATE[1] = -2.0F;
     }
@@ -1036,16 +1060,19 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   /* End of Outputs for SubSystem: '<S1>/Controller' */
 
   /* Outputs for Atomic SubSystem: '<S1>/CommandHandling' */
+
   /* Saturate: '<S3>/Saturation' incorporates:
    *  Inport: '<Root>/Commands'
    */
   /* Unit Conversion - from: deg to: rad
-     Expression: output = (0.0174533*input) + (0) */
+   * Expression: output = (0.0174533*input) + (0) */
   if (rtU_Commands->control_input.yaw_cmd > 180.0F) {
     rtb_preprocessing_accel_out_i_0 = 180.0F;
-  } else if (rtU_Commands->control_input.yaw_cmd < -180.0F) {
+  }
+  else if (rtU_Commands->control_input.yaw_cmd < -180.0F) {
     rtb_preprocessing_accel_out_i_0 = -180.0F;
-  } else {
+  }
+  else {
     rtb_preprocessing_accel_out_i_0 = rtU_Commands->control_input.yaw_cmd;
   }
 
@@ -1056,6 +1083,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   /* Outputs for Atomic SubSystem: '<S4>/YawControl' */
   /* Outputs for Atomic SubSystem: '<Root>/StatesEstimator' */
   /* Outputs for Atomic SubSystem: '<S2>/OrientationEstimator' */
+
   /* Gain: '<S8>/Gain' incorporates:
    *  Concatenate: '<S14>/preprocessing_pqr_concat'
    *  Gain: '<S8>/Yaw_D_Gain'
@@ -1066,7 +1094,7 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  UnitConversion: '<S11>/Unit Conversion'
    */
   pressureFilter_IIR_tmp = -((0.0174532924F * rtb_preprocessing_accel_out_i_0 -
-    Subtract1[0]) * PID_yaw_P - PID_yaw_D * rtb_preprocessing_gyro_out_idx_);
+                              Subtract1[0]) * PID_yaw_P - PID_yaw_D * rtb_preprocessing_gyro_out_idx_);
 
   /* End of Outputs for SubSystem: '<S2>/OrientationEstimator' */
   /* End of Outputs for SubSystem: '<Root>/StatesEstimator' */
@@ -1074,23 +1102,25 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
   /* End of Outputs for SubSystem: '<S1>/Controller' */
 
   /* Outputs for Atomic SubSystem: '<S1>/MotorMixing' */
+
   /* Sum: '<S5>/MotorFR' incorporates:
    *  Sum: '<S5>/MotorBL'
    */
   rtb_preprocessing_accel_out_i_0 = rtb_preprocessing_alt_ned +
-    pressureFilter_IIR_tmp;
+                                    pressureFilter_IIR_tmp;
 
   /* Polyval: '<S5>/Polynomial' incorporates:
    *  Sum: '<S5>/MotorFR'
    */
   Subtract2_idx_1 = ((rtb_preprocessing_accel_out_i_0 +
                       rtb_preprocessing_accel_out_idx) - Subtract2_idx_0) *
-    86.036F + 113.82F;
+                    86.036F + 113.82F;
 
   /* Saturate: '<S5>/Saturation' */
   if (Subtract2_idx_1 > 1000.0F) {
     Subtract2_idx_1 = 1000.0F;
-  } else {
+  }
+  else {
     if (Subtract2_idx_1 < 100.0F) {
       Subtract2_idx_1 = 100.0F;
     }
@@ -1111,12 +1141,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    */
   Subtract2_idx_1 = ((rtb_preprocessing_alt_ned +
                       rtb_preprocessing_accel_out_idx) + Subtract2_idx_0) *
-    86.036F + 113.82F;
+                    86.036F + 113.82F;
 
   /* Saturate: '<S5>/Saturation' */
   if (Subtract2_idx_1 > 1000.0F) {
     Subtract2_idx_1 = 1000.0F;
-  } else {
+  }
+  else {
     if (Subtract2_idx_1 < 100.0F) {
       Subtract2_idx_1 = 100.0F;
     }
@@ -1132,12 +1163,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    */
   Subtract2_idx_1 = ((rtb_preprocessing_alt_ned -
                       rtb_preprocessing_accel_out_idx) - Subtract2_idx_0) *
-    86.036F + 113.82F;
+                    86.036F + 113.82F;
 
   /* Saturate: '<S5>/Saturation' */
   if (Subtract2_idx_1 > 1000.0F) {
     Subtract2_idx_1 = 1000.0F;
-  } else {
+  }
+  else {
     if (Subtract2_idx_1 < 100.0F) {
       Subtract2_idx_1 = 100.0F;
     }
@@ -1153,12 +1185,13 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    */
   Subtract2_idx_1 = ((rtb_preprocessing_accel_out_i_0 -
                       rtb_preprocessing_accel_out_idx) + Subtract2_idx_0) *
-    86.036F + 113.82F;
+                    86.036F + 113.82F;
 
   /* Saturate: '<S5>/Saturation' */
   if (Subtract2_idx_1 > 1000.0F) {
     Subtract2_idx_1 = 1000.0F;
-  } else {
+  }
+  else {
     if (Subtract2_idx_1 < 100.0F) {
       Subtract2_idx_1 = 100.0F;
     }
@@ -1177,15 +1210,15 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
    *  Concatenate: '<S14>/preprocessing_pqr_concat'
    *  Inport: '<S13>/<gyro_data_SI>'
    */
-  rtY_State_Estim->x = 0.0F;
-  rtY_State_Estim->y = 0.0F;
-  rtY_State_Estim->z = rtb_preprocessing_alt_out;
-  rtY_State_Estim->dx = 0.0F;
-  rtY_State_Estim->dy = 0.0F;
-  rtY_State_Estim->dz = IIR_IMUgyro_r_tmp;
-  rtY_State_Estim->yaw = Subtract1[0];
+  rtY_State_Estim->x     = 0.0F;
+  rtY_State_Estim->y     = 0.0F;
+  rtY_State_Estim->z     = rtb_preprocessing_alt_out;
+  rtY_State_Estim->dx    = 0.0F;
+  rtY_State_Estim->dy    = 0.0F;
+  rtY_State_Estim->dz    = IIR_IMUgyro_r_tmp;
+  rtY_State_Estim->yaw   = Subtract1[0];
   rtY_State_Estim->pitch = Subtract1[1];
-  rtY_State_Estim->roll = Subtract1[2];
+  rtY_State_Estim->roll  = Subtract1[2];
 
   /* Outputs for Atomic SubSystem: '<Root>/StatesEstimator' */
   /* Outputs for Atomic SubSystem: '<S2>/OrientationEstimator' */
@@ -1199,26 +1232,26 @@ void flightController_step(RT_MODEL *const rtM, FCS_command_t *rtU_Commands,
 
 /* Model initialize function */
 void flightController_initialize(RT_MODEL *const rtM, FCS_command_t
-  *rtU_Commands, sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors,
-  states_estimate_t *rtY_State_Estim, uint16_T rtY_Throttle[4])
+                                 *rtU_Commands, sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors,
+                                 states_estimate_t *rtY_State_Estim, uint16_T rtY_Throttle[4])
 {
   DW *rtDW = rtM->dwork;
 
   /* Registration code */
 
   /* states (dwork) */
-  (void) memset((void *)rtDW, 0,
-                sizeof(DW));
+  (void)memset((void *)rtDW, 0,
+               sizeof(DW));
 
   /* external inputs */
   *rtU_Commands = flightController_rtZFCS_command;
-  *rtU_Bias = flightController_rtZsensor_bias;
-  *rtU_Sensors = flightController_rtZsensor_data;
+  *rtU_Bias     = flightController_rtZsensor_bias;
+  *rtU_Sensors  = flightController_rtZsensor_data;
 
   /* external outputs */
   (*rtY_State_Estim) = flightController_rtZstates_estimate_t;
-  (void) memset(&rtY_Throttle[0], 0,
-                4U*sizeof(uint16_T));
+  (void)memset(&rtY_Throttle[0], 0,
+               4U * sizeof(uint16_T));
 
   {
     int32_T i;

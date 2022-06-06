@@ -28,7 +28,8 @@ static unsigned char lLastBankSelected = 0xFF;
 
 static uint8_t check_reg_access_lp_disable(unsigned short reg)
 {
-  switch (reg) {
+  switch (reg)
+  {
   case 0x05: /** LP_CONFIG reg */
   case 0x06: /** PWR_MGMT_1 reg */
   case 0x07: /** PWR_MGMT_2 reg */
@@ -44,7 +45,9 @@ static uint8_t check_reg_access_lp_disable(unsigned short reg)
   case 0x7e: /** MEM_BANK_SEL reg */
   case 0x7f: /** REG_BANK_SEL reg */
     return 0;
+
     break;
+
   default:
 
     break;
@@ -75,8 +78,8 @@ static inv_error_t inv_set_bank(unsigned char bank)
 
   if (result) return result;
 
-  reg &= 0xce;
-  reg |= (bank << 4);
+  reg   &= 0xce;
+  reg   |= (bank << 4);
   result = inv_serial_interface_write_hook(REG_BANK_SEL, 1, &reg);
 
   return result;
@@ -96,9 +99,9 @@ static inv_error_t inv_set_bank(unsigned char bank)
  */
 inv_error_t inv_write_mems_reg(uint16_t reg, unsigned int length, const unsigned char *data)
 {
-  inv_error_t result = 0;
-  unsigned int bytesWrite = 0;
-  unsigned char regOnly = (unsigned char)(reg & 0x7F);
+  inv_error_t   result     = 0;
+  unsigned int  bytesWrite = 0;
+  unsigned char regOnly    = (unsigned char)(reg & 0x7F);
 
   unsigned char power_state = inv_get_chip_power_state();
 
@@ -135,7 +138,7 @@ inv_error_t inv_write_mems_reg(uint16_t reg, unsigned int length, const unsigned
  */
 inv_error_t inv_write_single_mems_reg_core(uint16_t reg, const unsigned char data)
 {
-  inv_error_t result = 0;
+  inv_error_t   result  = 0;
   unsigned char regOnly = (unsigned char)(reg & 0x7F);
 
   result |= inv_set_bank(reg >> 7);
@@ -179,12 +182,13 @@ inv_error_t inv_write_single_mems_reg(uint16_t reg, const unsigned char data)
  */
 inv_error_t inv_read_mems_reg_core(uint16_t reg, unsigned int length, unsigned char *data)
 {
-  inv_error_t result = 0;
-  unsigned int bytesRead = 0;
-  unsigned char regOnly = (unsigned char)(reg & 0x7F);
+  inv_error_t   result    = 0;
+  unsigned int  bytesRead = 0;
+  unsigned char regOnly   = (unsigned char)(reg & 0x7F);
+
 #if (MEMS_CHIP != HW_ICM30630)
   unsigned char dat[INV_MAX_SERIAL_READ + 1];
-  int i;
+  int           i;
 #endif
 
   result |= inv_set_bank(reg >> 7);
@@ -254,9 +258,10 @@ inv_error_t inv_read_mems_reg(uint16_t reg, unsigned int length, unsigned char *
  */
 inv_error_t inv_read_mems(unsigned short reg, unsigned int length, unsigned char *data)
 {
-  int result = 0;
+  int          result       = 0;
   unsigned int bytesWritten = 0;
   unsigned int thisLen;
+
 #if (MEMS_CHIP != HW_ICM30630)
   unsigned char i, dat[INV_MAX_SERIAL_READ + 1];
 #endif
@@ -271,20 +276,22 @@ inv_error_t inv_read_mems(unsigned short reg, unsigned int length, unsigned char
 
   result |= inv_set_chip_power_state(CHIP_LP_ENABLE, 0);
 
-  result |= inv_set_bank(0);
+  result       |= inv_set_bank(0);
   lBankSelected = (reg >> 8);
   if (lBankSelected != lLastBankSelected) {
     result |= inv_serial_interface_write_hook(REG_MEM_BANK_SEL, 1, &lBankSelected);
     if (result) return result;
+
     lLastBankSelected = lBankSelected;
   }
   while (bytesWritten < length) {
     lStartAddrSelected = (reg & 0xff);
+
     /* Sets the starting read or write address for the selected memory, inside of the selected page (see MEM_SEL
-       Register). Contents are changed after read or write of the selected memory. This register must be written prior
-       to each access to initialize the register to the proper starting address.
-       The address will auto increment during burst transactions.  Two consecutive bursts without re-initializing the
-       start address would skip one address. */
+     * Register). Contents are changed after read or write of the selected memory. This register must be written prior
+     * to each access to initialize the register to the proper starting address.
+     * The address will auto increment during burst transactions.  Two consecutive bursts without re-initializing the
+     * start address would skip one address. */
     result |= inv_serial_interface_write_hook(REG_MEM_START_ADDR, 1, &lStartAddrSelected);
     if (result) return result;
 
@@ -305,7 +312,7 @@ inv_error_t inv_read_mems(unsigned short reg, unsigned int length, unsigned char
     if (result) return result;
 
     bytesWritten += thisLen;
-    reg += thisLen;
+    reg          += thisLen;
   }
 
 #if (MEMS_CHIP != HW_ICM30630)
@@ -331,9 +338,9 @@ inv_error_t inv_read_mems(unsigned short reg, unsigned int length, unsigned char
  */
 inv_error_t inv_write_mems(unsigned short reg, unsigned int length, const unsigned char *data)
 {
-  int result = 0;
-  unsigned int bytesWritten = 0;
-  unsigned int thisLen;
+  int           result       = 0;
+  unsigned int  bytesWritten = 0;
+  unsigned int  thisLen;
   unsigned char lBankSelected;
   unsigned char lStartAddrSelected;
 
@@ -346,20 +353,22 @@ inv_error_t inv_write_mems(unsigned short reg, unsigned int length, const unsign
 
   result |= inv_set_chip_power_state(CHIP_LP_ENABLE, 0);
 
-  result |= inv_set_bank(0);
+  result       |= inv_set_bank(0);
   lBankSelected = (reg >> 8);
   if (lBankSelected != lLastBankSelected) {
     result |= inv_serial_interface_write_hook(REG_MEM_BANK_SEL, 1, &lBankSelected);
     if (result) return result;
+
     lLastBankSelected = lBankSelected;
   }
   while (bytesWritten < length) {
     lStartAddrSelected = (reg & 0xff);
+
     /* Sets the starting read or write address for the selected memory, inside of the selected page (see MEM_SEL
-       Register). Contents are changed after read or write of the selected memory. This register must be written prior
-       to each access to initialize the register to the proper starting address.
-       The address will auto increment during burst transactions.  Two consecutive bursts without re-initializing the
-       start address would skip one address. */
+     * Register). Contents are changed after read or write of the selected memory. This register must be written prior
+     * to each access to initialize the register to the proper starting address.
+     * The address will auto increment during burst transactions.  Two consecutive bursts without re-initializing the
+     * start address would skip one address. */
     result |= inv_serial_interface_write_hook(REG_MEM_START_ADDR, 1, &lStartAddrSelected);
     if (result) return result;
 
@@ -370,7 +379,7 @@ inv_error_t inv_write_mems(unsigned short reg, unsigned int length, const unsign
     if (result) return result;
 
     bytesWritten += thisLen;
-    reg += thisLen;
+    reg          += thisLen;
   }
 
   // Enable LP_EN since we disabled it at begining of this function.

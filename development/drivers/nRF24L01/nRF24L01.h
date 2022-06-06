@@ -11,7 +11,7 @@
 typedef struct
 {
   drv_spi_tf_t blockingTransfer;
-  void * spiCtx;
+  void *       spiCtx;
   void (*setCS)(uint8_t value);
 } nRF24L01_t;
 
@@ -28,13 +28,13 @@ typedef struct
  *
  * @param int_source Radio interrupt Source.
  * @param irq_state Enable or Disable.
-*/
+ */
 void nRF24L01_set_irq_mode(nRF24L01_t *instance, nRF24L01_irq_source_t int_source, bool irq_state);
 
 /* For the obsolete nRF24L01 it is necessary to issue an activate command before the
  * features enabled by the FEATURE register can be used. For nRF24L01+ these features
  * are by default enabled.
-*/
+ */
 void nRF24L01_activate_features(nRF24L01_t *instance);
 
 /** Enables the dynamic packet length
@@ -81,7 +81,7 @@ void nRF24L01_write_ack_payload(nRF24L01_t *instance, uint8_t pipe, const uint8_
  * @retval 0x10 Max Retransmit interrupt
  * @retval 0x20 TX Data sent interrupt
  * @retval 0x40 RX Data received interrupt
-*/
+ */
 uint8_t nRF24L01_get_clear_irq_flags(nRF24L01_t *instance);
 
 uint8_t nRF24L01_clear_irq_flags_get_status(nRF24L01_t *instance);
@@ -91,14 +91,14 @@ uint8_t nRF24L01_clear_irq_flags_get_status(nRF24L01_t *instance);
  * Other interrupt flags are left unchanged.
  *
  * @param int_source Interrupt source of which flag to clear
-*/
+ */
 void nRF24L01_clear_irq_flag(nRF24L01_t *instance, nRF24L01_irq_source_t int_source);
 
 /** Set the CRC mode used by the radio.
  * Use this function to set the CRC mode; CRC disabled, 1 or 2 bytes.
  *
  * @param crc_mode CRC mode to use
-*/
+ */
 void nRF24L01_set_crc_mode(nRF24L01_t *instance, nRF24L01_crc_mode_t crc_mode);
 
 /** Open radio pipe(s) and enable/ disable auto acknowledge.
@@ -108,14 +108,14 @@ void nRF24L01_set_crc_mode(nRF24L01_t *instance, nRF24L01_crc_mode_t crc_mode);
  * @param pipe_num Radio pipe to open
  * @param auto_ack Auto_Ack ON/OFF
  * @see nRF24L01_address
-*/
+ */
 void nRF24L01_open_pipe(nRF24L01_t *instance, nRF24L01_address_t pipe_num, bool auto_ack);
 
 /** Close radio pipe(s).
  * Use this function to close one pipe or all pipes.
  *
  * @param pipe_num Pipe# number to close
-*/
+ */
 void nRF24L01_close_pipe(nRF24L01_t *instance, nRF24L01_address_t pipe_num);
 
 /** Set radio's RX address and TX address.
@@ -124,7 +124,7 @@ void nRF24L01_close_pipe(nRF24L01_t *instance, nRF24L01_address_t pipe_num);
  *
  * @param address Which address to set
  * @param *addr Buffer from which the address is stored in
-*/
+ */
 void nRF24L01_set_address(nRF24L01_t *instance, const nRF24L01_address_t address, const uint8_t *addr);
 
 /** Get address for selected pipe.
@@ -137,8 +137,8 @@ void nRF24L01_set_address(nRF24L01_t *instance, const nRF24L01_address_t address
  * in the<BR> *addr buffer.
  *
  * @return Numbers of bytes copied to addr
-*/
-uint8_t nRF24L01_get_address (nRF24L01_t *instance, uint8_t address, uint8_t *addr);
+ */
+uint8_t nRF24L01_get_address(nRF24L01_t *instance, uint8_t address, uint8_t *addr);
 
 /** Set auto acknowledge parameters.
  * Use this function to set retransmit and retransmit delay
@@ -146,7 +146,7 @@ uint8_t nRF24L01_get_address (nRF24L01_t *instance, uint8_t address, uint8_t *ad
  *
  * @param retr Number of retransmit, 0 equ retransmit OFF
  * @param delay Retransmit delay in µs. Must be a
-*/
+ */
 void nRF24L01_set_auto_retr(nRF24L01_t *instance, uint8_t retr, uint16_t delay);
 
 /** Set radio's address width.
@@ -154,14 +154,14 @@ void nRF24L01_set_auto_retr(nRF24L01_t *instance, uint8_t retr, uint16_t delay);
  * referes to both RX and TX.
  *
  * @param address_width Address with in bytes
-*/
+ */
 void nRF24L01_set_address_width(nRF24L01_t *instance, nRF24L01_address_width_t address_width);
 
 /** Gets the radio's address width.
  *
  * @return Address width
  */
-uint8_t nRF24L01_get_address_width (nRF24L01_t *instance);
+uint8_t nRF24L01_get_address_width(nRF24L01_t *instance);
 
 /** Set payload width for selected pipe.
  * Use this function to set the number of bytes expected
@@ -169,7 +169,7 @@ uint8_t nRF24L01_get_address_width (nRF24L01_t *instance);
  *
  * @param pipe_num Pipe number to set payload width for
  * @param pload_width number of bytes expected
-*/
+ */
 void nRF24L01_set_rx_payload_width(nRF24L01_t *instance, uint8_t pipe_num, uint8_t pload_width);
 
 /** Read current interrupt mode for selected interrupt source.
@@ -181,7 +181,7 @@ void nRF24L01_set_rx_payload_width(nRF24L01_t *instance, uint8_t pipe_num, uint8
  * @return Interrupt Mode
  * @retval FALSE Interrupt disabled
  * @retval TRUE Interrupt enabled
-*/
+ */
 bool nRF24L01_get_irq_mode(nRF24L01_t *instance, uint8_t int_source);
 
 /** Read all interrupt flags.
@@ -193,7 +193,7 @@ bool nRF24L01_get_irq_mode(nRF24L01_t *instance, uint8_t int_source);
  * @retval 0x10 Max Retransmit interrupt
  * @retval 0x20 TX Data sent interrupt
  * @retval 0x40 RX Data received interrupt
-*/
+ */
 uint8_t nRF24L01_get_irq_flags(nRF24L01_t *instance);
 
 /** Get pipe status.
@@ -205,7 +205,7 @@ uint8_t nRF24L01_get_irq_flags(nRF24L01_t *instance);
  * @retval 0x00 Pipe is closed, autoack disabled
  * @retval 0x01 Pipe is open, autoack disabled
  * @retval 0x03 Pipe is open, autoack enabled
-*/
+ */
 uint8_t nRF24L01_get_pipe_status(nRF24L01_t *instance, uint8_t pipe_num);
 
 /** Get auto retransmit parameters.
@@ -216,14 +216,14 @@ uint8_t nRF24L01_get_pipe_status(nRF24L01_t *instance, uint8_t pipe_num);
  *
  * @retval UpperNibble Retransmit Delay
  * @retval LowerNibble Retransmit Count
-*/
+ */
 uint8_t nRF24L01_get_auto_retr_status(nRF24L01_t *instance);
 
 /** Get packet lost counter
  * Use this function to get the packet(s) counter.
  *
  * @return packet lost counter
-*/
+ */
 uint8_t nRF24L01_get_packet_lost_ctr(nRF24L01_t *instance);
 
 /** Get RX payload width for selected pipe.
@@ -233,8 +233,9 @@ uint8_t nRF24L01_get_packet_lost_ctr(nRF24L01_t *instance);
  * @param pipe_num Pipe number to get payload width for
  *
  * @return Payload_Width in bytes
-*/
+ */
 uint8_t nRF24L01_get_rx_payload_width(nRF24L01_t *instance, uint8_t pipe_num);
+
 //@}
 
 /** @name Operation */
@@ -246,28 +247,28 @@ uint8_t nRF24L01_get_rx_payload_width(nRF24L01_t *instance, uint8_t pipe_num);
  * or PRX (primary RX).
  *
  * @param op_mode Operation mode
-*/
+ */
 void nRF24L01_set_operation_mode(nRF24L01_t *instance, nRF24L01_operation_mode_t op_mode);
 
 /** Set radio's power mode.
  * Use this function to power_up or power_down radio.
  *
  * @param pwr_mode POWER_UP or POWER_DOWN
-*/
+ */
 void nRF24L01_set_power_mode(nRF24L01_t *instance, nRF24L01_pwr_mode_t pwr_mode);
 
 /** Set radio's RF channel.
  * Use this function to select which RF channel to use.
  *
  * @param channel RF channel
-*/
+ */
 void nRF24L01_set_rf_channel(nRF24L01_t *instance, uint8_t channel);
 
 /** Set radio's TX output power.
  * Use this function set the radio's TX output power.
  *
  * @param power Radio's TX output power
-*/
+ */
 void nRF24L01_set_output_power(nRF24L01_t *instance, nRF24L01_output_power_t power);
 
 /** Set radio's on-air datarate.
@@ -275,7 +276,7 @@ void nRF24L01_set_output_power(nRF24L01_t *instance, nRF24L01_output_power_t pow
  * datarate.
  *
  * @param datarate On-air datarate
-*/
+ */
 void nRF24L01_set_datarate(nRF24L01_t *instance, nRF24L01_datarate_t datarate);
 
 
@@ -290,7 +291,7 @@ void nRF24L01_set_datarate(nRF24L01_t *instance, nRF24L01_datarate_t datarate);
  * @retval 0x01 FIFO empty
  * @retval 0x02 FIFO full
  *
-*/
+ */
 uint8_t nRF24L01_get_tx_fifo_status(nRF24L01_t *instance);
 
 /** Check for TX FIFO empty.
@@ -301,7 +302,7 @@ uint8_t nRF24L01_get_tx_fifo_status(nRF24L01_t *instance);
  * @retval FALSE TX FIFO NOT empty
  * @retval TRUE TX FIFO empty
  *
-*/
+ */
 bool nRF24L01_tx_fifo_empty(nRF24L01_t *instance);
 
 /** Check for TX FIFO full.
@@ -312,7 +313,7 @@ bool nRF24L01_tx_fifo_empty(nRF24L01_t *instance);
  * @retval FALSE TX FIFO NOT full
  * @retval TRUE TX FIFO full
  *
-*/
+ */
 bool nRF24L01_tx_fifo_full(nRF24L01_t *instance);
 
 /** Get radio's RX FIFO status.
@@ -324,7 +325,7 @@ bool nRF24L01_tx_fifo_full(nRF24L01_t *instance);
  * @retval 0x01 RX FIFO empty
  * @retval 0x02 RX FIFO full
  *
-*/
+ */
 uint8_t nRF24L01_get_rx_fifo_status(nRF24L01_t *instance);
 
 uint8_t nRF24L01_get_fifo_status(nRF24L01_t *instance);
@@ -339,7 +340,7 @@ uint8_t nRF24L01_get_fifo_status(nRF24L01_t *instance);
  * @retval FALSE RX FIFO NOT empty
  * @retval TRUE RX FIFO empty
  *
-*/
+ */
 bool nRF24L01_rx_fifo_empty(nRF24L01_t *instance);
 
 /** Check for RX FIFO full.
@@ -350,7 +351,7 @@ bool nRF24L01_rx_fifo_empty(nRF24L01_t *instance);
  * @retval FALSE RX FIFO NOT full
  * @retval TRUE RX FIFO full
  *
-*/
+ */
 bool nRF24L01_rx_fifo_full(nRF24L01_t *instance);
 
 /** Get radio's transmit attempts status.
@@ -358,7 +359,7 @@ bool nRF24L01_rx_fifo_full(nRF24L01_t *instance);
  * attempts and number of packet lost.
  *
  * @return Retransmit attempts counters
-*/
+ */
 uint8_t nRF24L01_get_transmit_attempts(nRF24L01_t *instance);
 
 /** Get the carrier detect flag.
@@ -369,7 +370,7 @@ uint8_t nRF24L01_get_transmit_attempts(nRF24L01_t *instance);
  * @return Carrier Detect
  * @retval FALSE Carrier NOT Detected
  * @retval TRUE Carrier Detected
-*/
+ */
 bool nRF24L01_get_carrier_detect(nRF24L01_t *instance);
 
 /* Data operation prototypes */
@@ -379,7 +380,7 @@ bool nRF24L01_get_carrier_detect(nRF24L01_t *instance);
  * was received on for current top level FIFO data packet.
  *
  * @return pipe number of current packet present
-*/
+ */
 uint8_t nRF24L01_get_rx_data_source(nRF24L01_t *instance);
 
 /** Read RX payload.
@@ -388,7 +389,7 @@ uint8_t nRF24L01_get_rx_data_source(nRF24L01_t *instance);
  *
  * @param  *rx_pload pointer to buffer in which RX payload are stored
  * @return pipe number (MSB byte) and packet length (LSB byte)
-*/
+ */
 uint16_t nRF24L01_read_rx_payload(nRF24L01_t *instance, uint8_t *rx_pload);
 
 /** Write TX payload to radio.
@@ -398,7 +399,7 @@ uint16_t nRF24L01_read_rx_payload(nRF24L01_t *instance, uint8_t *rx_pload);
  *
  * @param *tx_pload pointer to buffer in which TX payload are present
  * @param length number of bytes to write
-*/
+ */
 void nRF24L01_write_tx_payload(nRF24L01_t *instance, const uint8_t *tx_pload, uint8_t length);
 
 /** Write TX payload which do not require ACK. When transmitting
@@ -411,14 +412,14 @@ void nRF24L01_write_tx_payload(nRF24L01_t *instance, const uint8_t *tx_pload, ui
  *
  * @param *tx_pload pointer to buffer in which TX payload are present
  * @param length number of bytes to write
-*/
+ */
 void nRF24L01_write_tx_payload_noack(nRF24L01_t *instance, const uint8_t *tx_pload, uint8_t length);
 
 /** Reuse TX payload.
  * Use this function to set that the radio is using
  * the last transmitted payload for the next packet as well.
  *
-*/
+ */
 void nRF24L01_reuse_tx(nRF24L01_t *instance);
 
 /** Get status of reuse TX function.
@@ -428,21 +429,21 @@ void nRF24L01_reuse_tx(nRF24L01_t *instance);
  * @return Reuse TX payload mode
  * @retval FALSE Not activated
  * @retval TRUE Activated
-*/
+ */
 bool nRF24L01_get_reuse_tx_status(nRF24L01_t *instance);
 
 /** Flush RX FIFO.
  * Use this function to flush the radio's
  * RX FIFO.
  *
-*/
+ */
 void nRF24L01_flush_rx(nRF24L01_t *instance);
 
 /** Flush TX FIFO.
  * Use this function to flush the radio's
  * TX FIFO.
  *
-*/
+ */
 void nRF24L01_flush_tx(nRF24L01_t *instance);
 
 /** No Operation command.
@@ -450,8 +451,9 @@ void nRF24L01_flush_tx(nRF24L01_t *instance);
  * status register.
  *
  * @return Status register
-*/
+ */
 uint8_t nRF24L01_nop(nRF24L01_t *instance);
+
 //@}
 
 /** @name  Test */
@@ -463,7 +465,7 @@ uint8_t nRF24L01_nop(nRF24L01_t *instance);
  * or UNLOCK the radio's PLL.
  *
  * @param pll_lock PLL locked, TRUE or FALSE
-*/
+ */
 void nRF24L01_set_pll_mode(nRF24L01_t *instance, bool pll_lock);
 
 /** Set radio's LNA gain mode.
@@ -471,7 +473,7 @@ void nRF24L01_set_pll_mode(nRF24L01_t *instance, bool pll_lock);
  * current or LOW current mode for the radio.
  *
  * @param lna_gain LNA gain mode
-*/
+ */
 void nRF24L01_set_lna_gain(nRF24L01_t *instance, bool lna_gain);
 
 /** Enables continuous carrier transmit.
@@ -479,7 +481,7 @@ void nRF24L01_set_lna_gain(nRF24L01_t *instance, bool lna_gain);
  * continuous carrier transmission.
  * @param enable Enable continuous carrier
  */
-void nRF24L01_enable_continious_wave (nRF24L01_t *instance, bool enable);
+void nRF24L01_enable_continious_wave(nRF24L01_t *instance, bool enable);
 
 /* nRF24L01_l01 basic functions, used by all the other functions */
 
@@ -492,12 +494,12 @@ void nRF24L01_enable_continious_wave (nRF24L01_t *instance, bool enable);
  * @param value Databyte to write
  *
  * @return Databyte from radio.
-*/
+ */
 uint8_t nRF24L01_rw(nRF24L01_t *instance, uint8_t value);
 
-void nRF24L01_initialize (nRF24L01_t *instance, drv_spi_tf_t blockingTransfer, void *spiCtx, 
-  void (*setCS)(uint8_t val));
+void nRF24L01_initialize(nRF24L01_t *instance, drv_spi_tf_t blockingTransfer, void *spiCtx,
+                         void (*setCS)(uint8_t val));
 
-void nRF24L01_deinitialize (nRF24L01_t *instance );
+void nRF24L01_deinitialize(nRF24L01_t *instance);
 
 #endif // NRF24L01_H

@@ -39,7 +39,8 @@ typedef struct tag_RTM RT_MODEL;
 #ifndef DEFINED_TYPEDEF_FOR_states_estimate_t_
 #define DEFINED_TYPEDEF_FOR_states_estimate_t_
 
-typedef struct {
+typedef struct
+{
   real32_T x;
   real32_T y;
   real32_T z;
@@ -59,7 +60,8 @@ typedef struct {
 #ifndef DEFINED_TYPEDEF_FOR_FCS_control_t_
 #define DEFINED_TYPEDEF_FOR_FCS_control_t_
 
-typedef struct {
+typedef struct
+{
   real32_T yaw_cmd;
   real32_T roll_cmd;
   real32_T pitch_cmd;
@@ -71,8 +73,9 @@ typedef struct {
 #ifndef DEFINED_TYPEDEF_FOR_FCS_command_t_
 #define DEFINED_TYPEDEF_FOR_FCS_command_t_
 
-typedef struct {
-  uint8_T control_type;
+typedef struct
+{
+  uint8_T       control_type;
   FCS_control_t control_input;
 } FCS_command_t;
 
@@ -81,7 +84,8 @@ typedef struct {
 #ifndef DEFINED_TYPEDEF_FOR_sensor_bias_t_
 #define DEFINED_TYPEDEF_FOR_sensor_bias_t_
 
-typedef struct {
+typedef struct
+{
   real32_T gyro_bias[3];
   real32_T accel_bias[3];
   real32_T quat_bias[4];
@@ -93,7 +97,8 @@ typedef struct {
 #ifndef DEFINED_TYPEDEF_FOR_sensor_data_t_
 #define DEFINED_TYPEDEF_FOR_sensor_data_t_
 
-typedef struct {
+typedef struct
+{
   real32_T gyro_data_SI[3];
   real32_T accel_data_SI[3];
   real32_T quat_data[4];
@@ -103,22 +108,24 @@ typedef struct {
 #endif
 
 /* Block signals and states (default storage) for system '<Root>' */
-typedef struct {
-  real32_T FIR_IMUaccel_states[15];    /* '<S14>/FIR_IMUaccel' */
-  real32_T FIR_IMUgyro_states[10];     /* '<S14>/FIR_IMUgyro' */
-  real32_T IIR_IMUgyro_r_states[5];    /* '<S14>/IIR_IMUgyro_r' */
-  real32_T pressureFilter_IIR_states[3];/* '<S14>/pressureFilter_IIR' */
-  real32_T Delay_DSTATE[2];            /* '<S7>/Delay' */
-  real32_T DiscreteTimeIntegrator_DSTATE[2];/* '<S7>/Discrete-Time Integrator' */
-  real32_T altitude_delay0_DSTATE;     /* '<S12>/altitude_delay0' */
-  real32_T UD_DSTATE;                  /* '<S15>/UD' */
-  real32_T altitude_delay_DSTATE;      /* '<S12>/altitude_delay' */
-  int32_T FIR_IMUaccel_circBuf;        /* '<S14>/FIR_IMUaccel' */
-  int32_T FIR_IMUgyro_circBuf;         /* '<S14>/FIR_IMUgyro' */
+typedef struct
+{
+  real32_T FIR_IMUaccel_states[15];          /* '<S14>/FIR_IMUaccel' */
+  real32_T FIR_IMUgyro_states[10];           /* '<S14>/FIR_IMUgyro' */
+  real32_T IIR_IMUgyro_r_states[5];          /* '<S14>/IIR_IMUgyro_r' */
+  real32_T pressureFilter_IIR_states[3];     /* '<S14>/pressureFilter_IIR' */
+  real32_T Delay_DSTATE[2];                  /* '<S7>/Delay' */
+  real32_T DiscreteTimeIntegrator_DSTATE[2]; /* '<S7>/Discrete-Time Integrator' */
+  real32_T altitude_delay0_DSTATE;           /* '<S12>/altitude_delay0' */
+  real32_T UD_DSTATE;                        /* '<S15>/UD' */
+  real32_T altitude_delay_DSTATE;            /* '<S12>/altitude_delay' */
+  int32_T  FIR_IMUaccel_circBuf;             /* '<S14>/FIR_IMUaccel' */
+  int32_T  FIR_IMUgyro_circBuf;              /* '<S14>/FIR_IMUgyro' */
 } DW;
 
 /* Constant parameters (default storage) */
-typedef struct {
+typedef struct
+{
   /* Computed Parameter: FIR_IMUaccel_Coefficients
    * Referenced by: '<S14>/FIR_IMUaccel'
    */
@@ -141,15 +148,16 @@ typedef struct {
 } ConstP;
 
 /* Real-time Model Data Structure */
-struct tag_RTM {
+struct tag_RTM
+{
   DW *dwork;
 };
 
 /* External data declarations for dependent source files */
-extern const states_estimate_t flightController_rtZstates_estimate_t;/* states_estimate_t ground */
-extern const FCS_command_t flightController_rtZFCS_command;/* FCS_command_t ground */
-extern const sensor_bias_t flightController_rtZsensor_bias;/* sensor_bias_t ground */
-extern const sensor_data_t flightController_rtZsensor_data;/* sensor_data_t ground */
+extern const states_estimate_t flightController_rtZstates_estimate_t; /* states_estimate_t ground */
+extern const FCS_command_t     flightController_rtZFCS_command;       /* FCS_command_t ground */
+extern const sensor_bias_t     flightController_rtZsensor_bias;       /* sensor_bias_t ground */
+extern const sensor_data_t     flightController_rtZsensor_data;       /* sensor_data_t ground */
 
 /* Constant parameters (default storage) */
 extern const ConstP rtConstP;
@@ -189,11 +197,11 @@ extern real32_T PID_yaw_P;             /* Variable: PID_yaw_P
 
 /* Model entry point functions */
 extern void flightController_initialize(RT_MODEL *const rtM, FCS_command_t
-  *rtU_Commands, sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors,
-  states_estimate_t *rtY_State_Estim, uint16_T rtY_Throttle[4]);
+                                        *rtU_Commands, sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors,
+                                        states_estimate_t *rtY_State_Estim, uint16_T rtY_Throttle[4]);
 extern void flightController_step(RT_MODEL *const rtM, FCS_command_t
-  *rtU_Commands, sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors,
-  states_estimate_t *rtY_State_Estim, uint16_T rtY_Throttle[4]);
+                                  *rtU_Commands, sensor_bias_t *rtU_Bias, sensor_data_t *rtU_Sensors,
+                                  states_estimate_t *rtY_State_Estim, uint16_T rtY_Throttle[4]);
 
 /*-
  * These blocks were eliminated from the model due to optimizations:

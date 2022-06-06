@@ -6,8 +6,8 @@
 #include "fifo.h"
 #include "radio_common.h"
 
-#define RF_RX_BUFFER_SIZE 512
-#define RF_TX_BUFFER_SIZE 2048
+#define RF_RX_BUFFER_SIZE    512
+#define RF_TX_BUFFER_SIZE    2048
 
 static uint8_t rx_buffer[RF_RX_BUFFER_SIZE];
 static uint8_t tx_buffer[RF_TX_BUFFER_SIZE];
@@ -32,21 +32,24 @@ static inline void rf_isr(void)
 
 static void rf_event_callback(frf_event_t event)
 {
-  switch(event) {
-    case FRF_EVENT_TX_FAILED:
-      LOG_DEBUG("RF TX FAILED\r\n");
-      break;
-    case FRF_EVENT_TX_SUCCESS:
-      LOG_DEBUG("RF TX SUCCESS\r\n");
-      break;
-    case FRF_EVENT_RX:
-    {
-      uint8_t temp[FRF_PACKET_SIZE];
-      frf_getPacket(&radio, temp);
-      fifo_push(&rx_fifo, temp, FRF_PACKET_SIZE);
-      LOG_DEBUG("RF RX Event\r\n");
-      break;
-    }
+  switch (event)
+  {
+  case FRF_EVENT_TX_FAILED:
+    LOG_DEBUG("RF TX FAILED\r\n");
+    break;
+
+  case FRF_EVENT_TX_SUCCESS:
+    LOG_DEBUG("RF TX SUCCESS\r\n");
+    break;
+
+  case FRF_EVENT_RX:
+  {
+    uint8_t temp[FRF_PACKET_SIZE];
+    frf_getPacket(&radio, temp);
+    fifo_push(&rx_fifo, temp, FRF_PACKET_SIZE);
+    LOG_DEBUG("RF RX Event\r\n");
+    break;
+  }
   }
 }
 
@@ -91,13 +94,14 @@ void radio_init(void)
   FLN_ERR_CHECK(bsp_rf_init(rf_isr));
 
   /* RF Module Init */
-  frf_config_t config = {
-    .transferFunc = rf_spi_transfer,
-    .role = FRF_DEVICE_ROLE_RX,
-    .spiCtx = NULL,
-    .setCS = bsp_rf_cs_set,
-    .setCE = bsp_rf_ce_set,
-    .delay = rtos_delay_ms,
+  frf_config_t config =
+  {
+    .transferFunc  = rf_spi_transfer,
+    .role          = FRF_DEVICE_ROLE_RX,
+    .spiCtx        = NULL,
+    .setCS         = bsp_rf_cs_set,
+    .setCE         = bsp_rf_ce_set,
+    .delay         = rtos_delay_ms,
     .eventCallback = rf_event_callback
   };
 

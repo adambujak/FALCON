@@ -21,10 +21,10 @@
 
 #include <stddef.h>
 #include <stdio.h>              /* This ert_main.c example uses printf/fflush */
-#include "flightController.h"          /* Model's header file */
+#include "flightController.h"   /* Model's header file */
 #include "rtwtypes.h"
 
-static RT_MODEL rtM_;
+static RT_MODEL        rtM_;
 static RT_MODEL *const rtMPtr = &rtM_; /* Real-time model */
 static DW rtDW;                        /* Observable states */
 
@@ -55,6 +55,7 @@ static uint16_T rtY_Throttle[4];
  * real-time model and returns from rt_OneStep.
  */
 void rt_OneStep(RT_MODEL *const rtM);
+
 void rt_OneStep(RT_MODEL *const rtM)
 {
   static boolean_T OverrunFlag = false;
@@ -105,7 +106,7 @@ int_T main(int_T argc, const char *argv[])
 
   /* Initialize model */
   flightController_initialize(rtM, &rtU_Commands, &rtU_Bias, &rtU_Sensors,
-    &rtY_State_Estim, rtY_Throttle);
+                              &rtY_State_Estim, rtY_Throttle);
 
   /* Attach rt_OneStep to a timer or interrupt service routine with
    * period 0.01 seconds (the model's base sample time) here.  The
@@ -125,7 +126,6 @@ int_T main(int_T argc, const char *argv[])
    * is selected, therefore the following code does not need to execute.
    */
 #if 0
-
   /* Disable rt_OneStep() here */
 #endif
 

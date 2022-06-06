@@ -8,39 +8,39 @@
 
 static exti_cb_t rf_irq_cb = NULL;
 
-#define PIN_WRITE(pin, port, value)                       \
-  if ((value) == 0) {                                     \
-    LL_GPIO_ResetOutputPin((port), (pin));                \
-  }                                                       \
-  else {                                                  \
-    LL_GPIO_SetOutputPin((port), (pin));                  \
-  }                                                       \
+#define PIN_WRITE(pin, port, value)        \
+  if ((value) == 0) {                      \
+    LL_GPIO_ResetOutputPin((port), (pin)); \
+  }                                        \
+  else {                                   \
+    LL_GPIO_SetOutputPin((port), (pin));   \
+  }                                        \
 
 static void rf_ce_pin_init(void)
 {
   RF_GPIO_CE_CLK_EN();
-  LL_GPIO_InitTypeDef gpio_config = {0};
+  LL_GPIO_InitTypeDef gpio_config = { 0 };
 
   LL_GPIO_ResetOutputPin(RF_CE_GPIO_PORT, RF_CE_PIN);
-  gpio_config.Pin = RF_CE_PIN;
-  gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
-  gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+  gpio_config.Pin        = RF_CE_PIN;
+  gpio_config.Mode       = LL_GPIO_MODE_OUTPUT;
+  gpio_config.Speed      = LL_GPIO_SPEED_FREQ_HIGH;
   gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  gpio_config.Pull = LL_GPIO_PULL_UP;
+  gpio_config.Pull       = LL_GPIO_PULL_UP;
   LL_GPIO_Init(RF_CE_GPIO_PORT, &gpio_config);
 }
 
 static void rf_cs_pin_init(void)
 {
   RF_GPIO_SS_CLK_EN();
-  LL_GPIO_InitTypeDef gpio_config = {0};
+  LL_GPIO_InitTypeDef gpio_config = { 0 };
 
   LL_GPIO_ResetOutputPin(RF_SS_GPIO_PORT, RF_SPI_SS_PIN);
-  gpio_config.Pin = RF_SPI_SS_PIN;
-  gpio_config.Mode = LL_GPIO_MODE_OUTPUT;
-  gpio_config.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+  gpio_config.Pin        = RF_SPI_SS_PIN;
+  gpio_config.Mode       = LL_GPIO_MODE_OUTPUT;
+  gpio_config.Speed      = LL_GPIO_SPEED_FREQ_HIGH;
   gpio_config.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  gpio_config.Pull = LL_GPIO_PULL_UP;
+  gpio_config.Pull       = LL_GPIO_PULL_UP;
   LL_GPIO_Init(RF_SS_GPIO_PORT, &gpio_config);
 }
 
@@ -48,14 +48,14 @@ static void rf_irq_pin_init(void)
 {
   RF_GPIO_IRQ_CLK_EN();
 
-  LL_EXTI_InitTypeDef exti_config = {0};
+  LL_EXTI_InitTypeDef exti_config = { 0 };
 
   LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTB, LL_SYSCFG_EXTI_LINE10);
 
-  exti_config.Line_0_31 = RF_IRQ_EXTI_LINE;
+  exti_config.Line_0_31   = RF_IRQ_EXTI_LINE;
   exti_config.LineCommand = ENABLE;
-  exti_config.Mode = LL_EXTI_MODE_IT;
-  exti_config.Trigger = LL_EXTI_TRIGGER_FALLING;
+  exti_config.Mode        = LL_EXTI_MODE_IT;
+  exti_config.Trigger     = LL_EXTI_TRIGGER_FALLING;
   LL_EXTI_Init(&exti_config);
 
   LL_GPIO_SetPinPull(RF_IRQ_GPIO_PORT, RF_IRQ_PIN, LL_GPIO_PULL_DOWN);

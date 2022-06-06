@@ -62,9 +62,7 @@ void flash_write_start(uint8_t sector)
 
 void flash_write_end(uint8_t sector)
 {
-  (void) sector;
+  (void)sector;
   wait_for_busy();
   write_lock();
 }
-
-

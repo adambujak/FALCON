@@ -22,12 +22,13 @@
 #include "flightController.h"
 
 /* Constant parameters (default storage) */
-const ConstP rtConstP = {
+const ConstP rtConstP =
+{
   /* Computed Parameter: FIR_IMUaccel_Coefficients
    * Referenced by: '<S14>/FIR_IMUaccel'
    */
-  { 0.0264077242F, 0.140531361F, 0.33306092F, 0.33306092F, 0.140531361F,
-    0.0264077242F },
+  {    0.0264077242F,   0.140531361F,  0.33306092F,  0.33306092F,   0.140531361F,
+       0.0264077242F },
 
   /* Computed Parameter: FIR_IMUgyro_Coefficients
    * Referenced by: '<S14>/FIR_IMUgyro'
@@ -38,13 +39,13 @@ const ConstP rtConstP = {
   /* Computed Parameter: IIR_IMUgyro_r_NumCoef
    * Referenced by: '<S14>/IIR_IMUgyro_r'
    */
-  { 0.282124132F, 1.27253926F, 2.42084408F, 2.42084408F, 1.27253926F,
-    0.282124132F },
+  {     0.282124132F,    1.27253926F,  2.42084408F,  2.42084408F,    1.27253926F,
+        0.282124132F },
 
   /* Computed Parameter: IIR_IMUgyro_r_DenCoef
    * Referenced by: '<S14>/IIR_IMUgyro_r'
    */
-  { 1.0F, 2.22871494F, 2.52446198F, 1.57725322F, 0.54102242F, 0.0795623958F }
+  {             1.0F,    2.22871494F,  2.52446198F,  1.57725322F,    0.54102242F,0.0795623958F }
 };
 
 /*

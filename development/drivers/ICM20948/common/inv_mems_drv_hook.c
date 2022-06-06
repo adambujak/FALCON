@@ -12,44 +12,44 @@
 
 int inv_serial_interface_write_hook(uint16_t reg, uint32_t length, uint8_t *data)
 {
-    int result;
+  int result;
 
-    result = i2c_imu_write(ACCEL_GYRO_CHIP_ADDR, (uint8_t)reg, data, (uint16_t)length);
+  result = i2c_imu_write(ACCEL_GYRO_CHIP_ADDR, (uint8_t)reg, data, (uint16_t)length);
 
-    return result;
+  return result;
 }
 
 int inv_serial_interface_read_hook(uint16_t reg, uint32_t length, uint8_t *data)
 {
-	int status;
+  int status;
 
-    status = i2c_imu_read(ACCEL_GYRO_CHIP_ADDR, (uint8_t)reg, data, (uint16_t)length);
+  status = i2c_imu_read(ACCEL_GYRO_CHIP_ADDR, (uint8_t)reg, data, (uint16_t)length);
 
-	return status;
+  return status;
 }
 
 /**
  *  @brief  Sleep function.
-**/
+ **/
 void inv_sleep(unsigned long mSecs)
 {
-	rtos_delay_ms(mSecs);
+  rtos_delay_ms(mSecs);
 }
 
 void inv_sleep_100us(unsigned long nHowMany100MicroSecondsToSleep)
 {
-    (void)nHowMany100MicroSecondsToSleep;
-    inv_sleep(1);
+  (void)nHowMany100MicroSecondsToSleep;
+  inv_sleep(1);
 }
 
 /**
  *  @brief  get system's internal tick count.
  *          Used for time reference.
  *  @return current tick count.
-**/
+ **/
 long inv_get_tick_count(void)
 {
-    TickType_t xTicks = xTaskGetTickCount();
-    return (long)xTicks;
-}
+  TickType_t xTicks = xTaskGetTickCount();
 
+  return (long)xTicks;
+}

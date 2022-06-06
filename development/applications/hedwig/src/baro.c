@@ -1,10 +1,10 @@
 /******************************************************************************
- * @file     baro.c
- * @brief    Barometer Source File (MPL3115A2)
- * @version  1.0
- * @date     2020-11-11
- * @author   Devin Bell, Adam Bujak
- ******************************************************************************/
+* @file     baro.c
+* @brief    Barometer Source File (MPL3115A2)
+* @version  1.0
+* @date     2020-11-11
+* @author   Devin Bell, Adam Bujak
+******************************************************************************/
 #include "baro.h"
 
 #include <stdbool.h>
@@ -12,12 +12,13 @@
 #include "i2c.h"
 #include "MPL3115A2.h"
 
-#define CHIP_ID 0xC4
+#define CHIP_ID    0xC4
 
-typedef struct {
-  bool is_active;
+typedef struct
+{
+  bool         is_active;
   OverSample_t sample_setting;
-  float start_alt;
+  float        start_alt;
 } state_t;
 
 static state_t state;
@@ -92,10 +93,9 @@ int baro_calibrate(void)
 
   float test_data = 0;
 
-  for(int i=0; i<samples; i++)
-  {
+  for (int i = 0; i < samples; i++) {
     float temp = MPL3115A2_ReadAltitude();
-    LOG_DEBUG("Reading %d: %7.5f\r\n",i,temp);
+    LOG_DEBUG("Reading %d: %7.5f\r\n", i, temp);
 
     if (temp != 0) {
       test_data += temp;
@@ -106,7 +106,7 @@ int baro_calibrate(void)
     rtos_delay_ms(20);
   }
 
-  state.start_alt = test_data/samples;
+  state.start_alt = test_data / samples;
 
   MPL3115A2_OutputSampleRate(state.sample_setting);
 
@@ -118,6 +118,7 @@ int baro_calibrate(void)
 unsigned char MPL3115A2_ReadByte(uint8_t reg)
 {
   unsigned char data;
+
   i2c_baro_read(MPL3115A2_ADDRESS, reg, &data, 1U);
   return data;
 }
@@ -132,7 +133,7 @@ void MPL3115A2_WriteByte(uint8_t reg, uint8_t value)
   i2c_baro_write(MPL3115A2_ADDRESS, reg, &value, 1);
 }
 
-void MPL3115A2_WriteByteArray(uint8_t reg, uint8_t* buffer, uint8_t length)
+void MPL3115A2_WriteByteArray(uint8_t reg, uint8_t *buffer, uint8_t length)
 {
   i2c_baro_write(MPL3115A2_ADDRESS, reg, buffer, length);
 }

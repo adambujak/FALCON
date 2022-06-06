@@ -6,13 +6,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define max(a,b) (a)>(b)?a:b
+#define max(a, b)    (a) > (b)?a:b
 
 static SPI_HandleTypeDef spi_instance;
 
 int hw_init(void)
 {
-  spi_instance.Instance               = RF_SPI;
+  spi_instance.Instance = RF_SPI;
   spi_instance.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   spi_instance.Init.Direction         = SPI_DIRECTION_2LINES;
   spi_instance.Init.CLKPhase          = SPI_PHASE_1EDGE;
@@ -22,8 +22,8 @@ int hw_init(void)
   spi_instance.Init.TIMode            = SPI_TIMODE_DISABLE;
   spi_instance.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
   spi_instance.Init.CRCPolynomial     = 7;
-  spi_instance.Init.NSS               = SPI_NSS_SOFT;
-  spi_instance.Init.Mode              = SPI_MODE_MASTER;
+  spi_instance.Init.NSS  = SPI_NSS_SOFT;
+  spi_instance.Init.Mode = SPI_MODE_MASTER;
 
   GPIO_InitTypeDef gpio_config;
 
@@ -32,8 +32,7 @@ int hw_init(void)
   RF_SPI_MOSI_GPIO_CLK_ENABLE();
   RF_SPI_CLK_ENABLE();
 
-  if(HAL_SPI_Init(&spi_instance) != HAL_OK)
-  {
+  if (HAL_SPI_Init(&spi_instance) != HAL_OK) {
     /* Initialization Error */
     return FLN_ERR;
   }
@@ -45,11 +44,11 @@ int hw_init(void)
   gpio_config.Alternate = RF_SPI_SCK_AF;
   HAL_GPIO_Init(RF_SPI_SCK_GPIO_PORT, &gpio_config);
 
-  gpio_config.Pin = RF_SPI_MISO_PIN;
+  gpio_config.Pin       = RF_SPI_MISO_PIN;
   gpio_config.Alternate = RF_SPI_MISO_AF;
   HAL_GPIO_Init(RF_SPI_MISO_GPIO_PORT, &gpio_config);
 
-  gpio_config.Pin = RF_SPI_MOSI_PIN;
+  gpio_config.Pin       = RF_SPI_MOSI_PIN;
   gpio_config.Alternate = RF_SPI_MOSI_AF;
   HAL_GPIO_Init(RF_SPI_MOSI_GPIO_PORT, &gpio_config);
 
@@ -58,7 +57,7 @@ int hw_init(void)
 
 void bsp_rf_spi_deinit(void)
 {
-  if(spi_instance.Instance == RF_SPI) {
+  if (spi_instance.Instance == RF_SPI) {
     RF_SPI_FORCE_RESET();
     RF_SPI_RELEASE_RESET();
 
@@ -84,7 +83,7 @@ int spi_transfer(uint8_t *tx_buffer, uint16_t tx_size, uint8_t *rx_buffer, uint1
     hal_custom_transmit(&spi_instance, tx_buffer, tx_size, 5000);
   }
   else {
-    HAL_SPI_TransmitReceive(&spi_instance, tx_buffer, rx_buffer, max(rx_size,tx_size), 5000);
+    HAL_SPI_TransmitReceive(&spi_instance, tx_buffer, rx_buffer, max(rx_size, tx_size), 5000);
   }
   return FLN_OK;
 }

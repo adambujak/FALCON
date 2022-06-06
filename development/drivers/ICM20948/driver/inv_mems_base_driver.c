@@ -27,9 +27,9 @@
 #include "invn/common/invn_types.h"
 
 struct base_driver_t base_state;
-static uint8_t sAllowLpEn = 1;
+static uint8_t       sAllowLpEn = 1;
 #if defined MEMS_SECONDARY_DEVICE
-static uint8_t s_compass_available = 0;
+static uint8_t s_compass_available  = 0;
 static uint8_t s_pressure_available = 0;
 #endif
 
@@ -37,11 +37,13 @@ void inv_mems_prevent_lpen_control(void)
 {
   sAllowLpEn = 0;
 }
+
 void inv_mems_allow_lpen_control(void)
 {
   sAllowLpEn = 1;
   inv_set_chip_power_state(CHIP_LP_ENABLE, 1);
 }
+
 static uint8_t inv_mems_get_lpen_control(void)
 {
   return sAllowLpEn;
@@ -53,14 +55,15 @@ static uint8_t inv_mems_get_lpen_control(void)
  *              loop
  *   @param[in] Function - CHIP_AWAKE, CHIP_LP_ENABLE
  *   @param[in] On/Off - The functions are enabled if previously disabled and
-                disabled if previously enabled based on the value of On/Off.
+ *              disabled if previously enabled based on the value of On/Off.
  ******************************************************************************
  */
 inv_error_t inv_set_chip_power_state(unsigned char func, unsigned char on_off)
 {
   inv_error_t status = 0;
 
-  switch (func) {
+  switch (func)
+  {
   case CHIP_AWAKE:
     if (on_off) {
       if ((base_state.wake_state & CHIP_AWAKE) == 0) {  // undo sleep_en
@@ -105,7 +108,6 @@ inv_error_t inv_set_chip_power_state(unsigned char func, unsigned char on_off)
 
   default:
     break;
-
   }  // end switch
 
   return status;
@@ -126,7 +128,7 @@ uint8_t inv_get_chip_power_state()
 inv_error_t inv_wakeup_mems()
 {
   unsigned char data;
-  inv_error_t result = INV_SUCCESS;
+  inv_error_t   result = INV_SUCCESS;
 
   result = inv_set_chip_power_state(CHIP_AWAKE, 1);
 
@@ -135,7 +137,7 @@ inv_error_t inv_wakeup_mems()
     inv_write_single_mems_reg(REG_USER_CTRL, base_state.user_ctrl);
   }
 
-  data = 0x47;  // FIXME, should set up according to sensor/engines enabled.
+  data    = 0x47; // FIXME, should set up according to sensor/engines enabled.
   result |= inv_write_mems_reg(REG_PWR_MGMT_2, 1, &data);
 
   if (base_state.firmware_loaded == 1) {
@@ -151,10 +153,10 @@ inv_error_t inv_wakeup_mems()
  */
 inv_error_t inv_sleep_mems()
 {
-  inv_error_t result;
+  inv_error_t   result;
   unsigned char data;
 
-  data = 0x7F;
+  data   = 0x7F;
   result = inv_write_mems_reg(REG_PWR_MGMT_2, 1, &data);
 
   result |= inv_set_chip_power_state(CHIP_AWAKE, 0);
@@ -164,8 +166,8 @@ inv_error_t inv_sleep_mems()
 
 inv_error_t inv_set_dmp_address()
 {
-  inv_error_t result;
-  unsigned char dmp_cfg[2] = {0};
+  inv_error_t    result;
+  unsigned char  dmp_cfg[2] = { 0 };
   unsigned short config;
 
   // Write DMP Start address
@@ -186,13 +188,13 @@ inv_error_t inv_set_dmp_address()
 
 inv_error_t inv_set_secondary()
 {
-  inv_error_t r = 0;
+  inv_error_t    r         = 0;
   static uint8_t lIsInited = 0;
 
   if (lIsInited == 0) {
-    r = inv_write_single_mems_reg(REG_I2C_MST_CTRL, BIT_I2C_MST_P_NSR);
-    r |= inv_write_single_mems_reg(REG_I2C_MST_ODR_CONFIG, MIN_MST_ODR_CONFIG);
-    r |= inv_write_single_mems_reg(REG_I2C_MST_DELAY_CTRL, BIT_DELAY_ES_SHADOW);
+    r         = inv_write_single_mems_reg(REG_I2C_MST_CTRL, BIT_I2C_MST_P_NSR);
+    r        |= inv_write_single_mems_reg(REG_I2C_MST_ODR_CONFIG, MIN_MST_ODR_CONFIG);
+    r        |= inv_write_single_mems_reg(REG_I2C_MST_DELAY_CTRL, BIT_DELAY_ES_SHADOW);
     lIsInited = 1;
   }
   return r;
@@ -203,7 +205,7 @@ inv_error_t inv_set_secondary()
  */
 inv_error_t inv_initialize_lower_driver(enum MEMS_SERIAL_INTERFACE type, const unsigned char *dmp_image_sram)
 {
-  inv_error_t result = 0;
+  inv_error_t          result = 0;
   static unsigned char data;
 
   /* Reset the chip */
@@ -212,8 +214,8 @@ inv_error_t inv_initialize_lower_driver(enum MEMS_SERIAL_INTERFACE type, const u
 
   // Set varialbes to default values
   memset(&base_state, 0, sizeof(base_state));
-  base_state.pwr_mgmt_1 = BIT_CLK_PLL;
-  base_state.pwr_mgmt_2 = BIT_PWR_ACCEL_STBY | BIT_PWR_GYRO_STBY | BIT_PWR_PRESSURE_STBY;
+  base_state.pwr_mgmt_1       = BIT_CLK_PLL;
+  base_state.pwr_mgmt_2       = BIT_PWR_ACCEL_STBY | BIT_PWR_GYRO_STBY | BIT_PWR_PRESSURE_STBY;
   base_state.serial_interface = type;
   result |= inv_read_mems_reg(REG_USER_CTRL, 1, &base_state.user_ctrl);
 
@@ -252,14 +254,14 @@ inv_error_t inv_initialize_lower_driver(enum MEMS_SERIAL_INTERFACE type, const u
   result |= dmp_set_FIFO_watermark(800);
 
   // Enable Interrupts.
-  data = 0x2;
-  result |= inv_write_mems_reg(REG_INT_ENABLE, 1, &data);  // Enable DMP Interrupt
-  data = 0x1;
-  result |= inv_write_mems_reg(REG_INT_ENABLE_2, 1, &data);  // Enable FIFO Overflow Interrupt
+  data    = 0x2;
+  result |= inv_write_mems_reg(REG_INT_ENABLE, 1, &data);   // Enable DMP Interrupt
+  data    = 0x1;
+  result |= inv_write_mems_reg(REG_INT_ENABLE_2, 1, &data); // Enable FIFO Overflow Interrupt
 
 #if (MEMS_CHIP == HW_ICM20648)
   // TRACKING : To have accelerometers datas and the interrupt without gyro enables.
-  data = 0XE4;
+  data    = 0XE4;
   result |= inv_write_mems_reg(REG_SINGLE_FIFO_PRIORITY_SEL, 1, &data);
 
   // Disable HW temp fix
@@ -270,7 +272,7 @@ inv_error_t inv_initialize_lower_driver(enum MEMS_SERIAL_INTERFACE type, const u
 
   // Setup MEMs properties.
   base_state.accel_averaging = 1;       // Change this value if higher sensor sample avergaing is required.
-  base_state.gyro_averaging = 1;        // Change this value if higher sensor sample avergaing is required.
+  base_state.gyro_averaging  = 1;       // Change this value if higher sensor sample avergaing is required.
   inv_set_gyro_divider(FIFO_DIVIDER);   // Initial sampling rate 1125Hz/10+1 = 102Hz.
   inv_set_accel_divider(FIFO_DIVIDER);  // Initial sampling rate 1125Hz/10+1 = 102Hz.
   result |= inv_set_gyro_fullscale(MPU_FS_2000dps);
@@ -389,6 +391,7 @@ inv_error_t inv_set_slave_pressure_id(void)
   inv_mems_allow_lpen_control();
   return result;
 }
+
 #endif
 
 inv_error_t inv_set_gyro_divider(unsigned char div)
@@ -416,7 +419,7 @@ unsigned short inv_get_secondary_divider()
 
 inv_error_t inv_set_accel_divider(short div)
 {
-  unsigned char data[2] = {0};
+  unsigned char data[2] = { 0 };
 
   base_state.accel_div = div;
   data[0] = (unsigned char)(div >> 8);
@@ -435,14 +438,14 @@ extern unsigned long inv_androidSensor_enabled(unsigned char androidSensor);
 unsigned char inv_is_gyro_enabled(void);
 
 /*
- You can obtain the real odr in Milliseconds, Micro Seconds or Ticks.
- Use the enum values: ODR_IN_Ms, ODR_IN_Us or ODR_IN_Ticks,
- when calling inv_get_odr_in_units().
-*/
+ * You can obtain the real odr in Milliseconds, Micro Seconds or Ticks.
+ * Use the enum values: ODR_IN_Ms, ODR_IN_Us or ODR_IN_Ticks,
+ * when calling inv_get_odr_in_units().
+ */
 uint32_t inv_get_odr_in_units(unsigned short odrInDivider, unsigned char odr_units)
 {
-  uint32_t odr = 0;
-  uint32_t Us = 0;
+  uint32_t      odr = 0;
+  uint32_t      Us = 0;
   unsigned char PLL = 0, gyro_is_on = 0;
 
   if (base_state.timebase_correction_pll == 0)
@@ -453,8 +456,7 @@ uint32_t inv_get_odr_in_units(unsigned short odrInDivider, unsigned char odr_uni
   // check if Gyro is currently enabled
   gyro_is_on = inv_is_gyro_enabled();
 
-  if (PLL < 0x80)  // correction positive
-  {
+  if (PLL < 0x80) { // correction positive
     // In Micro Seconds
     Us = (odrInDivider * 1000000L / 1125L) * (1270L) / (1270L + (gyro_is_on ? PLL : 0));
   }
@@ -465,7 +467,8 @@ uint32_t inv_get_odr_in_units(unsigned short odrInDivider, unsigned char odr_uni
     Us = (odrInDivider * 1000000L / 1125L) * (1270L) / (1270L - (gyro_is_on ? PLL : 0));
   }
 
-  switch (odr_units) {
+  switch (odr_units)
+  {
   // ret in Milliseconds
   case ODR_IN_Ms:
     odr = Us / 1000;
@@ -494,17 +497,17 @@ uint32_t inv_get_odr_in_units(unsigned short odrInDivider, unsigned char odr_uni
  */
 inv_error_t inv_set_gyro_sf(unsigned char div, int gyro_level)
 {
-  long gyro_sf;
+  long        gyro_sf;
   static long lLastGyroSf = 0;
-  inv_error_t result = 0;
+  inv_error_t result      = 0;
 
   if (base_state.timebase_correction_pll == 0)
     result |= inv_read_mems_reg(REG_TIMEBASE_CORRECTION_PLL, 1, &base_state.timebase_correction_pll);
 
   {
-    unsigned long long const MagicConstant = 264446880937391LL;
+    unsigned long long const MagicConstant      = 264446880937391LL;
     unsigned long long const MagicConstantScale = 100000LL;
-    unsigned long long ResultLL;
+    unsigned long long       ResultLL;
 
     if (base_state.timebase_correction_pll & 0x80) {
       ResultLL = (MagicConstant * (long long)(1UL << gyro_level) * (1 + div)
@@ -514,11 +517,12 @@ inv_error_t inv_set_gyro_sf(unsigned char div, int gyro_level)
       ResultLL = (MagicConstant * (long long)(1UL << gyro_level) * (1 + div)
                   / (1270 + base_state.timebase_correction_pll) / MagicConstantScale);
     }
+
     /*
-        In above deprecated FP version, worst case arguments can produce a result that overflows a signed long.
-        Here, for such cases, we emulate the FP behavior of setting the result to the maximum positive value, as
-        the compiler's conversion of a u64 to an s32 is simple truncation of the u64's high half, sadly....
-    */
+     *  In above deprecated FP version, worst case arguments can produce a result that overflows a signed long.
+     *  Here, for such cases, we emulate the FP behavior of setting the result to the maximum positive value, as
+     *  the compiler's conversion of a u64 to an s32 is simple truncation of the u64's high half, sadly....
+     */
     if (ResultLL > 0x7FFFFFFF) {
       gyro_sf = 0x7FFFFFFF;
     }
@@ -528,7 +532,7 @@ inv_error_t inv_set_gyro_sf(unsigned char div, int gyro_level)
   }
 
   if (gyro_sf != lLastGyroSf) {
-    result |= dmp_set_gyro_sf(gyro_sf);
+    result     |= dmp_set_gyro_sf(gyro_sf);
     lLastGyroSf = gyro_sf;
   }
 
@@ -538,8 +542,9 @@ inv_error_t inv_set_gyro_sf(unsigned char div, int gyro_level)
 inv_error_t inv_set_gyro_fullscale(int level)
 {
   inv_error_t result;
+
   base_state.gyro_fullscale = level;
-  result = inv_set_mems_gyro_fullscale(level);
+  result  = inv_set_mems_gyro_fullscale(level);
   result |= inv_set_gyro_sf(base_state.gyro_div, level);
 
   return result;
@@ -552,52 +557,61 @@ uint8_t inv_get_gyro_fullscale()
 
 inv_error_t inv_set_mems_gyro_fullscale(int level)
 {
-  inv_error_t result = 0;
+  inv_error_t   result = 0;
   unsigned char gyro_config_1_reg;
   unsigned char gyro_config_2_reg;
   unsigned char dec3_cfg;
 
   if (level >= NUM_MPU_GFS) return INV_ERROR_INVALID_PARAMETER;
 
-  result |= inv_read_mems_reg(REG_GYRO_CONFIG_1, 1, &gyro_config_1_reg);
+  result            |= inv_read_mems_reg(REG_GYRO_CONFIG_1, 1, &gyro_config_1_reg);
   gyro_config_1_reg &= 0xC0;
   gyro_config_1_reg |= (level << 1) | 1;  // fchoice = 1, filter = 0.
-  result |= inv_write_mems_reg(REG_GYRO_CONFIG_1, 1, &gyro_config_1_reg);
+  result            |= inv_write_mems_reg(REG_GYRO_CONFIG_1, 1, &gyro_config_1_reg);
 
-  result |= inv_read_mems_reg(REG_GYRO_CONFIG_2, 1, &gyro_config_2_reg);
+  result            |= inv_read_mems_reg(REG_GYRO_CONFIG_2, 1, &gyro_config_2_reg);
   gyro_config_2_reg &= 0xF8;
 
-  switch (base_state.gyro_averaging) {
+  switch (base_state.gyro_averaging)
+  {
   case 1:
     dec3_cfg = 0;
     break;
+
   case 2:
     dec3_cfg = 1;
     break;
+
   case 4:
     dec3_cfg = 2;
     break;
+
   case 8:
     dec3_cfg = 3;
     break;
+
   case 16:
     dec3_cfg = 4;
     break;
+
   case 32:
     dec3_cfg = 5;
     break;
+
   case 64:
     dec3_cfg = 6;
     break;
+
   case 128:
     dec3_cfg = 7;
     break;
+
   default:
     dec3_cfg = 0;
     break;
   }
   gyro_config_2_reg |= dec3_cfg;
-  result |= inv_write_single_mems_reg(REG_GYRO_CONFIG_2, gyro_config_2_reg);
+  result            |= inv_write_single_mems_reg(REG_GYRO_CONFIG_2, gyro_config_2_reg);
 
   return result;
 }
@@ -605,8 +619,9 @@ inv_error_t inv_set_mems_gyro_fullscale(int level)
 inv_error_t inv_set_accel_fullscale(int level)
 {
   inv_error_t result;
+
   base_state.accel_fullscale = level;
-  result = inv_set_mems_accel_fullscale(level);
+  result  = inv_set_mems_accel_fullscale(level);
   result |= dmp_set_accel_fsr(2 << level);
   result |= dmp_set_accel_scale2(2 << level);
 
@@ -620,14 +635,14 @@ uint8_t inv_get_accel_fullscale()
 
 inv_error_t inv_set_mems_accel_fullscale(int level)
 {
-  inv_error_t result = 0;
+  inv_error_t   result = 0;
   unsigned char accel_config_1_reg;
   unsigned char accel_config_2_reg;
   unsigned char dec3_cfg;
 
   if (level >= NUM_MPU_AFS) return INV_ERROR_INVALID_PARAMETER;
 
-  result |= inv_read_mems_reg(REG_ACCEL_CONFIG, 1, &accel_config_1_reg);
+  result             |= inv_read_mems_reg(REG_ACCEL_CONFIG, 1, &accel_config_1_reg);
   accel_config_1_reg &= 0xC0;
 
   if (base_state.accel_averaging > 1) {
@@ -639,32 +654,38 @@ inv_error_t inv_set_mems_accel_fullscale(int level)
 
   result |= inv_write_single_mems_reg(REG_ACCEL_CONFIG, accel_config_1_reg);
 
-  switch (base_state.accel_averaging) {
+  switch (base_state.accel_averaging)
+  {
   case 1:
     dec3_cfg = 0;
     break;
+
   case 4:
     dec3_cfg = 0;
     break;
+
   case 8:
     dec3_cfg = 1;
     break;
+
   case 16:
     dec3_cfg = 2;
     break;
+
   case 32:
     dec3_cfg = 3;
     break;
+
   default:
     dec3_cfg = 0;
     break;
   }
 
-  result |= inv_read_mems_reg(REG_ACCEL_CONFIG_2, 1, &accel_config_2_reg);
+  result             |= inv_read_mems_reg(REG_ACCEL_CONFIG_2, 1, &accel_config_2_reg);
   accel_config_2_reg &= 0xFC;
 
   accel_config_2_reg |= dec3_cfg;
-  result |= inv_write_single_mems_reg(REG_ACCEL_CONFIG_2, accel_config_2_reg);
+  result             |= inv_write_single_mems_reg(REG_ACCEL_CONFIG_2, accel_config_2_reg);
 
   return result;
 }
@@ -723,11 +744,12 @@ inv_error_t inv_set_int1_assertion(int enable)
   unsigned char reg_int_enable;
 
   // INT1 held until interrupt status is cleared
+
   /*
-  result         |= inv_read_mems_reg(REG_INT_PIN_CFG, 1, &reg_pin_cfg);
-  reg_pin_cfg    |= BIT_INT_LATCH_EN ;    // Latchen : BIT5 held the IT until register is read
-  result         |= inv_write_single_mems_reg(REG_INT_PIN_CFG, reg_pin_cfg);
-  */
+   * result         |= inv_read_mems_reg(REG_INT_PIN_CFG, 1, &reg_pin_cfg);
+   * reg_pin_cfg    |= BIT_INT_LATCH_EN ;    // Latchen : BIT5 held the IT until register is read
+   * result         |= inv_write_single_mems_reg(REG_INT_PIN_CFG, reg_pin_cfg);
+   */
 
   // Set int1 enable
   result |= inv_read_mems_reg(REG_INT_ENABLE, 1, &reg_int_enable);
@@ -752,7 +774,7 @@ inv_error_t inv_set_int1_assertion(int enable)
 inv_error_t inv_accel_read_hw_reg_data(short accel_hw_reg_data[3])
 {
   inv_error_t result = 0;
-  uint8_t accel_data[6];  // Store 6 bytes for that
+  uint8_t     accel_data[6]; // Store 6 bytes for that
 
   // read mem regs
   result = inv_read_mems_reg(REG_ACCEL_XOUT_H_SH, 6, (unsigned char *)&accel_data);
@@ -770,7 +792,7 @@ inv_error_t inv_accel_read_hw_reg_data(short accel_hw_reg_data[3])
  */
 inv_error_t inv_reset_dmp_odr_counters(void)
 {
-  inv_error_t ret = 0;
+  inv_error_t   ret = 0;
   unsigned char reg;
 
   reg = base_state.user_ctrl;
@@ -784,4 +806,5 @@ inv_error_t inv_reset_dmp_odr_counters(void)
 
   return ret;
 }
+
 #endif

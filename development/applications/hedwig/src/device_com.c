@@ -13,25 +13,26 @@
 
 #include <string.h>
 
-#define min(a, b)          (((a) > (b)) ? b : a)
+#define min(a, b)             (((a) > (b)) ? b : a)
 
-#define RTOS_TIMEOUT_TICKS 25
-#define PACKET_BUFFER_SIZE 256
-#define RX_BUFFER_SIZE     128
-#define RF_TX_INTERVAL_MS  300
-#define STATUS_INTERVAL_MS 800
+#define RTOS_TIMEOUT_TICKS    25
+#define PACKET_BUFFER_SIZE    256
+#define RX_BUFFER_SIZE        128
+#define RF_TX_INTERVAL_MS     300
+#define STATUS_INTERVAL_MS    800
 
-typedef struct {
-  fifo_t packet_fifo;
-  uint8_t packet_buffer[PACKET_BUFFER_SIZE];
-  uint32_t last_tx_time;
+typedef struct
+{
+  fifo_t        packet_fifo;
+  uint8_t       packet_buffer[PACKET_BUFFER_SIZE];
+  uint32_t      last_tx_time;
   TimerHandle_t watchdog_timer;
 } radio_manager_t;
 
 static uint32_t last_status_process_time;
 
 static radio_manager_t radio_manager;
-static uint8_t decode_buffer[RX_BUFFER_SIZE];
+static uint8_t         decode_buffer[RX_BUFFER_SIZE];
 
 static fs_decoder_t decoder;
 static ff_encoder_t encoder;
@@ -50,6 +51,7 @@ static void radio_watchdog_timeout(TimerHandle_t xTimer)
 static void radio_watchdog_pet(void)
 {
   BaseType_t reset_status = xTimerReset(radio_manager.watchdog_timer, 0);
+
   if (reset_status != pdPASS) {
     LOG_DEBUG("radio reset timer reset failed\r\n");
   }
@@ -57,48 +59,55 @@ static void radio_watchdog_pet(void)
 
 static void decoder_callback(uint8_t *data, fp_type_t packetType)
 {
-  switch (packetType) {
-    case FPT_FLIGHT_CONTROL_COMMAND: {
-      fpc_flight_control_t controlInput = {};
-      fpc_flight_control_decode(data, &controlInput);
-      flight_control_set_command_data(&controlInput);
-      LOG_DEBUG("CONTROL INPUT: %f, %f, %f, %f\r\n",
-                controlInput.fcsControlCmd.yaw,
-                controlInput.fcsControlCmd.pitch,
-                controlInput.fcsControlCmd.roll,
-                controlInput.fcsControlCmd.alt);
-    } break;
-    case FPT_ATTITUDE_PARAMS_COMMAND:
-    case FPT_YAW_PARAMS_COMMAND: 
-    case FPT_ALT_PARAMS_COMMAND: {
-      LOG_DEBUG("PARAMETER UPDATE COMMAND\r\n");
-      flight_control_set_controller_params(data, packetType);
-    } break;
-    case FPT_FCS_MODE_COMMAND: {
-      fpc_fcs_mode_t fcsMode = {};
-      fpc_fcs_mode_decode(data, &fcsMode);
-      flight_control_set_mode(fcsMode.mode);
-      LOG_DEBUG("MODE COMMAND: %d\r\n", fcsMode.mode);
-    } break;
-    case FPT_TEST_QUERY: {
-      LOG_DEBUG("TEST QUERY RECEIVED\r\n");
-      fpr_test_t response = {cnt++};
-      uint8_t buffer[MAX_PACKET_SIZE];
-      uint8_t length = fpr_test_encode(buffer, &response);
-      device_com_send_packet(buffer, length);
-    } break;
-    case FPT_CALIBRATE_COMMAND: {
-      LOG_DEBUG("CALIBRATION COMMAND\r\n");
-      flight_control_calibrate_sensors();
-    }
-    default:
-      break;
+  switch (packetType)
+  {
+  case FPT_FLIGHT_CONTROL_COMMAND: {
+    fpc_flight_control_t controlInput = {};
+    fpc_flight_control_decode(data, &controlInput);
+    flight_control_set_command_data(&controlInput);
+    LOG_DEBUG("CONTROL INPUT: %f, %f, %f, %f\r\n",
+              controlInput.fcsControlCmd.yaw,
+              controlInput.fcsControlCmd.pitch,
+              controlInput.fcsControlCmd.roll,
+              controlInput.fcsControlCmd.alt);
+  } break;
+
+  case FPT_ATTITUDE_PARAMS_COMMAND:
+  case FPT_YAW_PARAMS_COMMAND:
+  case FPT_ALT_PARAMS_COMMAND: {
+    LOG_DEBUG("PARAMETER UPDATE COMMAND\r\n");
+    flight_control_set_controller_params(data, packetType);
+  } break;
+
+  case FPT_FCS_MODE_COMMAND: {
+    fpc_fcs_mode_t fcsMode = {};
+    fpc_fcs_mode_decode(data, &fcsMode);
+    flight_control_set_mode(fcsMode.mode);
+    LOG_DEBUG("MODE COMMAND: %d\r\n", fcsMode.mode);
+  } break;
+
+  case FPT_TEST_QUERY: {
+    LOG_DEBUG("TEST QUERY RECEIVED\r\n");
+    fpr_test_t response = { cnt++ };
+    uint8_t    buffer[MAX_PACKET_SIZE];
+    uint8_t    length = fpr_test_encode(buffer, &response);
+    device_com_send_packet(buffer, length);
+  } break;
+
+  case FPT_CALIBRATE_COMMAND: {
+    LOG_DEBUG("CALIBRATION COMMAND\r\n");
+    flight_control_calibrate_sensors();
+  }
+
+  default:
+    break;
   }
 }
 
 static void status_process(void)
 {
   uint32_t now = system_time_get();
+
   if (system_time_cmp_ms(last_status_process_time, now) < STATUS_INTERVAL_MS) {
     return;
   }
@@ -108,6 +117,7 @@ static void status_process(void)
   uint8_t packet_buffer[MAX_PACKET_SIZE];
 
   fe_flight_mode_t flight_mode;
+
   if (flight_control_get_mode(&flight_mode) != FLN_OK) {
     LOG_ERROR("error getting flight mode\r\n");
     return;
@@ -123,7 +133,8 @@ static void status_process(void)
 
 static void decoder_init()
 {
-  fs_decoder_config_t decoder_config = {.callback = decoder_callback};
+  fs_decoder_config_t decoder_config = { .callback = decoder_callback };
+
   fs_decoder_init(&decoder, &decoder_config);
 }
 
@@ -135,6 +146,7 @@ static void encoder_init(void)
 static void rf_tx(void)
 {
   uint32_t now = system_time_get();
+
   if (system_time_cmp_ms(radio_manager.last_tx_time, now) < RF_TX_INTERVAL_MS) {
     return;
   }
@@ -174,7 +186,7 @@ static void rf_tx(void)
   }
 
   uint8_t frame_length = ff_encoder_append_footer(&encoder);
-  uint8_t mod = frame_length % FRF_PACKET_SIZE;
+  uint8_t mod          = frame_length % FRF_PACKET_SIZE;
 
   if (mod != 0) {
     memset(frame_buffer + frame_length, 0, FRF_PACKET_SIZE - mod);
@@ -224,28 +236,29 @@ void device_com_setup(void)
 {
   radio_init();
   radio_manager.watchdog_timer = xTimerCreate("radio watchdog",
-                                 RADIO_WATCHDOG_PERIOD,
-                                 pdTRUE,
-                                 0,
-                                 radio_watchdog_timeout);
+                                              RADIO_WATCHDOG_PERIOD,
+                                              pdTRUE,
+                                              0,
+                                              radio_watchdog_timeout);
 
   decoder_init();
   encoder_init();
   radio_manager.last_tx_time = 0;
-  last_status_process_time = 0;
+  last_status_process_time   = 0;
   ASSERT(fifo_init(&radio_manager.packet_fifo, radio_manager.packet_buffer, PACKET_BUFFER_SIZE) == 0);
 }
 
 void device_com_start(void)
 {
   BaseType_t timer_status = xTimerStart(radio_manager.watchdog_timer, 0);
+
   RTOS_ERR_CHECK(timer_status);
   BaseType_t task_status = xTaskCreate(device_com_task,
-                           "device_com_task",
-                           DEVICE_COM_STACK_SIZE,
-                           NULL,
-                           device_com_TASK_PRIORITY,
-                           NULL);
+                                       "device_com_task",
+                                       DEVICE_COM_STACK_SIZE,
+                                       NULL,
+                                       device_com_TASK_PRIORITY,
+                                       NULL);
 
   RTOS_ERR_CHECK(task_status);
 }
