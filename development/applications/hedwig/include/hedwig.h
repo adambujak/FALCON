@@ -23,6 +23,16 @@
 #define LED_STACK_SIZE               128
 #define FLIGHT_CONTROL_STACK_SIZE    512
 
+#define DISABLE_IRQ()        \
+  uint32_t prim;             \
+  prim = __get_PRIMASK();    \
+  __disable_irq();           \
+
+#define ENABLE_IRQ()         \
+  if (!prim) {               \
+    __enable_irq();          \
+  }                          \
+
 #define RTOS_ERR_CHECK(x)   \
   do {                      \
     int retval = (x);       \

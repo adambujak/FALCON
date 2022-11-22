@@ -3,10 +3,12 @@
 
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_ll_bus.h"
+#include "stm32f4xx_ll_gpio.h"
 #include "stm32f4xx_ll_pwr.h"
 #include "stm32f4xx_ll_rcc.h"
 #include "stm32f4xx_ll_system.h"
 #include "stm32f4xx_ll_tim.h"
+#include "stm32f4xx_ll_usart.h"
 #include "stm32f4xx_ll_utils.h"
 
 #define SYSCLK_FREQ                           96000000
@@ -30,21 +32,21 @@
 
 /* UART */
 #define UART                                  USART2
-#define UART_CLK_ENABLE()                     __HAL_RCC_USART2_CLK_ENABLE();
-#define UART_RX_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOA_CLK_ENABLE()
-#define UART_TX_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOA_CLK_ENABLE()
+#define UART_CLK_EN()                         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2)
+#define GPIO_UART_CLK_EN()                    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA)
 
 #define UART_FORCE_RESET()                    __HAL_RCC_USART2_FORCE_RESET()
 #define UART_RELEASE_RESET()                  __HAL_RCC_USART2_RELEASE_RESET()
 
+#define UART_GPIO_PORT                        GPIOA
+#define UART_GPIO_AF                          GPIO_AF7_USART2
 #define UART_TX_PIN                           GPIO_PIN_2
-#define UART_TX_GPIO_PORT                     GPIOA
-#define UART_TX_AF                            GPIO_AF7_USART2
 #define UART_RX_PIN                           GPIO_PIN_3
-#define UART_RX_GPIO_PORT                     GPIOA
-#define UART_RX_AF                            GPIO_AF7_USART2
 
 #define UART_BAUDRATE                         1000000
+
+#define UART_IRQn                             USART2_IRQn
+#define UART_IRQHandler                       USART2_IRQHandler
 
 /* Sensors */
 #define FLN_SENSORS_I2C                       I2C1

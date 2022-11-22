@@ -4,6 +4,8 @@
 #include <stdio.h>
 
 void logger_write(char *string);
+void logger_process(void);
+void logger_init(void);
 
 #define LOG_MAX_STRING_LEN 256
 
@@ -17,9 +19,16 @@ void logger_write(char *string);
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 #endif // LOG_LEVEL
 
-#ifndef LOG_MODE_BLOCKING
-#define LOG_MODE_BLOCKING 1
-#endif // LOG_MODE_BLOCKING
+#define LOG_MODE_ASYNC    1
+#define LOG_MODE_BLOCKING 2
+
+#ifndef LOG_MODE
+#define LOG_MODE LOG_MODE_BLOCKING
+#endif // LOG_MODE
+
+#ifndef LOG_BUFFER_SIZE
+#define LOG_BUFFER_SIZE 2048
+#endif // LOG_MODE
 
 #define LOGX(fmt, ...)                   \
   do {                                   \

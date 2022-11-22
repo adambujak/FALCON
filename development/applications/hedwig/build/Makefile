@@ -77,8 +77,10 @@ HAL_SOURCES = \
 	$(HAL_ROOT)/Src/stm32f4xx_hal_spi.c \
 	$(HAL_ROOT)/Src/stm32f4xx_hal_uart.c \
 	$(HAL_ROOT)/Src/stm32f4xx_hal_i2c.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_gpio.c \
 	$(HAL_ROOT)/Src/stm32f4xx_ll_tim.c \
 	$(HAL_ROOT)/Src/stm32f4xx_ll_rcc.c \
+	$(HAL_ROOT)/Src/stm32f4xx_ll_usart.c \
 	$(HAL_ROOT)/Src/stm32f4xx_ll_utils.c \
 
 # C sources
@@ -164,6 +166,7 @@ endif
 C_DEFS +=  \
 	-DHEDWIG \
 	-DLOG_LEVEL=LOG_LEVEL_DEBUG \
+	-DLOG_MODE=LOG_MODE_ASYNC \
 	-DUSE_HAL_DRIVER \
 	-DUSE_FULL_LL_DRIVER \
 	-D$(CHIPSET_DEF) \
