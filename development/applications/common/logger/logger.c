@@ -33,7 +33,9 @@ void logger_process(void)
 {
 #if (LOG_MODE == LOG_MODE_ASYNC)
   uint32_t length = fifo_available(&logger_fifo);
-  FLN_ERR_CHECK(fifo_pop(&logger_fifo, logger_buffer, length));
+  if (fifo_pop(&logger_fifo, logger_buffer, length) != length) {
+    error_handler();
+  }
   uart_write((uint8_t *)logger_buffer, (uint32_t)length);
 #endif // LOG_MODE_ASYNC
 }

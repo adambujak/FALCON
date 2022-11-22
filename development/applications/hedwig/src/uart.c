@@ -90,8 +90,6 @@ int uart_init(void)
   hw_init();
   FLN_ERR_CHECK(fifo_init(&rx_fifo, rx_buffer, UART_RX_BUFFER_SIZE));
   FLN_ERR_CHECK(fifo_init(&tx_fifo, tx_buffer, UART_TX_BUFFER_SIZE));
-  uint8_t mychar = (uint8_t)'a';
-  uart_write(&mychar, 1);
   return FLN_OK;
 }
 
