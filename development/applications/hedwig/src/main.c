@@ -150,6 +150,7 @@ void error_handler(void)
 {
   motors_emergency_stop();
   LOG_ERROR("Error Handler\r\n");
+  logger_process();
   vTaskSuspendAll();
   while (1);
 }
