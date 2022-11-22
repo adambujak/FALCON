@@ -1,4 +1,7 @@
 #include "logger.h"
+
+#include "falcon_common.h"
+#include "fifo.h"
 #include "uart.h"
 
 #include <string.h>

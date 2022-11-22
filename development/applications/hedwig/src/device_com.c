@@ -210,6 +210,7 @@ static void device_com_task(void *pvParameters)
   while (1) {
     status_process();
     rf_process();
+    logger_process();
     rtos_delay_ms(1);
   }
 }
