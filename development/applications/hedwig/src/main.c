@@ -93,6 +93,7 @@ static void board_bringup(void)
   sysclk_init();
 
   uart_init();
+  logger_init();
   i2c_init();
   system_time_init();
   persistent_data_init();
