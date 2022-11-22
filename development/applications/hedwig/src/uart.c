@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
 
 static uint8_t rx_buffer[UART_RX_BUFFER_SIZE];
 static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
