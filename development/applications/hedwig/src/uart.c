@@ -2,7 +2,7 @@
 
 #include "falcon_common.h"
 #include "board.h"
-#include <fifo.h>
+#include "fifo.h"
 
 #include <stdint.h>
 #include <stdbool.h>
