@@ -62,27 +62,27 @@
 #endif
 
 /* RF */
-#define RF_SPI                        SPI2
-#define RF_SPI_CLK_ENABLE()           __HAL_RCC_SPI2_CLK_ENABLE()
-#define RF_SPI_SCK_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
-#define RF_SPI_MISO_GPIO_CLK_ENABLE() __HAL_RCC_GPIOB_CLK_ENABLE()
-#define RF_SPI_MOSI_GPIO_CLK_ENABLE() __HAL_RCC_GPIOB_CLK_ENABLE()
+#define RF_SPI                        SPI1
+#define RF_SPI_CLK_ENABLE()           __HAL_RCC_SPI1_CLK_ENABLE()
+#define RF_SPI_SCK_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOA_CLK_ENABLE()
+#define RF_SPI_MISO_GPIO_CLK_ENABLE() __HAL_RCC_GPIOA_CLK_ENABLE()
+#define RF_SPI_MOSI_GPIO_CLK_ENABLE() __HAL_RCC_GPIOA_CLK_ENABLE()
 #define RF_GPIO_CLK_ENABLE()          __HAL_RCC_GPIOB_CLK_ENABLE(); \
                                       __HAL_RCC_GPIOC_CLK_ENABLE()
 #define RF_IRQ_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
 
-#define RF_SPI_FORCE_RESET()          __HAL_RCC_SPI2_FORCE_RESET()
-#define RF_SPI_RELEASE_RESET()        __HAL_RCC_SPI2_RELEASE_RESET()
+#define RF_SPI_FORCE_RESET()          __HAL_RCC_SPI1_FORCE_RESET()
+#define RF_SPI_RELEASE_RESET()        __HAL_RCC_SPI1_RELEASE_RESET()
 
-#define RF_SPI_SCK_PIN                GPIO_PIN_13
-#define RF_SPI_SCK_GPIO_PORT          GPIOB
-#define RF_SPI_SCK_AF                 GPIO_AF5_SPI2
-#define RF_SPI_MISO_PIN               GPIO_PIN_14
-#define RF_SPI_MISO_GPIO_PORT         GPIOB
-#define RF_SPI_MISO_AF                GPIO_AF5_SPI2
-#define RF_SPI_MOSI_PIN               GPIO_PIN_15
-#define RF_SPI_MOSI_GPIO_PORT         GPIOB
-#define RF_SPI_MOSI_AF                GPIO_AF5_SPI2
+#define RF_SPI_SCK_PIN                GPIO_PIN_5
+#define RF_SPI_SCK_GPIO_PORT          GPIOA
+#define RF_SPI_SCK_AF                 GPIO_AF5_SPI1
+#define RF_SPI_MISO_PIN               GPIO_PIN_6
+#define RF_SPI_MISO_GPIO_PORT         GPIOA
+#define RF_SPI_MISO_AF                GPIO_AF5_SPI1
+#define RF_SPI_MOSI_PIN               GPIO_PIN_7
+#define RF_SPI_MOSI_GPIO_PORT         GPIOA
+#define RF_SPI_MOSI_AF                GPIO_AF5_SPI1
 
 #define RF_IRQ_PIN                    LL_GPIO_PIN_10
 #define RF_IRQ_GPIO_PORT              GPIOB

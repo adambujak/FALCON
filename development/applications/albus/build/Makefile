@@ -1,6 +1,6 @@
 TARGET = ALBUS
 BUILD_CONFIG ?= DEBUG
-BOARD_VERSION ?= DISCO
+BOARD_VERSION ?= NUCLEO
 
 # Build path
 BUILD_DIR = _build
@@ -95,11 +95,7 @@ C_INCLUDES += \
 	-I$(FREERTOS_PORTABLE) \
 
 
-ifeq ($(BOARD_VERSION), DISCO)
 STARTUP_FILE = startup_stm32f412zx.s
-else
-STARTUP_FILE = startup_stm32f412rx.s
-endif
 # ASM sources
 ASM_SOURCES += $(STARTUP_FILE)
 
