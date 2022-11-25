@@ -9,10 +9,6 @@
 
 rotationMatrix_t DCM = DCM_INITIALIZE;
 
-static rotationMatrix_t DCMnwu2ned = { .m = { { 1,  0,  0 },
-                                              { 0, -1,  0 },
-                                              { 0,  0, -1 } } };
-
 static quaternion_t qnwu2ned = { .w = 0, .x = 1, .y = 0, .z = 0 };
 static quaternion_t qnwu2nedINV;
 
@@ -22,7 +18,6 @@ static float gravity_bof[XYZ];
 // quaternion of sensor frame relative to earth frame
 quaternion_t q = QUATERNION_INITIALIZE;
 static quaternion_t qINV;
-static quaternionProducts_t qP = QUATERNION_PRODUCTS_INITIALIZE;
 
 attitudeEulerAngles_t attitude = EULER_INITIALIZE;
 
@@ -42,7 +37,7 @@ static void QuaternionComputeProducts(quaternion_t *quat, quaternionProducts_t *
   quatProd->zz = quat->z * quat->z;
 }
 
-static void dcm_rotation(float *v, rotationMatrix_t *rotationMatrix)
+void dcm_rotation(float *v, rotationMatrix_t *rotationMatrix)
 {
   float tmp[XYZ] = { v[X], v[Y], v[Z] };
 
@@ -142,14 +137,14 @@ static void quaternion_inverse(quaternion_t *quat, quaternion_t *output)
   output->z = -tmp.z / denom;
 }
 
-static void vector_subtraction(float *v1, float *v2, float *output)
+void vector_subtraction(float *v1, float *v2, float *output)
 {
   output[X] = v1[X] - v2[X];
   output[Y] = v1[Y] - v2[Y];
   output[Z] = v1[Z] - v2[Z];
 }
 
-static void vector_addition(float *v1, float *v2, float *output)
+void vector_addition(float *v1, float *v2, float *output)
 {
   output[X] = v1[X] + v2[X];
   output[Y] = v1[Y] + v2[Y];

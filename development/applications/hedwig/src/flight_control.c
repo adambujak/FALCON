@@ -1,16 +1,18 @@
 #include "flight_control.h"
 
+#include "device_com.h"
 #include "falcon_common.h"
-#include "motors.h"
 #include "falcon_packet.h"
 #include "fp_encode.h"
 #include "fp_decode.h"
+#include "motors.h"
+#include "persistent_data.h"
 #include "sensors.h"
-#include "device_com.h"
-#include <stdbool.h>
 
 #include "flightController.h"
 #include "rtwtypes.h"
+
+#include <stdbool.h>
 
 #define FC_PERIOD_TICKS       MS_TO_TICKS(10)
 #define RTOS_TIMEOUT_TICKS    MS_TO_TICKS(5)
@@ -298,14 +300,19 @@ static bool load_controller_params(void)
 static void send_params_back(void)
 {
   uint8_t buffer[MAX_PACKET_SIZE];
-  uint8_t length = fpc_attitude_params_encode(buffer, &att_control_params);
+  uint8_t length;
 
+  fpc_attitude_params_t *att_params = (fpc_attitude_params_t *) &att_control_params;
+  fpc_yaw_params_t      *yaw_params = (fpc_yaw_params_t *) &yaw_control_params;
+  fpc_alt_params_t      *alt_params = (fpc_alt_params_t *) &alt_control_params;
+
+  length = fpc_attitude_params_encode(buffer, att_params);
   device_com_send_packet(buffer, length);
 
-  length = fpc_yaw_params_encode(buffer, &yaw_control_params);
+  length = fpc_yaw_params_encode(buffer, yaw_params);
   device_com_send_packet(buffer, length);
 
-  length = fpc_alt_params_encode(buffer, &alt_control_params);
+  length = fpc_alt_params_encode(buffer, alt_params);
   device_com_send_packet(buffer, length);
 }
 

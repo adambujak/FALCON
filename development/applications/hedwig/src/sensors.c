@@ -69,13 +69,6 @@ void sensors_calibrate(void)
   calibration_required = true;
 }
 
-static void quat2ypr(float quat[4], float *RPY)
-{
-  RPY[0] = atan2(2.0 * (quat[3] * quat[2] + quat[0] * quat[1]), 1.0 - 2.0 * (quat[1] * quat[1] + quat[2] * quat[2]));
-  RPY[1] = asin(2.0 * (quat[2] * quat[0] - quat[3] * quat[1]));
-  RPY[2] = atan2(2.0 * (quat[3] * quat[0] + quat[1] * quat[2]), -1.0 + 2.0 * (quat[0] * quat[0] + quat[1] * quat[1]));
-}
-
 static void sensors_task(void *pvParameters)
 {
   LOG_DEBUG("SENSORS TASK STARTED\r\n");
@@ -100,7 +93,6 @@ static void sensors_task(void *pvParameters)
   BaseType_t sensor_notification;
 
   uint32_t baro_skip_count = 1;
-  uint32_t old_time;
 
   while (1) {
     /* Wait to be notified of an interrupt. */
@@ -124,8 +116,6 @@ static void sensors_task(void *pvParameters)
       quat_data[2] = q.y;
       quat_data[3] = q.z;
 
-
-      // LOG_INFO("%u\r\n", system_time_cmp_us(old_time, system_time_get()));
       LOG_INFO("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
                attitude.roll,
                attitude.pitch,
@@ -139,7 +129,6 @@ static void sensors_task(void *pvParameters)
                alt_data);
 
       flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
-      old_time = system_time_get();
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");
