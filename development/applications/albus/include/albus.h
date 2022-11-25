@@ -11,6 +11,10 @@
 
 #include <stdint.h>
 
+#define SYS_TICK_FREQ      1000
+#define MS_TO_TICKS(MS)    (MS)
+#define TICKS_TO_MS(ticks) (ticks)
+
 #define DISABLE_IRQ()        \
   uint32_t prim;             \
   prim = __get_PRIMASK();    \

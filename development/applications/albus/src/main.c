@@ -31,7 +31,7 @@ void delay_ms(uint32_t ms)
 void rtos_delay_ms(uint32_t ms)
 {
   if (os_started) {
-    vTaskDelay(ms);
+    vTaskDelay(MS_TO_TICKS(ms));
   }
   else {
     delay_ms(ms);
