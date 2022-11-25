@@ -1,26 +1,26 @@
 /******************************************************************************
- * @file     frf.c
- * @brief    Falcon RF Library Source File
- * @version  1.0
- * @date     2020-06-07
- * @author   Adam Bujak
- ******************************************************************************/
+* @file     frf.c
+* @brief    Falcon RF Library Source File
+* @version  1.0
+* @date     2020-06-07
+* @author   Adam Bujak
+******************************************************************************/
 
 #include "frf.h"
 
 #include <string.h>
 
-#define FRF_DEFAULT_SIZE_PACKET          32
-#define FRF_NB_BITS_FOR_ERROR_RATE_CALC  100000
-#define FRF_NB_BYTES_FOR_ERROR_RATE_CALC 12500
-#define FRF_ADDR_WIDTH                   NRF24L01_AW_5BYTES
+#define FRF_DEFAULT_SIZE_PACKET             32
+#define FRF_NB_BITS_FOR_ERROR_RATE_CALC     100000
+#define FRF_NB_BYTES_FOR_ERROR_RATE_CALC    12500
+#define FRF_ADDR_WIDTH                      NRF24L01_AW_5BYTES
 
-#define FRF_ENABLE()                     (RFCKEN = 1);
-#define FRF_IRQ_ENABLE()                 (RF = 1);
-#define FRF_IRQ_DISABLE()                (RF = 0);
+#define FRF_ENABLE()                        (RFCKEN = 1);
+#define FRF_IRQ_ENABLE()                    (RF = 1);
+#define FRF_IRQ_DISABLE()                   (RF = 0);
 
-#define CE_LOW()                         (instance->setCE(0))
-#define CE_HIGH()                        (instance->setCE(1))
+#define CE_LOW()                            (instance->setCE(0))
+#define CE_HIGH()                           (instance->setCE(1))
 
 static uint8_t rx_buffer[FRF_PACKET_SIZE];
 
@@ -204,5 +204,3 @@ uint8_t frf_getStatus(frf_t *instance)
 {
   return nRF24L01_nop(&instance->rfInstance);
 }
-
-

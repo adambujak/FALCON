@@ -6,8 +6,8 @@
 
 void error_handler(void);
 
-#define FLN_OK  0
-#define FLN_ERR -1
+#define FLN_OK     0
+#define FLN_ERR    -1
 
 #define FLN_ERR_CHECK(x)    \
   do {                      \
@@ -17,11 +17,11 @@ void error_handler(void);
     }                       \
   } while (0)
 
-#define ASSERT(val)         \
-  do {                      \
-    if(!(val)) {            \
-      error_handler();      \
-    }                       \
+#define ASSERT(val)    \
+  do {                 \
+    if (!(val)) {      \
+      error_handler(); \
+    }                  \
   } while (0)
 
 #ifdef ALBUS

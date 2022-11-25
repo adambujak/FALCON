@@ -66,5 +66,3 @@ void flash_write_end(uint8_t sector)
   wait_for_busy();
   write_lock();
 }
-
-

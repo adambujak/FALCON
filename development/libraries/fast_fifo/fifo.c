@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
+#define IS_POWER_OF_TWO(num)    (((num) & ((num) - 1)) == 0) ? true : false
 
 int fifo_init(fifo_t *fifo, uint8_t *buffer, uint32_t size)
 {

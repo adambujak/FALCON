@@ -25,7 +25,7 @@ void motors_set_motor_us(uint8_t motor, uint16_t speed)
 {
   if (!emergency_stop) {
     ASSERT(speed <= 1000);
-    bsp_motors_pwm_set_us(motor, speed+1000);
+    bsp_motors_pwm_set_us(motor, speed + 1000);
   }
 }
 

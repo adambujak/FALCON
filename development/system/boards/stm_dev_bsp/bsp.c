@@ -1,5 +1,5 @@
 #include "bsp.h"
-#define max(a,b) (a)>(b)?a:b
+#define max(a, b)    (a) > (b)?a:b
 
 /************************************************************
  *************************** LED ****************************
@@ -27,7 +27,7 @@ int bsp_leds_init(void (*callback) (void))
   HAL_NVIC_EnableIRQ(FLN_LED_TIMER_IRQ);
 
   ledTimerHandle.Instance = FLN_LED_TIMER;
-  ledTimerHandle.Init.Prescaler = (uint32_t)(SystemCoreClock / 1000000) - 1;
+  ledTimerHandle.Init.Prescaler = (uint32_t) (SystemCoreClock / 1000000) - 1;
   ledTimerHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
   ledTimerHandle.Init.Period = 24;
   ledTimerHandle.Init.ClockDivision = 0;
@@ -70,12 +70,12 @@ void FLN_LED_TIMER_IRQ_Handler(void)
 static void (*imuISRCallback) (void);
 int bsp_imu_int_init(void (*isrCallback) (void))
 {
-  GPIO_InitTypeDef  GPIO_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
 
   IMU_IRQ_GPIO_CLK_ENABLE();
 
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull  = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Pin = IMU_IRQ_PIN;
   HAL_GPIO_Init(IMU_IRQ_GPIO_PORT, &GPIO_InitStruct);
 
@@ -99,7 +99,7 @@ static TIM_HandleTypeDef motorTimerHandle;
 
 int bsp_motors_init(void)
 {
-  GPIO_InitTypeDef   GPIO_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
 
   FLN_MOTOR_TIMER_CLK_ENABLE();
   FLN_MOTOR_GPIO_CLK_ENABLE();
@@ -124,29 +124,30 @@ int bsp_motors_init(void)
   GPIO_InitStruct.Pin = FLN_MOTOR_GPIO_PIN_CHANNEL4;
   HAL_GPIO_Init(FLN_MOTOR_GPIO_PORT_CHANNEL4, &GPIO_InitStruct);
 
-  uint32_t motorTimerPrescalerValue = (uint32_t)(SystemCoreClock / 1000000) - 1;
+  uint32_t motorTimerPrescalerValue = (uint32_t) (SystemCoreClock / 1000000) - 1;
 
   motorTimerHandle.Instance = FLN_MOTOR_TIMER;
 
-  motorTimerHandle.Init.Prescaler         = motorTimerPrescalerValue;
-  motorTimerHandle.Init.Period            = 20000;
-  motorTimerHandle.Init.ClockDivision     = 0;
-  motorTimerHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
+  motorTimerHandle.Init.Prescaler = motorTimerPrescalerValue;
+  motorTimerHandle.Init.Period = 20000;
+  motorTimerHandle.Init.ClockDivision = 0;
+  motorTimerHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
   motorTimerHandle.Init.RepetitionCounter = 0;
   motorTimerHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
   if (HAL_TIM_PWM_Init(&motorTimerHandle) != HAL_OK) {
     return FLN_ERR;
   }
-	return FLN_OK;
+  return FLN_OK;
 }
 
 void bsp_motors_pwm_set_us(uint8_t motor, uint16_t us)
 {
   ASSERT(us >= 1000 && us <= 2000);
 
-  static uint32_t motorChannels[] = {TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_4};
-  static TIM_OC_InitTypeDef pwmConfig = {
+  static uint32_t motorChannels[] = { TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_4 };
+  static TIM_OC_InitTypeDef pwmConfig =
+  {
     .OCMode       = TIM_OCMODE_PWM1,
     .OCPolarity   = TIM_OCPOLARITY_HIGH,
     .OCFastMode   = TIM_OCFAST_DISABLE,
@@ -172,20 +173,20 @@ static SPI_HandleTypeDef rfSpiHandle;
 
 int bsp_rf_spi_init(void)
 {
-  rfSpiHandle.Instance               = RF_SPI;
+  rfSpiHandle.Instance = RF_SPI;
   rfSpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
-  rfSpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
-  rfSpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
-  rfSpiHandle.Init.CLKPolarity       = SPI_POLARITY_LOW;
-  rfSpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
-  rfSpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
-  rfSpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
-  rfSpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
-  rfSpiHandle.Init.CRCPolynomial     = 7;
-  rfSpiHandle.Init.NSS               = SPI_NSS_SOFT;
-  rfSpiHandle.Init.Mode              = SPI_MODE_MASTER;
+  rfSpiHandle.Init.Direction = SPI_DIRECTION_2LINES;
+  rfSpiHandle.Init.CLKPhase = SPI_PHASE_1EDGE;
+  rfSpiHandle.Init.CLKPolarity = SPI_POLARITY_LOW;
+  rfSpiHandle.Init.DataSize = SPI_DATASIZE_8BIT;
+  rfSpiHandle.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  rfSpiHandle.Init.TIMode = SPI_TIMODE_DISABLE;
+  rfSpiHandle.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  rfSpiHandle.Init.CRCPolynomial = 7;
+  rfSpiHandle.Init.NSS = SPI_NSS_SOFT;
+  rfSpiHandle.Init.Mode = SPI_MODE_MASTER;
 
-  GPIO_InitTypeDef  GPIO_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
 
   if (rfSpiHandle.Instance == RF_SPI) {
     RF_SPI_SCK_GPIO_CLK_ENABLE();
@@ -193,16 +194,15 @@ int bsp_rf_spi_init(void)
     RF_SPI_MOSI_GPIO_CLK_ENABLE();
     RF_SPI_CLK_ENABLE();
 
-    if(HAL_SPI_Init(&rfSpiHandle) != HAL_OK)
-    {
+    if (HAL_SPI_Init(&rfSpiHandle) != HAL_OK) {
       /* Initialization Error */
       return FLN_ERR;
     }
 
-    GPIO_InitStruct.Pin       = RF_SPI_SCK_PIN;
-    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
-    GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Pin = RF_SPI_SCK_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
     GPIO_InitStruct.Alternate = RF_SPI_SCK_AF;
     HAL_GPIO_Init(RF_SPI_SCK_GPIO_PORT, &GPIO_InitStruct);
 
@@ -219,7 +219,7 @@ int bsp_rf_spi_init(void)
 
 void bsp_rf_spi_deinit(void)
 {
-  if(rfSpiHandle.Instance == RF_SPI) {
+  if (rfSpiHandle.Instance == RF_SPI) {
     RF_SPI_FORCE_RESET();
     RF_SPI_RELEASE_RESET();
 
@@ -238,19 +238,19 @@ int bsp_rf_transceive(uint8_t *txBuffer, uint16_t txSize, uint8_t *rxBuffer, uin
     hal_custom_transmit(&rfSpiHandle, txBuffer, txSize, 5000);
   }
   else {
-	  HAL_SPI_TransmitReceive(&rfSpiHandle, txBuffer, rxBuffer, max(rxSize,txSize), 5000);
+    HAL_SPI_TransmitReceive(&rfSpiHandle, txBuffer, rxBuffer, max(rxSize, txSize), 5000);
   }
   return FLN_OK;
 }
 
 int bsp_rf_gpio_init(void)
 {
-  GPIO_InitTypeDef  GPIO_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
 
   RF_GPIO_CLK_ENABLE();
 
-  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 
   GPIO_InitStruct.Pin = RF_CE_PIN;
@@ -265,7 +265,7 @@ int bsp_rf_gpio_init(void)
   RF_IRQ_GPIO_CLK_ENABLE();
 
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull  = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Pin = RF_IRQ_PIN;
   HAL_GPIO_Init(RF_IRQ_GPIO_PORT, &GPIO_InitStruct);
 
@@ -304,12 +304,10 @@ void EXTI15_10_IRQHandler(void)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if (GPIO_Pin == IMU_IRQ_PIN)
-  {
+  if (GPIO_Pin == IMU_IRQ_PIN) {
     imuISRCallback();
   }
-  else if (GPIO_Pin == RF_IRQ_PIN)
-  {
+  else if (GPIO_Pin == RF_IRQ_PIN) {
     rfISRCallback();
   }
 }

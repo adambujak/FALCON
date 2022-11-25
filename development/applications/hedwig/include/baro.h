@@ -1,10 +1,10 @@
 /******************************************************************************
- * @file     baro.h
- * @brief    Barometer Header File (MPL3115A2)
- * @version  1.0
- * @date     2020-11-11
- * @author   Devin Bell, Adam Bujak
- ******************************************************************************/
+* @file     baro.h
+* @brief    Barometer Header File (MPL3115A2)
+* @version  1.0
+* @date     2020-11-11
+* @author   Devin Bell, Adam Bujak
+******************************************************************************/
 #ifndef BARO_H
 #define BARO_H
 

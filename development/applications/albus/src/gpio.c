@@ -8,18 +8,18 @@
 
 static exti_cb_t rf_irq_cb = NULL;
 
-#define PIN_WRITE(pin, port, value)                       \
-  if ((value) == 0) {                                     \
-    LL_GPIO_ResetOutputPin((port), (pin));                \
-  }                                                       \
-  else {                                                  \
-    LL_GPIO_SetOutputPin((port), (pin));                  \
-  }                                                       \
+#define PIN_WRITE(pin, port, value)        \
+  if ((value) == 0) {                      \
+    LL_GPIO_ResetOutputPin((port), (pin)); \
+  }                                        \
+  else {                                   \
+    LL_GPIO_SetOutputPin((port), (pin));   \
+  }                                        \
 
 static void rf_ce_pin_init(void)
 {
   RF_GPIO_CE_CLK_EN();
-  LL_GPIO_InitTypeDef gpio_config = {0};
+  LL_GPIO_InitTypeDef gpio_config = { 0 };
 
   LL_GPIO_ResetOutputPin(RF_CE_GPIO_PORT, RF_CE_PIN);
   gpio_config.Pin = RF_CE_PIN;
@@ -33,7 +33,7 @@ static void rf_ce_pin_init(void)
 static void rf_cs_pin_init(void)
 {
   RF_GPIO_SS_CLK_EN();
-  LL_GPIO_InitTypeDef gpio_config = {0};
+  LL_GPIO_InitTypeDef gpio_config = { 0 };
 
   LL_GPIO_ResetOutputPin(RF_SS_GPIO_PORT, RF_SPI_SS_PIN);
   gpio_config.Pin = RF_SPI_SS_PIN;
@@ -48,7 +48,7 @@ static void rf_irq_pin_init(void)
 {
   RF_GPIO_IRQ_CLK_EN();
 
-  LL_EXTI_InitTypeDef exti_config = {0};
+  LL_EXTI_InitTypeDef exti_config = { 0 };
 
   LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTB, LL_SYSCFG_EXTI_LINE10);
 

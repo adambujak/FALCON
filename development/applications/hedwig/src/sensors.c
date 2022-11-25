@@ -14,21 +14,21 @@
 #include "system_time.h"
 #include "persistent_data.h"
 
-#define IMU_SAMPLE_RATE  (200) // Hz
-#define BARO_SAMPLE_RATE (10)  // Hz
+#define IMU_SAMPLE_RATE       (200) // Hz
+#define BARO_SAMPLE_RATE      (10)  // Hz
 
-#define IMU_SAMPLE_PERIOD  (1000 / IMU_SAMPLE_RATE)
-#define BARO_SAMPLE_PERIOD (1000 / BARO_SAMPLE_RATE)
+#define IMU_SAMPLE_PERIOD     (1000 / IMU_SAMPLE_RATE)
+#define BARO_SAMPLE_PERIOD    (1000 / BARO_SAMPLE_RATE)
 
-#define IMU_SAMPLE_TIMEOUT (IMU_SAMPLE_PERIOD + (IMU_SAMPLE_PERIOD / 10))
-#define BARO_SKIP_COUNT  (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)
+#define IMU_SAMPLE_TIMEOUT    (IMU_SAMPLE_PERIOD + (IMU_SAMPLE_PERIOD / 10))
+#define BARO_SKIP_COUNT       (IMU_SAMPLE_RATE / BARO_SAMPLE_RATE)
 
 static TaskHandle_t sensors_task_handle = NULL;
 
-static float gyro_data[3] = {0.0F, 0.0F, 0.0F};
-static float accel_data[3] = {0.0F, 0.0F, 0.0F};
-static float mag_data[3] = {0.0F, 0.0F, 0.0F};
-static float quat_data[4] = {1.0F, 0.0F, 0.0F, 0.0F};
+static float gyro_data[3] = { 0.0F, 0.0F, 0.0F };
+static float accel_data[3] = { 0.0F, 0.0F, 0.0F };
+static float mag_data[3] = { 0.0F, 0.0F, 0.0F };
+static float quat_data[4] = { 1.0F, 0.0F, 0.0F, 0.0F };
 static float alt_data = 0.0F;
 
 static bool calibration_required = false;
@@ -71,29 +71,30 @@ void sensors_calibrate(void)
 
 static void quat2ypr(float quat[4], float *RPY)
 {
-  RPY[0]  = atan2(2.0 * (quat[3] * quat[2] + quat[0] * quat[1]) , 1.0 - 2.0 * (quat[1] * quat[1] + quat[2] * quat[2]));
+  RPY[0] = atan2(2.0 * (quat[3] * quat[2] + quat[0] * quat[1]), 1.0 - 2.0 * (quat[1] * quat[1] + quat[2] * quat[2]));
   RPY[1] = asin(2.0 * (quat[2] * quat[0] - quat[3] * quat[1]));
-  RPY[2]   = atan2(2.0 * (quat[3] * quat[0] + quat[1] * quat[2]) , - 1.0 + 2.0 * (quat[0] * quat[0] + quat[1] * quat[1]));
+  RPY[2] = atan2(2.0 * (quat[3] * quat[0] + quat[1] * quat[2]), -1.0 + 2.0 * (quat[0] * quat[0] + quat[1] * quat[1]));
 }
 
 static void sensors_task(void *pvParameters)
 {
-  LOG_DEBUG("SENSORS TASK STARTED\r\n");  
+  LOG_DEBUG("SENSORS TASK STARTED\r\n");
 
   fe_flight_mode_t initial_flight_mode;
-  if (flight_control_get_mode(&initial_flight_mode) == FLN_OK) {
 
+  if (flight_control_get_mode(&initial_flight_mode) == FLN_OK) {
     flight_control_set_mode(FE_FLIGHT_MODE_CALIBRATING);
     FLN_ERR_CHECK(baro_calibrate());
     flight_control_set_mode(initial_flight_mode);
-  } else {
+  }
+  else {
     LOG_ERROR("error getting flight mode\r\n");
     return;
   }
   LOG_DEBUG("Sensors Calibrated\r\n");
 
   attitude_init_axis();
-  
+
   rtos_delay_ms(200);
 
   BaseType_t sensor_notification;
@@ -102,15 +103,13 @@ static void sensors_task(void *pvParameters)
   uint32_t old_time;
 
   while (1) {
-
     /* Wait to be notified of an interrupt. */
     sensor_notification = xTaskNotifyWait(pdFALSE,
-                                         0xFFFFFFFF,
-                                         NULL,
-                                         MS_TO_TICKS(IMU_SAMPLE_TIMEOUT));
+                                          0xFFFFFFFF,
+                                          NULL,
+                                          MS_TO_TICKS(IMU_SAMPLE_TIMEOUT));
 
     if (sensor_notification == pdPASS) {
-
       FLN_ERR_CHECK(imu_get_data(accel_data, gyro_data, mag_data));
 
       if (baro_skip_count++ >= BARO_SKIP_COUNT) {
@@ -128,18 +127,18 @@ static void sensors_task(void *pvParameters)
 
       // LOG_INFO("%u\r\n", system_time_cmp_us(old_time, system_time_get()));
       LOG_INFO("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
-            attitude.roll,
-            attitude.pitch,
-            attitude.yaw,            
-            gyro_data[0],
-            gyro_data[1],
-            gyro_data[2],
-            accel_data[0],
-            accel_data[1],
-            accel_data[2],
-            alt_data);
+               attitude.roll,
+               attitude.pitch,
+               attitude.yaw,
+               gyro_data[0],
+               gyro_data[1],
+               gyro_data[2],
+               accel_data[0],
+               accel_data[1],
+               accel_data[2],
+               alt_data);
 
-      flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);      
+      flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
       old_time = system_time_get();
     }
     else {
@@ -162,10 +161,10 @@ void sensors_task_setup(void)
 
   float accel_bias[3];
   float gyro_bias[3];
-  
+
   if (persistent_data_imu_bias_get(accel_bias, gyro_bias)) {
-    imu_set_bias(accel_bias, gyro_bias);  
-  } 
+    imu_set_bias(accel_bias, gyro_bias);
+  }
 
   LOG_DEBUG("Sensors Initialized\r\n");
 }
