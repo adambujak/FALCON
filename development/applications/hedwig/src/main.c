@@ -15,13 +15,13 @@
 
 #include <stdint.h>
 
-#define PRIORITYGROUP          ((uint32_t)0x00000003)
+#define PRIORITYGROUP             ((uint32_t) 0x00000003)
 
-#define INCLUDE_LEDS           0
-#define INCLUDE_MOTORS         1
-#define INCLUDE_SENSORS        1
-#define INCLUDE_DEVICE_COM     1
-#define INCLUDE_FLIGHT_CONTROL 1
+#define INCLUDE_LEDS              0
+#define INCLUDE_MOTORS            1
+#define INCLUDE_SENSORS           1
+#define INCLUDE_DEVICE_COM        1
+#define INCLUDE_FLIGHT_CONTROL    1
 
 // To handle user input when in error handler
 extern void input_process(void);
@@ -37,13 +37,15 @@ static void os_start(void)
 void delay_us(uint32_t us)
 {
   uint32_t start_time = system_time_get();
-  while(system_time_cmp_us(start_time, system_time_get()) < us);
+
+  while (system_time_cmp_us(start_time, system_time_get()) < us);
 }
 
 void delay_ms(uint32_t ms)
 {
   uint32_t start_time = system_time_get();
-  while(system_time_cmp_ms(start_time, system_time_get()) < ms);
+
+  while (system_time_cmp_ms(start_time, system_time_get()) < ms);
 }
 
 void rtos_delay_ms(uint32_t ms)
@@ -58,8 +60,8 @@ void rtos_delay_ms(uint32_t ms)
 
 void sysclk_init(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
@@ -127,7 +129,7 @@ int main(void)
   leds_task_start();
 #endif
 #if INCLUDE_DEVICE_COM
- device_com_start();
+  device_com_start();
 #endif
 #if INCLUDE_SENSORS
   sensors_task_start();

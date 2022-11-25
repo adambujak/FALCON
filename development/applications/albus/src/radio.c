@@ -12,8 +12,8 @@
 #include "gpio.h"
 #include "spi.h"
 
-#define RF_RX_BUFFER_SIZE 512
-#define RF_TX_BUFFER_SIZE 512
+#define RF_RX_BUFFER_SIZE    512
+#define RF_TX_BUFFER_SIZE    512
 
 static frf_t radio;
 
@@ -48,9 +48,11 @@ static void rf_event_callback(frf_event_t event)
     LOG_WARN("RF TX FAILED\r\n");
     tx_fail_cnt++;
     break;
+
   case FRF_EVENT_TX_SUCCESS:
     LOG_DEBUG("RF TX SUCCESS\r\n");
     break;
+
   case FRF_EVENT_RX: {
     uint8_t temp[FRF_PACKET_SIZE];
     frf_getPacket(&radio, temp);
@@ -111,13 +113,14 @@ void radio_init(void)
   ASSERT(fifo_init(&rx_fifo, rx_buffer, RF_RX_BUFFER_SIZE) == 0);
   ASSERT(fifo_init(&tx_fifo, tx_buffer, RF_TX_BUFFER_SIZE) == 0);
 
-  frf_config_t config = {
-    .transferFunc = rf_spi_transfer,
-    .role = FRF_DEVICE_ROLE_TX,
-    .spiCtx = NULL,
-    .setCS = gpio_rf_cs_write,
-    .setCE = gpio_rf_ce_write,
-    .delay = rtos_delay_ms,
+  frf_config_t config =
+  {
+    .transferFunc  = rf_spi_transfer,
+    .role          = FRF_DEVICE_ROLE_TX,
+    .spiCtx        = NULL,
+    .setCS         = gpio_rf_cs_write,
+    .setCE         = gpio_rf_ce_write,
+    .delay         = rtos_delay_ms,
     .eventCallback = rf_event_callback
   };
 

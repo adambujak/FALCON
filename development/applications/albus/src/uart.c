@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define IS_POWER_OF_TWO(num) (((num) & ((num) - 1)) == 0) ? true : false
+#define IS_POWER_OF_TWO(num)    (((num) & ((num) - 1)) == 0) ? true : false
 
 typedef struct {
   uint8_t *buffer;
@@ -61,8 +61,8 @@ static int fifo_pop(fifo_t *fifo, uint8_t *dest, uint32_t length)
 
 static void hw_init(void)
 {
-  LL_USART_InitTypeDef uart_config = {0};
-  LL_GPIO_InitTypeDef gpio_config = {0};
+  LL_USART_InitTypeDef uart_config = { 0 };
+  LL_GPIO_InitTypeDef gpio_config = { 0 };
 
   UART_CLK_EN();
   GPIO_UART_CLK_EN();
@@ -98,6 +98,7 @@ static void hw_init(void)
 static inline void tx(void)
 {
   uint8_t write_byte;
+
   if (fifo_pop(&tx_fifo, &write_byte, 1) == 1) {
     LL_USART_TransmitData8(UART, write_byte);
     writing = true;
@@ -123,6 +124,7 @@ int uart_read(uint8_t *data, uint32_t length)
 {
   DISABLE_IRQ();
   int ret = fifo_pop(&rx_fifo, data, length);
+
   ENABLE_IRQ();
   return ret;
 }
@@ -138,6 +140,7 @@ void UART_IRQHandler(void)
 {
   DISABLE_IRQ();
   uint8_t data;
+
   if (LL_USART_IsActiveFlag_RXNE(UART)) {
     data = LL_USART_ReceiveData8(UART);
     LL_USART_ClearFlag_RXNE(UART);

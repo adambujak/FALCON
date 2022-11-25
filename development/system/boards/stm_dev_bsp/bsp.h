@@ -1,10 +1,10 @@
 /******************************************************************************
- * @file     bsp.h
- * @brief    Falcon BSP for STM32 Dev Kit
- * @version  1.0
- * @date     2020-10-04
- * @author   Adam Bujak
- ******************************************************************************/
+* @file     bsp.h
+* @brief    Falcon BSP for STM32 Dev Kit
+* @version  1.0
+* @date     2020-10-04
+* @author   Adam Bujak
+******************************************************************************/
 
 #ifndef FALCON_BSP_H
 #define FALCON_BSP_H
@@ -37,4 +37,5 @@ void bsp_rf_cs_set(uint8_t value);
 void bsp_rf_ce_set(uint8_t value);
 
 int bsp_rf_init(void (*isrCallback) (void));
+
 #endif  // FALCON_BSP_H
