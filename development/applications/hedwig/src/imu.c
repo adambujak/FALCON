@@ -105,9 +105,6 @@ int imu_get_data(float *accel_float, float *gyro_float, float *compass_float)
         if (header & GYRO_SET) {
           float scale;
           signed long raw_data[3] = { 0 };
-          signed long bias_data[3] = { 0 };
-          float gyro_bias_float[3] = { 0 };
-          float gyro_raw_float[3] = { 0 };
 
           dmp_get_raw_gyro(short_data);
           scale = (1 << inv_get_gyro_fullscale()) * 250.f / (1L << 15);  // From raw to dps
