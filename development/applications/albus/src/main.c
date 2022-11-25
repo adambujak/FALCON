@@ -40,6 +40,11 @@ void rtos_delay_ms(uint32_t ms)
   }
 }
 
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  LOG_ERROR("\r\nassert_failed(). file: %s, line: %ld\r\n", file, line);
+}
+
 void sysclk_init(void)
 {
   LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
