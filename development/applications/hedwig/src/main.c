@@ -23,6 +23,9 @@
 #define INCLUDE_DEVICE_COM     1
 #define INCLUDE_FLIGHT_CONTROL 1
 
+// To handle user input when in error handler
+extern void input_process(void);
+
 static uint8_t os_started = 0;
 
 static void os_start(void)
@@ -152,5 +155,7 @@ void error_handler(void)
   LOG_ERROR("Error Handler\r\n");
   logger_process();
   vTaskSuspendAll();
-  while (1);
+  while (1) {
+    input_process();
+  }
 }
