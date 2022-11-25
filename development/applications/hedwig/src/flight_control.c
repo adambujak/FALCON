@@ -15,6 +15,8 @@
 #define FC_PERIOD_TICKS    MS_TO_TICKS(10)
 #define RTOS_TIMEOUT_TICKS MS_TO_TICKS(5)
 
+#define PRINT_PARAMS       1
+
 static RT_MODEL rtM_;
 static RT_MODEL *const rtM = &rtM_; /* Real-time model */
 static DW rtDW;                     /* Observable states */
@@ -478,15 +480,15 @@ static fe_calib_request_t calibrate_sensors(void)
 static void flight_control_task(void *pvParameters)
 {
 
-  PID_alt_P = 0;//0.64F;
-  PID_alt_D = 0;//0.24F;
+  PID_alt_P = 0;
+  PID_alt_D = 0;
 
   PID_pitch_P = 3.6;
   PID_pitch_roll_I = 0.2;
   PID_pitch_D = 0.18;
 
-  PID_yaw_P = 0;//0.1F;
-  PID_yaw_D = 0;//0.14F;
+  PID_yaw_P = 0;
+  PID_yaw_D = 0;
 
   if (load_controller_params()) {
     send_params_back();
@@ -528,8 +530,8 @@ static void flight_control_task(void *pvParameters)
           }
         }
 
-        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u ALT_PD: %7.4f, %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n",
-            rtY_State_Estim.z,
+#if (PRINT_PARAMS == 1)
+        LOG_DEBUG("z: %7.4f dz: %7.4f yaw, pitch, roll: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f motors: %u, %u, %u, %u ALT_PD: %7.4f, %7.4f, %7.4f ATT_PID: %7.4f, %7.4f, %7.4f YAW_PD: %7.4f, %7.4f\r\n", rtY_State_Estim.z,
             rtY_State_Estim.dz,
             rtY_State_Estim.yaw,
             rtY_State_Estim.pitch,
@@ -549,8 +551,7 @@ static void flight_control_task(void *pvParameters)
             PID_pitch_D,
             PID_yaw_P,
             PID_yaw_D);
-
-        rtos_delay_ms(1);
+#endif
       }
       else {
         LOG_DEBUG("timer notif not received\r\n");
@@ -577,8 +578,6 @@ void flight_control_setup(void)
   createCommandDataMutex();
   createOutputDataMutex();
   createModeMutex();
-
-
 }
 
 void flight_control_task_start(void)

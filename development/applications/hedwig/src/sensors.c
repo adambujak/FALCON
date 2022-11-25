@@ -10,6 +10,7 @@
 #include "imu.h"
 #include "bsp.h"
 #include "rtwtypes.h"
+#include "attitude.h"
 #include "system_time.h"
 #include "persistent_data.h"
 
@@ -68,9 +69,16 @@ void sensors_calibrate(void)
   calibration_required = true;
 }
 
+static void quat2ypr(float quat[4], float *RPY)
+{
+  RPY[0]  = atan2(2.0 * (quat[3] * quat[2] + quat[0] * quat[1]) , 1.0 - 2.0 * (quat[1] * quat[1] + quat[2] * quat[2]));
+  RPY[1] = asin(2.0 * (quat[2] * quat[0] - quat[3] * quat[1]));
+  RPY[2]   = atan2(2.0 * (quat[3] * quat[0] + quat[1] * quat[2]) , - 1.0 + 2.0 * (quat[0] * quat[0] + quat[1] * quat[1]));
+}
+
 static void sensors_task(void *pvParameters)
 {
-  LOG_DEBUG("SENSORS TASK STARTED\r\n");
+  LOG_DEBUG("SENSORS TASK STARTED\r\n");  
 
   fe_flight_mode_t initial_flight_mode;
   if (flight_control_get_mode(&initial_flight_mode) == FLN_OK) {
@@ -84,12 +92,15 @@ static void sensors_task(void *pvParameters)
   }
   LOG_DEBUG("Sensors Calibrated\r\n");
 
+  attitude_init_axis();
+  
   rtos_delay_ms(200);
 
   BaseType_t sensor_notification;
 
   uint32_t baro_skip_count = 1;
   uint32_t old_time;
+
   while (1) {
 
     /* Wait to be notified of an interrupt. */
@@ -106,21 +117,30 @@ static void sensors_task(void *pvParameters)
         baro_get_altitude(&alt_data);
         baro_skip_count = 1;
       }
-      // LOG_INFO("%u  ", system_time_cmp_us(old_time, system_time_get()));
-      old_time = system_time_get();
-      // LOG_INFO("\tp,q,r:\t %7.4f\t %7.4f\t %7.4f\t accel:\t %7.4f\t %7.4f\t %7.4f\t mag:\t %7.4f\t %7.4f\t %7.4f\t alt:\t %7.4f\t\r\n",        
-      //       gyro_data[0],
-      //       gyro_data[1],
-      //       gyro_data[2],
-      //       accel_data[0],
-      //       accel_data[1],
-      //       accel_data[2],
-      //       mag_data[0],
-      //       mag_data[1],
-      //       mag_data[2],
-      //       alt_data);
 
-      flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);
+      attitude_compute_estimation(system_time_get(), accel_data, gyro_data, NULL);
+
+      quat_data[0] = q.w;
+      quat_data[1] = q.x;
+      quat_data[2] = q.y;
+      quat_data[3] = q.z;
+
+
+      // LOG_INFO("%u\r\n", system_time_cmp_us(old_time, system_time_get()));
+      LOG_INFO("RPY: %7.4f, %7.4f, %7.4f p, q, r: %7.4f, %7.4f, %7.4f accel: %7.4f, %7.4f, %7.4f alt: %7.4f \r\n",
+            attitude.roll,
+            attitude.pitch,
+            attitude.yaw,            
+            gyro_data[0],
+            gyro_data[1],
+            gyro_data[2],
+            accel_data[0],
+            accel_data[1],
+            accel_data[2],
+            alt_data);
+
+      flight_control_set_sensor_data(gyro_data, accel_data, quat_data, alt_data);      
+      old_time = system_time_get();
     }
     else {
       LOG_DEBUG("sensor notification not received\r\n");

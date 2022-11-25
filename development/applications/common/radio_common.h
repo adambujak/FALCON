@@ -8,7 +8,7 @@
 
 #define RADIO_ADDRESS_LENGTH  5
 
-#define RADIO_WATCHDOG_PERIOD 2000 // 2 seconds
+#define RADIO_WATCHDOG_PERIOD 500 // 0.5 seconds
 
 void radio_get_hedwig_address(uint8_t *buffer);
 void radio_get_albus_address(uint8_t *buffer);
