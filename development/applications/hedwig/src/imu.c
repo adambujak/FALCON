@@ -3,11 +3,14 @@
 #include "falcon_common.h"
 #include "inv_mems.h"
 
+#define IMU_CALIBRATION_CYCLES 400
+#define GRAVITY 9.80665f
+
 signed char ACCEL_GYRO_ORIENTATION[9] = {0, 1, 0,
                                          -1, 0, 0,
                                          0, 0, 1};
 signed char COMPASS_ORIENTATION[9] = {1, 0, 0,
-                                      0, -1, 0, 
+                                      0, -1, 0,
                                       0, 0, -1};
 
 const unsigned char ACCEL_GYRO_CHIP_ADDR = 0x68;
@@ -15,8 +18,6 @@ const unsigned char COMPASS_SLAVE_ID = HW_AK09916;
 const unsigned char COMPASS_CHIP_ADDR = 0x0C;
 const unsigned char PRESSURE_CHIP_ADDR = 0x00;
 long SOFT_IRON_MATRIX[] = {1073741824,0,0,0,1073741824,0,0,0,1073741824};
-
-#define IMU_CALIBRATION_CYCLES 400
 
 static int calibrating_imu = 0;
 static float gyro_bias[3] = {0, 0, 0};
@@ -35,9 +36,8 @@ static void imu_calibrate(float *accel_reading, float *gyro_reading)
   static float accel_readings[3];
   static float gyro_readings[3];
 
-  
   for (int i = 0; i < 3; i++) {
-    
+
     if (calibrating_imu == IMU_CALIBRATION_CYCLES) {
       accel_readings[i] = 0;
       gyro_readings[i] = 0;
@@ -51,7 +51,7 @@ static void imu_calibrate(float *accel_reading, float *gyro_reading)
     // calibration complete
     accel_bias[0] = accel_readings[0] / IMU_CALIBRATION_CYCLES;
     accel_bias[1] = accel_readings[1] / IMU_CALIBRATION_CYCLES;
-    accel_bias[2] = (accel_readings[2] / IMU_CALIBRATION_CYCLES) - 9.80665f;
+    accel_bias[2] = (accel_readings[2] / IMU_CALIBRATION_CYCLES) - GRAVITY;
     gyro_bias[0] = gyro_readings[0] / IMU_CALIBRATION_CYCLES;
     gyro_bias[1] = gyro_readings[1] / IMU_CALIBRATION_CYCLES;
     gyro_bias[2] = gyro_readings[2] / IMU_CALIBRATION_CYCLES;
@@ -99,7 +99,7 @@ int imu_get_data(float *accel_float, float *gyro_float, float *compass_float)
           float scale;
           dmp_get_accel(long_data);
           scale = (1 << inv_get_accel_fullscale()) * 2.f / (1L << 30);  // Convert from raw units to g's
-          scale *= 9.80665f;                                            // Convert to m/s^2
+          scale *= GRAVITY;                                            // Convert to m/s^2
           inv_convert_dmp3_to_body(long_data, scale, accel_float);
         }  // header & ACCEL_SET
 
@@ -150,7 +150,7 @@ int imu_get_data(float *accel_float, float *gyro_float, float *compass_float)
 
     return FLN_OK;
   }
-  else {    
+  else {
     return FLN_ERR;
   }
 }
