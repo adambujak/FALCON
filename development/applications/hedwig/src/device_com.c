@@ -6,12 +6,12 @@
 #include "fp_decode.h"
 #include "fp_encode.h"
 
-#include "radio.h"
+#include "board.h"
 #include "fifo.h"
-#include "system_time.h"
 #include "flight_control.h"
-
-#include <string.h>
+#include "radio.h"
+#include "system_time.h"
+#include "uart.h"
 
 #define min(a, b)          (((a) > (b)) ? b : a)
 
@@ -43,7 +43,7 @@ static void radio_watchdog_timeout(TimerHandle_t xTimer)
   LOG_WARN("Radio RESET TIMEOUT!!\r\n");
   // TODO remove later
   error_handler();
-  LOG_WARN("radio status: %d\r\n", radio_status_get());
+  LOG_WARN("radio status: %lu\r\n", radio_status_get());
   radio_reset();
 }
 
@@ -92,6 +92,15 @@ static void decoder_callback(uint8_t *data, fp_type_t packetType)
       flight_control_calibrate_sensors();
     }
     default:
+      break;
+  }
+}
+
+static void handle_input(char input)
+{
+  switch (input) {
+    case 'r':
+      NVIC_SystemReset();
       break;
   }
 }
@@ -203,6 +212,15 @@ static inline void rf_process(void)
   fs_decoder_decode(&decoder, decode_buffer, byte_cnt);
 }
 
+void input_process(void)
+{
+  char input;
+
+  while (uart_read((uint8_t *) &input, 1) == 1) {
+    handle_input(input);
+  }
+}
+
 static void device_com_task(void *pvParameters)
 {
   LOG_DEBUG("Device com task started\r\n");
@@ -211,6 +229,7 @@ static void device_com_task(void *pvParameters)
     status_process();
     rf_process();
     logger_process();
+    input_process();
     rtos_delay_ms(1);
   }
 }
