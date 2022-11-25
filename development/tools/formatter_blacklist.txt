@@ -1,3 +1,8 @@
 test/Unity
 test/**/test_runners
-libraries/bno055
+libraries/flight_control
+libraries/c-ringbuf
+libraries/falcon_packet
+libraries/grinbuf
+libraries/libcrv
+drivers/ICM20948
